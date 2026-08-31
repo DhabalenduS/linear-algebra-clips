@@ -118,8 +118,3 @@ st.html(
 )
 
 
-### `requirements.txt`
-
-
-streamlit==1.48.0
-
