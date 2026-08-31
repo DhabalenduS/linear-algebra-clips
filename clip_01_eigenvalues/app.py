@@ -403,7 +403,7 @@ if st.session_state.presentation_state < 10:
 # ============================================================
 
 if st.session_state.presentation_state == 0:
-pass
+    pass
 
 # ============================================================
 
