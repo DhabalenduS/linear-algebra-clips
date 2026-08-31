@@ -4,45 +4,7 @@
 
 # One action → one visual event
 
-#
-
-# Slide 3:
-
-# 1  = Visualization of Soccer Match
-
-# 2  = Football ground
-
-# 3  = Football
-
-# 4  = P(x,y,z) + O(0,0,0)
-
-# 5  = OP ray with front arrow
-
-# 6  = First pumping: P -> P'
-
-# 7  = Visualize Again
-
-# 8  = Second pumping
-
-# 9  = Observation heading
-
-# 10 = Observation point 1
-
-# 11 = Observation point 2
-
-# 12 = Observation point 3
-
-# 13 = Conclusion heading
-
-# 14 = Conclusion point 1
-
-# 15 = Conclusion point 2
-
-# 16 = Conclusion point 3
-
 import streamlit as st
-import os
-import base64
 
 # ------------------------------------------------------------
 
@@ -68,35 +30,7 @@ st.session_state.presentation_state = 0
 
 # ------------------------------------------------------------
 
-# OPTIONAL PRESENTER PHOTO
-
-# ------------------------------------------------------------
-
-def get_photo_data():
-
-```
-photo_path = os.path.join(
-    os.path.dirname(__file__),
-    "author_photo.png"
-)
-
-if os.path.exists(photo_path):
-
-    with open(photo_path, "rb") as photo_file:
-        encoded = base64.b64encode(
-            photo_file.read()
-        ).decode()
-
-    return f"data:image/png;base64,{encoded}"
-
-return ""
-```
-
-photo_data = get_photo_data()
-
-# ------------------------------------------------------------
-
-# PRESENTATION-STYLE CSS
+# PRESENTATION CSS
 
 # ------------------------------------------------------------
 
@@ -104,10 +38,6 @@ st.markdown(
 """ <style>
 
 ```
-/* --------------------------------------------------------
-   HIDE STREAMLIT INTERFACE
-   -------------------------------------------------------- */
-
 #MainMenu,
 footer,
 header,
@@ -116,229 +46,127 @@ header,
     visibility: hidden;
 }
 
-
-/* --------------------------------------------------------
-   REMOVE DEFAULT STREAMLIT SPACING
-   -------------------------------------------------------- */
-
 .block-container {
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
 }
 
-
-/* --------------------------------------------------------
-   COMMON PRESENTATION CANVAS
-   -------------------------------------------------------- */
-
 .slide {
     width: 100%;
     min-height: 100vh;
-
     box-sizing: border-box;
-
     background: #ffffff;
-
     position: relative;
-
     overflow: hidden;
 }
 
 
-/* --------------------------------------------------------
+/* ========================================================
    SLIDE 1
-   -------------------------------------------------------- */
+   ======================================================== */
 
 .slide1-content {
     position: absolute;
-
     top: 50%;
     left: 50%;
-
     transform: translate(-50%, -50%);
-
     width: 84vw;
-
     text-align: center;
 }
 
-
 .slide-title {
     font-family: Georgia, "Times New Roman", serif;
-
     font-size: clamp(2.2rem, 4vw, 4.5rem);
-
     font-weight: 600;
-
     line-height: 1.2;
-
     letter-spacing: 0.01em;
-
     margin-bottom: 7vh;
 }
 
-
 .by {
     font-family: Georgia, "Times New Roman", serif;
-
     font-size: clamp(1.4rem, 2vw, 2.2rem);
-
     margin-bottom: 1.5vh;
 }
 
-
 .author {
     font-family: Georgia, "Times New Roman", serif;
-
     font-size: clamp(1.7rem, 2.5vw, 2.8rem);
-
     font-weight: 600;
-
     letter-spacing: 0.02em;
 }
 
 
-/* --------------------------------------------------------
+/* ========================================================
    SLIDE 2
-   -------------------------------------------------------- */
+   ======================================================== */
 
 .slide2 {
     width: 100%;
     min-height: 100vh;
-
     box-sizing: border-box;
-
     background: #ffffff;
-
     position: relative;
-
     overflow: hidden;
-
     text-align: center;
 }
-
 
 .slide2-title {
     position: absolute;
-
     top: 9vh;
     left: 50%;
-
     transform: translateX(-50%);
-
     width: 90vw;
-
     font-family: Georgia, "Times New Roman", serif;
-
     font-size: clamp(2.2rem, 3.5vw, 4rem);
-
     font-weight: 600;
-
     line-height: 1.2;
-
     text-align: center;
 }
 
-
 .event-list {
     position: absolute;
-
     top: 24vh;
     left: 50%;
-
     transform: translateX(-50%);
-
     width: min(1100px, 84vw);
-
     text-align: left;
-
     font-family: Georgia, "Times New Roman", serif;
-
     font-size: clamp(1.15rem, 1.8vw, 2rem);
-
     line-height: 1.45;
 }
 
-
 .event {
     margin: 0 0 2.5vh 0;
-
     min-height: 10vh;
-
     display: flex;
-
     align-items: flex-start;
 }
 
-
 .event-number {
     flex: 0 0 4.5rem;
-
     font-weight: 700;
 }
-
 
 .event-text {
     flex: 1;
 }
-
 
 .event-emphasis {
     font-weight: 700;
 }
 
 
-.heading-reveal {
-    animation: headingAppear 0.45s ease-out both;
-}
-
-
-@keyframes headingAppear {
-
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
-
-}
-
-
-.new-event {
-    animation: eventAppear 0.45s ease-out both;
-}
-
-
-@keyframes eventAppear {
-
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-}
-
-
-/* --------------------------------------------------------
+/* ========================================================
    SLIDE 3
-   -------------------------------------------------------- */
+   ======================================================== */
 
 .slide3 {
     width: 100%;
     min-height: 100vh;
-
     background: #ffffff;
-
     position: relative;
-
     overflow: hidden;
 }
 
@@ -349,42 +177,34 @@ header,
 
 .slide3-title {
     position: absolute;
-
-    top: 6vh;
+    top: 5vh;
     left: 50%;
-
     transform: translateX(-50%);
-
     width: 90vw;
 
     text-align: center;
 
     font-family: Georgia, "Times New Roman", serif;
-
     font-size: clamp(2rem, 3.2vw, 3.8rem);
-
     font-weight: 600;
-
     line-height: 1.2;
 
-    z-index: 20;
+    z-index: 30;
 }
 
 
 /* --------------------------------------------------------
-   MAIN FOOTBALL VISUAL AREA
+   MAIN VISUAL STAGE
    -------------------------------------------------------- */
 
 .football-stage {
-
     position: absolute;
 
-    left: 4vw;
-    right: 4vw;
+    left: 5vw;
+    right: 5vw;
 
-    top: 15vh;
-
-    height: 49vh;
+    top: 14vh;
+    height: 50vh;
 
     overflow: hidden;
 
@@ -397,7 +217,6 @@ header,
    -------------------------------------------------------- */
 
 .football-ground {
-
     position: absolute;
 
     left: 0;
@@ -421,10 +240,7 @@ header,
 }
 
 
-/* Football pitch markings */
-
 .field-line {
-
     position: absolute;
 
     left: 12%;
@@ -439,7 +255,6 @@ header,
 
 
 .field-circle {
-
     position: absolute;
 
     left: 50%;
@@ -461,7 +276,6 @@ header,
    -------------------------------------------------------- */
 
 .football {
-
     position: absolute;
 
     left: 50%;
@@ -472,15 +286,18 @@ header,
     width: 130px;
     height: 130px;
 
-    z-index: 8;
+    z-index: 10;
 
     filter:
         drop-shadow(0 12px 10px rgba(0,0,0,0.28));
 }
 
 
-.football.inflate {
+/* --------------------------------------------------------
+   FOOTBALL PUMPING ANIMATION
+   -------------------------------------------------------- */
 
+.football-pump {
     animation:
         footballInflate 3.2s ease-in-out forwards;
 }
@@ -497,23 +314,42 @@ header,
     45% {
         transform:
             translate(-50%, -50%)
-            scale(1.13);
+            scale(1.12);
     }
 
     100% {
         transform:
             translate(-50%, -50%)
-            scale(1.28);
+            scale(1.27);
     }
 }
 
 
 /* --------------------------------------------------------
-   RAY SYSTEM
+   ORIGIN
+   -------------------------------------------------------- */
+
+.origin-label {
+    position: absolute;
+
+    left: calc(50% - 18px);
+    top: calc(36% + 12px);
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: clamp(1rem, 1.35vw, 1.5rem);
+
+    font-weight: 700;
+
+    z-index: 20;
+}
+
+
+/* --------------------------------------------------------
+   RAYS
    -------------------------------------------------------- */
 
 .ray {
-
     position: absolute;
 
     height: 4px;
@@ -522,14 +358,13 @@ header,
 
     transform-origin: left center;
 
-    z-index: 12;
+    z-index: 18;
 
-    border-radius: 3px;
+    border-radius: 4px;
 }
 
 
 .ray::after {
-
     content: "";
 
     position: absolute;
@@ -537,9 +372,7 @@ header,
     right: -1px;
     top: 50%;
 
-    transform:
-        translateY(-50%)
-        rotate(0deg);
+    transform: translateY(-50%);
 
     width: 0;
     height: 0;
@@ -551,122 +384,58 @@ header,
 
 
 .ray-op {
-
     left: 50%;
-
     top: 36%;
-
     width: 165px;
 }
 
 
 .ray-opp {
-
     left: 50%;
-
     top: 36%;
-
     width: 285px;
-
-    opacity: 0;
-}
-
-
-.show-opp {
-
-    animation:
-        showOpp 0.7s ease-out forwards;
-}
-
-
-@keyframes showOpp {
-
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
 }
 
 
 /* --------------------------------------------------------
-   POINT O
-   -------------------------------------------------------- */
-
-.origin-label {
-
-    position: absolute;
-
-    left: calc(50% - 18px);
-    top: calc(36% + 12px);
-
-    font-family: Georgia, "Times New Roman", serif;
-
-    font-size: clamp(1.1rem, 1.5vw, 1.7rem);
-
-    font-weight: 700;
-
-    z-index: 16;
-}
-
-
-/* --------------------------------------------------------
-   P AND P' LABELS
+   POINT LABELS
    -------------------------------------------------------- */
 
 .point-label {
-
     position: absolute;
 
     font-family: Georgia, "Times New Roman", serif;
 
-    font-size: clamp(1rem, 1.35vw, 1.5rem);
+    font-size: clamp(0.95rem, 1.3vw, 1.45rem);
 
     font-weight: 600;
 
     white-space: nowrap;
 
-    z-index: 18;
+    z-index: 25;
 }
 
 
 .point-p {
-
     left: calc(50% + 165px);
-
-    top: calc(36% - 46px);
+    top: calc(36% - 42px);
 }
 
 
 .point-pp {
-
     left: calc(50% + 285px);
-
-    top: calc(36% - 46px);
-
-    opacity: 0;
-}
-
-
-.show-pp {
-
-    animation:
-        showOpp 0.7s ease-out forwards;
+    top: calc(36% - 42px);
 }
 
 
 /* --------------------------------------------------------
-   PUMPING LABEL
+   PUMPING MESSAGE
    -------------------------------------------------------- */
 
 .pumping-label {
-
     position: absolute;
 
     left: 50%;
-
     bottom: 3%;
 
     transform: translateX(-50%);
@@ -679,12 +448,11 @@ header,
 
     letter-spacing: 0.03em;
 
-    z-index: 20;
+    z-index: 25;
 }
 
 
 .pumping-active {
-
     animation:
         pumpingPulse 0.8s ease-in-out infinite alternate;
 }
@@ -694,29 +462,58 @@ header,
 
     from {
         opacity: 0.65;
-        transform: translateX(-50%) scale(1);
     }
 
     to {
         opacity: 1;
-        transform: translateX(-50%) scale(1.04);
     }
 }
 
 
 /* --------------------------------------------------------
-   LOWER EXPLANATION AREA
+   VISUALIZE AGAIN
    -------------------------------------------------------- */
 
-.explanation-area {
+.visualize-again {
+    position: absolute;
 
+    left: 50%;
+    top: 39%;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 60;
+
+    font-family: Georgia, "Times New Roman", serif;
+
+    font-size: clamp(1.5rem, 2.5vw, 2.8rem);
+
+    font-weight: 600;
+
+    letter-spacing: 0.04em;
+
+    padding: 1.2vh 2.5vw;
+
+    background: rgba(255,255,255,0.94);
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 5px 20px rgba(0,0,0,0.12);
+}
+
+
+/* ========================================================
+   LOWER EXPLANATION AREA
+   ======================================================== */
+
+.explanation-area {
     position: absolute;
 
     left: 6vw;
     right: 6vw;
 
     top: 66vh;
-
     bottom: 4vh;
 
     display: flex;
@@ -729,7 +526,6 @@ header,
 
 .observation-box,
 .conclusion-box {
-
     flex: 1;
 
     font-family: Georgia, "Times New Roman", serif;
@@ -739,7 +535,6 @@ header,
 
 
 .section-heading {
-
     font-size: clamp(1.35rem, 1.9vw, 2rem);
 
     font-weight: 700;
@@ -749,8 +544,7 @@ header,
 
 
 .math-point {
-
-    font-size: clamp(0.95rem, 1.35vw, 1.45rem);
+    font-size: clamp(0.9rem, 1.25vw, 1.4rem);
 
     line-height: 1.38;
 
@@ -758,14 +552,7 @@ header,
 }
 
 
-.math-emphasis {
-
-    font-weight: 700;
-}
-
-
 .equation {
-
     font-size: clamp(1.2rem, 1.7vw, 1.8rem);
 
     text-align: center;
@@ -775,47 +562,26 @@ header,
 
 
 /* --------------------------------------------------------
-   PRESENTER PHOTO
+   PRESENTER
    -------------------------------------------------------- */
 
 .presenter {
-
     position: absolute;
 
-    right: 2.5vw;
+    right: 2vw;
+    bottom: 1.5vh;
 
-    bottom: 2vh;
-
-    width: clamp(70px, 7vw, 105px);
+    width: 75px;
 
     text-align: center;
 
-    z-index: 30;
+    z-index: 40;
 }
 
 
-.presenter img {
-
-    width: clamp(55px, 5.5vw, 82px);
-
-    height: clamp(55px, 5.5vw, 82px);
-
-    object-fit: cover;
-
-    border-radius: 50%;
-
-    border: 2px solid #ffffff;
-
-    box-shadow:
-        0 4px 14px rgba(0,0,0,0.20);
-}
-
-
-.presenter-placeholder {
-
-    width: clamp(55px, 5.5vw, 82px);
-
-    height: clamp(55px, 5.5vw, 82px);
+.presenter-circle {
+    width: 58px;
+    height: 58px;
 
     margin: auto;
 
@@ -828,22 +594,20 @@ header,
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     font-family: Georgia, "Times New Roman", serif;
 
-    font-size: 1.2rem;
+    font-size: 1rem;
 
     font-weight: 700;
 }
 
 
 .presenter-name {
-
     font-family: Georgia, "Times New Roman", serif;
 
-    font-size: clamp(0.55rem, 0.75vw, 0.8rem);
+    font-size: 0.55rem;
 
     margin-top: 0.5vh;
 
@@ -852,66 +616,33 @@ header,
 
 
 /* --------------------------------------------------------
-   VISUALIZE AGAIN
+   CUMULATIVE REVEAL
    -------------------------------------------------------- */
 
-.visualize-again {
-
-    position: absolute;
-
-    left: 50%;
-    top: 50%;
-
-    transform: translate(-50%, -50%);
-
-    z-index: 50;
-
-    font-family: Georgia, "Times New Roman", serif;
-
-    font-size: clamp(1.5rem, 2.5vw, 2.8rem);
-
-    font-weight: 600;
-
-    letter-spacing: 0.04em;
-
-    padding: 1.2vh 2.5vw;
-
-    background: rgba(255,255,255,0.92);
-
-    border-radius: 12px;
-
-    box-shadow:
-        0 5px 20px rgba(0,0,0,0.12);
-
-    animation:
-        visualizeAppear 0.6s ease-out both;
+.reveal {
+    animation: revealItem 0.45s ease-out both;
 }
 
 
-@keyframes visualizeAppear {
+@keyframes revealItem {
 
     from {
         opacity: 0;
-        transform:
-            translate(-50%, -50%)
-            scale(0.95);
+        transform: translateY(8px);
     }
 
     to {
         opacity: 1;
-        transform:
-            translate(-50%, -50%)
-            scale(1);
+        transform: translateY(0);
     }
 }
 
 
-/* --------------------------------------------------------
-   FULL-SCREEN INVISIBLE ADVANCE BUTTON
-   -------------------------------------------------------- */
+/* ========================================================
+   FULL-SCREEN INVISIBLE CLICK / TOUCH AREA
+   ======================================================== */
 
 div[data-testid="stButton"] button {
-
     position: fixed;
 
     inset: 0;
@@ -935,7 +666,7 @@ unsafe_allow_html=True,
 
 # ------------------------------------------------------------
 
-# ADVANCE PRESENTATION
+# ADVANCE ONE STATE PER CLICK / TOUCH
 
 # ------------------------------------------------------------
 
@@ -946,25 +677,17 @@ if st.button(
     "advance",
     key=f"advance_{st.session_state.presentation_state}",
 ):
-
     st.session_state.presentation_state += 1
-
     st.rerun()
 ```
 
-# ------------------------------------------------------------
-
-# CURRENT STATE
-
-# ------------------------------------------------------------
-
 state = st.session_state.presentation_state
 
-# ------------------------------------------------------------
+# ============================================================
 
 # STATE 0 — COMPLETELY BLANK
 
-# ------------------------------------------------------------
+# ============================================================
 
 if state == 0:
 
@@ -972,11 +695,11 @@ if state == 0:
 pass
 ```
 
-# ------------------------------------------------------------
+# ============================================================
 
 # STATE 1 — SLIDE 1
 
-# ------------------------------------------------------------
+# ============================================================
 
 elif state == 1:
 
@@ -1006,11 +729,11 @@ st.html(
 )
 ```
 
-# ------------------------------------------------------------
+# ============================================================
 
 # STATES 2–7 — SLIDE 2
 
-# ------------------------------------------------------------
+# ============================================================
 
 elif 2 <= state <= 7:
 
@@ -1028,10 +751,8 @@ slide2_content = """
 
 if state >= 3:
 
-    reveal_class = "new-event" if state == 3 else ""
-
-    slide2_content += f"""
-            <div class="event {reveal_class}">
+    slide2_content += """
+            <div class="event reveal">
 
                 <div class="event-number">
                     (i)
@@ -1047,10 +768,8 @@ if state >= 3:
 
 if state >= 4:
 
-    reveal_class = "new-event" if state == 4 else ""
-
-    slide2_content += f"""
-            <div class="event {reveal_class}">
+    slide2_content += """
+            <div class="event reveal">
 
                 <div class="event-number">
                     (ii)
@@ -1067,10 +786,8 @@ if state >= 4:
 
 if state >= 5:
 
-    reveal_class = "new-event" if state == 5 else ""
-
-    slide2_content += f"""
-            <div class="event {reveal_class}">
+    slide2_content += """
+            <div class="event reveal">
 
                 <div class="event-number">
                     (iii)
@@ -1086,10 +803,8 @@ if state >= 5:
 
 if state >= 6:
 
-    reveal_class = "new-event" if state == 6 else ""
-
-    slide2_content += f"""
-            <div class="event {reveal_class}">
+    slide2_content += """
+            <div class="event reveal">
 
                 <div class="event-number">
                     (iv)
@@ -1106,10 +821,8 @@ if state >= 6:
 
 if state >= 7:
 
-    reveal_class = "new-event" if state == 7 else ""
-
-    slide2_content += f"""
-            <div class="event {reveal_class}">
+    slide2_content += """
+            <div class="event reveal">
 
                 <div class="event-number">
                     (v)
@@ -1134,68 +847,74 @@ slide2_content += """
 st.html(slide2_content)
 ```
 
-# ------------------------------------------------------------
+# ============================================================
 
 # STATES 8–16 — SLIDE 3
 
-# ------------------------------------------------------------
+# ============================================================
 
 elif 8 <= state <= 16:
 
 ```
 # --------------------------------------------------------
-# DETERMINE VISUAL CONDITIONS
+# SLIDE 3 STATE CONDITIONS
 # --------------------------------------------------------
 
-first_pumping = state == 8
+first_pumping = state == 13
+visualize_again = state == 14
+second_pumping = state == 15
 
-visualize_again = state == 9
-
-second_pumping = state == 10
-
-show_observation = state >= 11
-
-show_observation_1 = state >= 12
-show_observation_2 = state >= 13
-show_observation_3 = state >= 14
-
-show_conclusion = state >= 15
-
-show_conclusion_1 = state >= 16
+show_observation = state >= 16
 
 
 # --------------------------------------------------------
-# SLIDE 3 HTML
+# SLIDE 3
 # --------------------------------------------------------
 
-slide3_html = f"""
+slide3_html = """
     <div class="slide3">
-
-        <!-- TITLE -->
 
         <div class="slide3-title">
             Visualization of Soccer Match
         </div>
 
-
-        <!-- MAIN FOOTBALL STAGE -->
-
         <div class="football-stage">
+"""
 
 
-            <!-- GREEN GROUND -->
+# --------------------------------------------------------
+# STATE 8 — TITLE ONLY
+# --------------------------------------------------------
 
+if state >= 8:
+
+    pass
+
+
+# --------------------------------------------------------
+# STATE 9 — GREEN GROUND
+# --------------------------------------------------------
+
+if state >= 9:
+
+    slide3_html += """
             <div class="football-ground"></div>
 
             <div class="field-line"></div>
 
             <div class="field-circle"></div>
+    """
 
 
-            <!-- FOOTBALL -->
+# --------------------------------------------------------
+# STATE 10 — FOOTBALL
+# --------------------------------------------------------
 
+if state >= 10:
+
+    slide3_html += """
             <svg
-                class="football {'inflate' if first_pumping or second_pumping else ''}"
+                class="football"
                 viewBox="0 0 200 200"
                 xmlns="http://www.w3.org/2000/svg"
             >
@@ -1208,6 +927,7 @@ slide3_html = f"""
                         cy="30%"
                         r="70%"
                     >
+
                         <stop
                             offset="0%"
                             stop-color="#ffffff"
@@ -1222,6 +942,7 @@ slide3_html = f"""
                             offset="100%"
                             stop-color="#cfcfcf"
                         />
+
                     </radialGradient>
 
                 </defs>
@@ -1237,15 +958,11 @@ slide3_html = f"""
                 />
 
 
-                <!-- Central black pentagon -->
-
                 <polygon
                     points="100,68 117,80 111,101 89,101 83,80"
                     fill="#111111"
                 />
 
-
-                <!-- Surrounding black panels -->
 
                 <polygon
                     points="53,67 68,55 82,70 76,88 57,84"
@@ -1267,7 +984,6 @@ slide3_html = f"""
                     fill="#111111"
                 />
 
-                <!-- Connecting seams -->
 
                 <path
                     d="M82 70 L68 55"
@@ -1298,23 +1014,20 @@ slide3_html = f"""
                 />
 
             </svg>
+    """
 
 
-            <!-- ORIGIN -->
+# --------------------------------------------------------
+# STATE 11 — O AND P
+# --------------------------------------------------------
 
+if state >= 11:
+
+    slide3_html += """
             <div class="origin-label">
                 O(0,0,0)
             </div>
-"""
 
-
-# --------------------------------------------------------
-# POINT P
-# --------------------------------------------------------
-
-if state >= 5:
-
-    slide3_html += """
             <div class="point-label point-p">
                 P(x,y,z)
             </div>
@@ -1322,10 +1035,10 @@ if state >= 5:
 
 
 # --------------------------------------------------------
-# OP RAY
+# STATE 12 — OP RAY
 # --------------------------------------------------------
 
-if state >= 6:
+if state >= 12:
 
     slide3_html += """
             <div class="ray ray-op"></div>
@@ -1333,40 +1046,27 @@ if state >= 6:
 
 
 # --------------------------------------------------------
-# PUMPING / OP'
+# STATE 13 — FIRST PUMPING
 # --------------------------------------------------------
 
-if state >= 8:
+if state >= 13:
 
     slide3_html += """
-            <div class="ray ray-opp show-opp"></div>
+            <div class="ray ray-opp"></div>
 
-            <div class="point-label point-pp show-pp">
+            <div class="point-label point-pp">
                 P′(x′,y′,z′)
             </div>
-    """
 
-
-# --------------------------------------------------------
-# PUMPING LABEL
-# --------------------------------------------------------
-
-if first_pumping or second_pumping:
-
-    slide3_html += """
             <div class="pumping-label pumping-active">
                 Pumping ...
             </div>
     """
 
-elif state >= 8:
 
-    slide3_html += """
-            <div class="pumping-label">
-                Pumping completed
-            </div>
-    """
-
+# --------------------------------------------------------
+# CLOSE MAIN STAGE
+# --------------------------------------------------------
 
 slide3_html += """
         </div>
@@ -1387,96 +1087,65 @@ if visualize_again:
 
 
 # --------------------------------------------------------
-# EXPLANATION AREA
+# SECOND PUMPING MESSAGE
 # --------------------------------------------------------
 
-if show_observation or show_conclusion:
+if second_pumping:
 
     slide3_html += """
-        <div class="explanation-area">
+        <div class="pumping-label pumping-active">
+            Pumping ...
+        </div>
     """
 
 
-    # ----------------------------------------------------
-    # OBSERVATION
-    # ----------------------------------------------------
+# --------------------------------------------------------
+# OBSERVATION / CONCLUSION
+# --------------------------------------------------------
 
-    if show_observation:
+if show_observation:
 
-        slide3_html += """
+    slide3_html += """
+        <div class="explanation-area">
+
             <div class="observation-box">
 
-                <div class="section-heading">
+                <div class="section-heading reveal">
                     Observation
                 </div>
-        """
 
-
-    if show_observation_1:
-
-        slide3_html += """
-                <div class="math-point new-event">
-
+                <div class="math-point reveal">
                     • Throughout the pumping process,
                     <b>P</b> moves in the direction <b>OP</b>
                     and finally reaches <b>P′</b>.
-
                 </div>
-        """
 
+                <div class="math-point reveal">
 
-    if show_observation_2:
-
-        slide3_html += """
-                <div class="math-point new-event">
-
-                    • The position vector is scaled by a factor
+                    • The point <b>P</b> is scaled by a factor
 
                     <div class="equation">
                         λ = OP′ / OP
                     </div>
 
                 </div>
-        """
 
-
-    if show_observation_3:
-
-        slide3_html += """
-                <div class="math-point new-event">
+                <div class="math-point reveal">
 
                     • The point <b>P</b> is non-zero.
 
                 </div>
-        """
 
-
-    if show_observation:
-
-        slide3_html += """
             </div>
-        """
 
 
-    # ----------------------------------------------------
-    # CONCLUSION
-    # ----------------------------------------------------
-
-    if show_conclusion:
-
-        slide3_html += """
             <div class="conclusion-box">
 
-                <div class="section-heading">
+                <div class="section-heading reveal">
                     Conclusion
                 </div>
-        """
 
-
-    if show_conclusion_1:
-
-        slide3_html += """
-                <div class="math-point new-event">
+                <div class="math-point reveal">
 
                     • The non-zero point <b>P</b> does not
                     change its direction while moving toward
@@ -1484,7 +1153,7 @@ if show_observation or show_conclusion:
 
                 </div>
 
-                <div class="math-point new-event">
+                <div class="math-point reveal">
 
                     Therefore, <b>P</b> is an
                     <b>eigenvector</b> corresponding to the
@@ -1492,7 +1161,7 @@ if show_observation or show_conclusion:
 
                 </div>
 
-                <div class="math-point new-event">
+                <div class="math-point reveal">
 
                     • All other non-zero points on the surface
                     of the football behave in the same way.
@@ -1501,45 +1170,21 @@ if show_observation or show_conclusion:
                     to the same eigenvalue <b>λ</b>.
 
                 </div>
-        """
 
-
-    if show_conclusion:
-
-        slide3_html += """
-            </div>
-        """
-
-
-    slide3_html += """
-        </div>
-    """
-
-
-# --------------------------------------------------------
-# PRESENTER PHOTO
-# --------------------------------------------------------
-
-if photo_data:
-
-    slide3_html += f"""
-        <div class="presenter">
-
-            <img src="{photo_data}">
-
-            <div class="presenter-name">
-                Dr. Dhabalendu Samanta
             </div>
 
         </div>
     """
 
-else:
 
-    slide3_html += """
+# --------------------------------------------------------
+# PRESENTER PLACEHOLDER
+# --------------------------------------------------------
+
+slide3_html += """
         <div class="presenter">
 
-            <div class="presenter-placeholder">
+            <div class="presenter-circle">
                 DS
             </div>
 
@@ -1548,10 +1193,8 @@ else:
             </div>
 
         </div>
-    """
 
 
-slide3_html += """
     </div>
 """
 
