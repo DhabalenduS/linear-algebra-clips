@@ -529,81 +529,75 @@ elif 2 <= st.session_state.presentation_state <= 7:
     st.html(content)
 
 # ============================================================
-
 # STATES 8–10 — SLIDE 3
-
 # ============================================================
 
 elif 8 <= st.session_state.presentation_state <= 10:
 
-```
-state = st.session_state.presentation_state
+    state = st.session_state.presentation_state
 
-content = """
-<div class="slide3">
+    content = """
+    <div class="slide3">
 
-    <div class="slide3-title">
-        Visualization of Soccer Match
-    </div>
-"""
-
-
-# ========================================================
-# CLICK 2 — FOOTBALL GROUND
-# ========================================================
-
-if state >= 9:
-
-    reveal = "reveal" if state == 9 else ""
-
-    content += f"""
-    <div class="football-ground {reveal}">
-
-        <div class="half-line"></div>
-
-        <div class="centre-circle"></div>
-
-        <div class="centre-spot"></div>
-
-        <div class="penalty-area-left"></div>
-
-        <div class="penalty-area-right"></div>
-
-        <div class="goal-area-left"></div>
-
-        <div class="goal-area-right"></div>
-
-        <div class="goal-left"></div>
-
-        <div class="goal-right"></div>
-
-    </div>
+        <div class="slide3-title">
+            Visualization of Soccer Match
+        </div>
     """
 
+    # ========================================================
+    # CLICK 2 — FOOTBALL GROUND
+    # ========================================================
 
-# ========================================================
-# CLICK 3 — FOOTBALL
-# ========================================================
+    if state >= 9:
 
-if state >= 10:
+        reveal = "reveal" if state == 9 else ""
+
+        content += f"""
+        <div class="football-ground {reveal}">
+
+            <div class="half-line"></div>
+
+            <div class="centre-circle"></div>
+
+            <div class="centre-spot"></div>
+
+            <div class="penalty-area-left"></div>
+
+            <div class="penalty-area-right"></div>
+
+            <div class="goal-area-left"></div>
+
+            <div class="goal-area-right"></div>
+
+            <div class="goal-left"></div>
+
+            <div class="goal-right"></div>
+
+        </div>
+        """
+
+    # ========================================================
+    # CLICK 3 — FOOTBALL
+    # ========================================================
+
+    if state >= 10:
+
+        content += """
+        <div class="football reveal">
+
+            <div class="football-patch patch-1"></div>
+
+            <div class="football-patch patch-2"></div>
+
+            <div class="football-patch patch-3"></div>
+
+            <div class="football-patch patch-4"></div>
+
+        </div>
+        """
 
     content += """
-    <div class="football reveal">
-
-        <div class="football-patch patch-1"></div>
-
-        <div class="football-patch patch-2"></div>
-
-        <div class="football-patch patch-3"></div>
-
-        <div class="football-patch patch-4"></div>
-
     </div>
     """
 
-
-content += """
-</div>
-"""
-
-st.html(content)
+    st.html(content)
