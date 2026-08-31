@@ -436,101 +436,97 @@ elif st.session_state.presentation_state == 1:
     )
 
 # ============================================================
-
 # STATES 2–7 — SLIDE 2
-
 # ============================================================
 
 elif 2 <= st.session_state.presentation_state <= 7:
 
+    state = st.session_state.presentation_state
 
-state = st.session_state.presentation_state
+    content = """
+    <div class="slide2">
 
-content = """
-<div class="slide2">
+        <div class="slide2-title">
+            The Event: Soccer Match
+        </div>
 
-    <div class="slide2-title">
-        The Event: Soccer Match
+        <div class="event-list">
+    """
+
+    if state >= 3:
+
+        reveal = "reveal" if state == 3 else ""
+
+        content += f"""
+            <div class="event {reveal}">
+                <div class="event-number">(i)</div>
+                <div class="event-text">
+                    A Soccer match is about to kick off.
+                </div>
+            </div>
+        """
+
+    if state >= 4:
+
+        reveal = "reveal" if state == 4 else ""
+
+        content += f"""
+            <div class="event {reveal}">
+                <div class="event-number">(ii)</div>
+                <div class="event-text">
+                    The referee inspects and finds that the air
+                    inside the football is insufficient.
+                </div>
+            </div>
+        """
+
+    if state >= 5:
+
+        reveal = "reveal" if state == 5 else ""
+
+        content += f"""
+            <div class="event {reveal}">
+                <div class="event-number">(iii)</div>
+                <div class="event-text event-emphasis">
+                    Air is then pumped into the football.
+                </div>
+            </div>
+        """
+
+    if state >= 6:
+
+        reveal = "reveal" if state == 6 else ""
+
+        content += f"""
+            <div class="event {reveal}">
+                <div class="event-number">(iv)</div>
+                <div class="event-text">
+                    After a short duration, pumping is successfully
+                    completed.
+                </div>
+            </div>
+        """
+
+    if state >= 7:
+
+        reveal = "reveal" if state == 7 else ""
+
+        content += f"""
+            <div class="event {reveal}">
+                <div class="event-number">(v)</div>
+                <div class="event-text">
+                    The football is now fully ready for the match
+                    to kick off.
+                </div>
+            </div>
+        """
+
+    content += """
+        </div>
     </div>
-
-    <div class="event-list">
-"""
-
-if state >= 3:
-
-    reveal = "reveal" if state == 3 else ""
-
-    content += f"""
-        <div class="event {reveal}">
-            <div class="event-number">(i)</div>
-            <div class="event-text">
-                A Soccer match is about to kick off.
-            </div>
-        </div>
     """
 
-if state >= 4:
-
-    reveal = "reveal" if state == 4 else ""
-
-    content += f"""
-        <div class="event {reveal}">
-            <div class="event-number">(ii)</div>
-            <div class="event-text">
-                The referee inspects and finds that the air
-                inside the football is insufficient.
-            </div>
-        </div>
-    """
-
-if state >= 5:
-
-    reveal = "reveal" if state == 5 else ""
-
-    content += f"""
-        <div class="event {reveal}">
-            <div class="event-number">(iii)</div>
-            <div class="event-text event-emphasis">
-                Air is then pumped into the football.
-            </div>
-        </div>
-    """
-
-if state >= 6:
-
-    reveal = "reveal" if state == 6 else ""
-
-    content += f"""
-        <div class="event {reveal}">
-            <div class="event-number">(iv)</div>
-            <div class="event-text">
-                After a short duration, pumping is successfully
-                completed.
-            </div>
-        </div>
-    """
-
-if state >= 7:
-
-    reveal = "reveal" if state == 7 else ""
-
-    content += f"""
-        <div class="event {reveal}">
-            <div class="event-number">(v)</div>
-            <div class="event-text">
-                The football is now fully ready for the match
-                to kick off.
-            </div>
-        </div>
-    """
-
-content += """
-    </div>
-</div>
-"""
-
-st.html(content)
-```
+    st.html(content)
 
 # ============================================================
 
