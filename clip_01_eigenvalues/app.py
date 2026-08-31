@@ -281,69 +281,106 @@ header,
 /* ==================== FOOTBALL ==================== */
 
 .football {
-    position: absolute;
-    left: 39vw;
-    top: 49vh;
-    width: 13vh;
-    height: 13vh;
-    border-radius: 50%;
+position: absolute;
 
-    background:
-        radial-gradient(
-            circle at 31% 28%,
-            #ffffff 0%,
-            #ffffff 32%,
-            transparent 33%
-        ),
-        radial-gradient(
-            circle at 70% 70%,
-            #d8d8d8 0%,
-            #f5f5f5 58%,
-            #bdbdbd 100%
-        );
+```
+/* Exact centre of the football ground */
+left: calc(7vw + 33vw);
+top: calc(19vh + 34vh);
 
-    border: 2px solid #222222;
+width: 13vh;
+height: 13vh;
 
-    box-shadow:
-        0 1vh 2vh rgba(0,0,0,0.28);
+border-radius: 50%;
 
-    z-index: 15;
-}
-
-.football-patch {
-    position: absolute;
-    width: 2.8vh;
-    height: 2.8vh;
-    background: #151515;
-
-    clip-path: polygon(
-        50% 0%,
-        95% 35%,
-        78% 90%,
-        22% 90%,
-        5% 35%
+background:
+    radial-gradient(
+        circle at 32% 27%,
+        #ffffff 0%,
+        #ffffff 12%,
+        #eeeeee 28%,
+        #cfcfcf 58%,
+        #8f8f8f 82%,
+        #555555 100%
     );
+
+border: 2px solid #222222;
+
+box-shadow:
+    0.8vh 1vh 1.8vh rgba(0,0,0,0.30),
+    inset -1.2vh -1.2vh 2vh rgba(0,0,0,0.22),
+    inset 1vh 0.8vh 1.5vh rgba(255,255,255,0.55);
+
+z-index: 15;
+
+transform: translate(-50%, -50%);
+```
+
 }
 
-.patch-1 {
-    left: 5vh;
-    top: 4.7vh;
+/* Black pentagonal panels */
+
+.football::before {
+content: "";
+
+```
+position: absolute;
+
+left: 50%;
+top: 50%;
+
+width: 3.4vh;
+height: 3.4vh;
+
+background: #111111;
+
+clip-path: polygon(
+    50% 0%,
+    97% 35%,
+    79% 90%,
+    21% 90%,
+    3% 35%
+);
+
+transform: translate(-50%, -50%);
+
+box-shadow:
+    0 0.2vh 0.4vh rgba(0,0,0,0.35);
+```
+
 }
 
-.patch-2 {
-    left: 2.2vh;
-    top: 7.8vh;
+/* Additional black panels */
+
+.football::after {
+content: "";
+
+```
+position: absolute;
+
+width: 2.4vh;
+height: 2.4vh;
+
+left: 1.8vh;
+top: 6.8vh;
+
+background: #151515;
+
+clip-path: polygon(
+    50% 0%,
+    95% 35%,
+    78% 90%,
+    22% 90%,
+    5% 35%
+);
+
+box-shadow:
+    6.4vh -4.2vh 0 -0.1vh #151515,
+    5.8vh 3.5vh 0 -0.1vh #151515;
+```
+
 }
 
-.patch-3 {
-    left: 8.1vh;
-    top: 8vh;
-}
-
-.patch-4 {
-    left: 5.1vh;
-    top: 9.5vh;
-}
 
 /* ==================== REVEAL ==================== */
 
@@ -577,27 +614,11 @@ elif 8 <= st.session_state.presentation_state <= 10:
         """
 
     # ========================================================
-    # CLICK 3 — FOOTBALL
-    # ========================================================
+# CLICK 3 — FOOTBALL
+# ========================================================
 
-    if state >= 10:
-
-        content += """
-        <div class="football reveal">
-
-            <div class="football-patch patch-1"></div>
-
-            <div class="football-patch patch-2"></div>
-
-            <div class="football-patch patch-3"></div>
-
-            <div class="football-patch patch-4"></div>
-
-        </div>
-        """
+if state >= 10:
 
     content += """
-    </div>
+    <div class="football reveal"></div>
     """
-
-    st.html(content)
