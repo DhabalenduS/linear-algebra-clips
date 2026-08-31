@@ -2,19 +2,9 @@
 
 # Slides 1–3
 
-# One action → one visual event
-
-# Slide 3: Visualization of Soccer Match
-
-# Current stage: Heading → Ground → Football
+# Stable Slides 1–2 + first three visual events of Slide 3
 
 import streamlit as st
-
-# ============================================================
-
-# PAGE CONFIGURATION
-
-# ============================================================
 
 st.set_page_config(
 page_title="",
@@ -23,71 +13,12 @@ layout="wide",
 initial_sidebar_state="collapsed",
 )
 
-# ============================================================
-
-# PRESENTATION STATE
-
-# ============================================================
-
-# 0  = blank
-
-# 1  = Slide 1
-
-#
-
-# 2  = Slide 2 heading
-
-# 3  = Slide 2 + (i)
-
-# 4  = Slide 2 + (i)-(ii)
-
-# 5  = Slide 2 + (i)-(iii)
-
-# 6  = Slide 2 + (i)-(iv)
-
-# 7  = Slide 2 + (i)-(v)
-
-#
-
-# 8  = Slide 3 heading
-
-# 9  = Slide 3 + football ground
-
-# 10 = Slide 3 + football
-
-#
-
-# Future:
-
-# 11 = P(x,y,z) + O(0,0,0)
-
-# 12 = OP ray with front arrow
-
-# 13 = first pumping
-
-# 14 = Visualize Again
-
-# 15 = second pumping
-
-# 16–20 = observations and conclusions
-
-if "presentation_state" not in st.session_state:
-st.session_state.presentation_state = 0
-
-# ============================================================
-
-# PRESENTATION CSS
-
-# ============================================================
+st.session_state.setdefault("presentation_state", 0)
 
 st.markdown(
 """ <style>
 
 ```
-/* ========================================================
-   HIDE STREAMLIT INTERFACE
-   ======================================================== */
-
 #MainMenu,
 footer,
 header,
@@ -96,21 +27,11 @@ header,
     visibility: hidden;
 }
 
-
-/* ========================================================
-   REMOVE DEFAULT STREAMLIT SPACING
-   ======================================================== */
-
 .block-container {
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
 }
-
-
-/* ========================================================
-   COMMON PRESENTATION CANVAS
-   ======================================================== */
 
 .slide {
     width: 100%;
@@ -122,10 +43,7 @@ header,
     font-family: Georgia, "Times New Roman", serif;
 }
 
-
-/* ========================================================
-   SLIDE 1
-   ======================================================== */
+/* ==================== SLIDE 1 ==================== */
 
 .slide1-content {
     position: absolute;
@@ -155,10 +73,7 @@ header,
     letter-spacing: 0.02em;
 }
 
-
-/* ========================================================
-   SLIDE 2
-   ======================================================== */
+/* ==================== SLIDE 2 ==================== */
 
 .slide2 {
     width: 100%;
@@ -212,10 +127,7 @@ header,
     font-weight: 700;
 }
 
-
-/* ========================================================
-   SLIDE 3
-   ======================================================== */
+/* ==================== SLIDE 3 ==================== */
 
 .slide3 {
     width: 100%;
@@ -226,38 +138,25 @@ header,
     overflow: hidden;
 }
 
-
-/* --------------------------------------------------------
-   SLIDE 3 HEADING
-   -------------------------------------------------------- */
-
 .slide3-title {
     position: absolute;
     top: 6vh;
     left: 50%;
     transform: translateX(-50%);
     width: 90vw;
-
     text-align: center;
-
     font-size: clamp(2rem, 3.2vw, 3.7rem);
     font-weight: 600;
     line-height: 1.2;
-
     z-index: 20;
 }
 
-
-/* --------------------------------------------------------
-   FOOTBALL GROUND
-   -------------------------------------------------------- */
+/* ==================== FOOTBALL GROUND ==================== */
 
 .football-ground {
     position: absolute;
-
     left: 7vw;
     top: 19vh;
-
     width: 66vw;
     height: 68vh;
 
@@ -278,236 +177,115 @@ header,
         inset 0 0 0 2px rgba(0,0,0,0.12);
 
     overflow: hidden;
-
     z-index: 5;
 }
 
-
-/* --------------------------------------------------------
-   OUTER FIELD MARKING
-   -------------------------------------------------------- */
-
-.field-line {
-    position: absolute;
-
-    border: 3px solid rgba(255,255,255,0.95);
-
-    box-sizing: border-box;
-}
-
-
-/* --------------------------------------------------------
-   HALF WAY LINE
-   -------------------------------------------------------- */
-
 .half-line {
     position: absolute;
-
     left: 50%;
     top: 0;
-
     width: 3px;
     height: 100%;
-
     background: rgba(255,255,255,0.95);
-
     transform: translateX(-50%);
 }
 
-
-/* --------------------------------------------------------
-   CENTRE CIRCLE
-   -------------------------------------------------------- */
-
 .centre-circle {
     position: absolute;
-
     left: 50%;
     top: 50%;
-
     width: 17vh;
     height: 17vh;
-
     border: 3px solid rgba(255,255,255,0.95);
     border-radius: 50%;
-
     transform: translate(-50%, -50%);
 }
-
-
-/* --------------------------------------------------------
-   CENTRE SPOT
-   -------------------------------------------------------- */
 
 .centre-spot {
     position: absolute;
-
     left: 50%;
     top: 50%;
-
     width: 10px;
     height: 10px;
-
     background: #ffffff;
     border-radius: 50%;
-
     transform: translate(-50%, -50%);
 }
 
-
-/* --------------------------------------------------------
-   PENALTY AREAS
-   -------------------------------------------------------- */
-
 .penalty-area-left {
     position: absolute;
-
     left: 0;
     top: 27%;
-
     width: 16%;
     height: 46%;
-
     border: 3px solid rgba(255,255,255,0.95);
     border-left: none;
-
     box-sizing: border-box;
 }
 
 .penalty-area-right {
     position: absolute;
-
     right: 0;
     top: 27%;
-
     width: 16%;
     height: 46%;
-
     border: 3px solid rgba(255,255,255,0.95);
     border-right: none;
-
     box-sizing: border-box;
 }
 
-
-/* --------------------------------------------------------
-   GOAL AREAS
-   -------------------------------------------------------- */
-
 .goal-area-left {
     position: absolute;
-
     left: 0;
     top: 37%;
-
     width: 7%;
     height: 26%;
-
     border: 3px solid rgba(255,255,255,0.95);
     border-left: none;
-
     box-sizing: border-box;
 }
 
 .goal-area-right {
     position: absolute;
-
     right: 0;
     top: 37%;
-
     width: 7%;
     height: 26%;
-
     border: 3px solid rgba(255,255,255,0.95);
     border-right: none;
-
     box-sizing: border-box;
 }
 
-
-/* --------------------------------------------------------
-   GOALS
-   -------------------------------------------------------- */
-
 .goal-left {
     position: absolute;
-
     left: -1.2%;
     top: 43%;
-
     width: 1.5%;
     height: 14%;
-
     border: 3px solid #ffffff;
     background: rgba(255,255,255,0.12);
-
     box-sizing: border-box;
 }
 
 .goal-right {
     position: absolute;
-
     right: -1.2%;
     top: 43%;
-
     width: 1.5%;
     height: 14%;
-
     border: 3px solid #ffffff;
     background: rgba(255,255,255,0.12);
-
     box-sizing: border-box;
 }
 
-
-/* --------------------------------------------------------
-   CORNER ARCS
-   -------------------------------------------------------- */
-
-.corner {
-    position: absolute;
-
-    width: 3vh;
-    height: 3vh;
-
-    border: 2px solid rgba(255,255,255,0.9);
-    border-radius: 50%;
-}
-
-.corner-tl {
-    left: -1.5vh;
-    top: -1.5vh;
-}
-
-.corner-tr {
-    right: -1.5vh;
-    top: -1.5vh;
-}
-
-.corner-bl {
-    left: -1.5vh;
-    bottom: -1.5vh;
-}
-
-.corner-br {
-    right: -1.5vh;
-    bottom: -1.5vh;
-}
-
-
-/* ========================================================
-   FOOTBALL
-   ======================================================== */
+/* ==================== FOOTBALL ==================== */
 
 .football {
     position: absolute;
-
     left: 39vw;
     top: 49vh;
-
     width: 13vh;
     height: 13vh;
-
     border-radius: 50%;
 
     background:
@@ -532,17 +310,10 @@ header,
     z-index: 15;
 }
 
-
-/* --------------------------------------------------------
-   FOOTBALL BLACK PATCHES
-   -------------------------------------------------------- */
-
 .football-patch {
     position: absolute;
-
     width: 2.8vh;
     height: 2.8vh;
-
     background: #151515;
 
     clip-path: polygon(
@@ -574,17 +345,13 @@ header,
     top: 9.5vh;
 }
 
-
-/* ========================================================
-   REVEAL ANIMATION
-   ======================================================== */
+/* ==================== REVEAL ==================== */
 
 .reveal {
     animation: revealEvent 0.55s ease-out both;
 }
 
 @keyframes revealEvent {
-
     from {
         opacity: 0;
         transform: translateY(10px);
@@ -594,26 +361,17 @@ header,
         opacity: 1;
         transform: translateY(0);
     }
-
 }
 
-
-/* ========================================================
-   INVISIBLE FULL-SCREEN BUTTON
-   ======================================================== */
+/* ==================== FULL SCREEN CONTROL ==================== */
 
 div[data-testid="stButton"] button {
     position: fixed;
-
     inset: 0;
-
     width: 100vw;
     height: 100vh;
-
     opacity: 0;
-
     z-index: 9999;
-
     cursor: pointer;
 }
 
@@ -631,27 +389,21 @@ unsafe_allow_html=True,
 # ============================================================
 
 if st.session_state.presentation_state < 10:
-
-```
 if st.button(
-    "advance",
-    key=f"advance_{st.session_state.presentation_state}",
+"advance",
+key="advance_button",
 ):
-    st.session_state.presentation_state += 1
-    st.rerun()
-```
+st.session_state.presentation_state += 1
+st.rerun()
 
 # ============================================================
 
-# STATE 0 — COMPLETELY BLANK
+# STATE 0 — BLANK
 
 # ============================================================
 
 if st.session_state.presentation_state == 0:
-
-```
 pass
-```
 
 # ============================================================
 
@@ -805,15 +557,15 @@ content = """
 
 
 # ========================================================
-# STATE 9 — FOOTBALL GROUND
+# CLICK 2 — FOOTBALL GROUND
 # ========================================================
 
 if state >= 9:
 
-    ground_reveal = "reveal" if state == 9 else ""
+    reveal = "reveal" if state == 9 else ""
 
     content += f"""
-    <div class="football-ground {ground_reveal}">
+    <div class="football-ground {reveal}">
 
         <div class="half-line"></div>
 
@@ -822,25 +574,23 @@ if state >= 9:
         <div class="centre-spot"></div>
 
         <div class="penalty-area-left"></div>
+
         <div class="penalty-area-right"></div>
 
         <div class="goal-area-left"></div>
+
         <div class="goal-area-right"></div>
 
         <div class="goal-left"></div>
-        <div class="goal-right"></div>
 
-        <div class="corner corner-tl"></div>
-        <div class="corner corner-tr"></div>
-        <div class="corner corner-bl"></div>
-        <div class="corner corner-br"></div>
+        <div class="goal-right"></div>
 
     </div>
     """
 
 
 # ========================================================
-# STATE 10 — BLACK-AND-WHITE FOOTBALL
+# CLICK 3 — FOOTBALL
 # ========================================================
 
 if state >= 10:
@@ -849,8 +599,11 @@ if state >= 10:
     <div class="football reveal">
 
         <div class="football-patch patch-1"></div>
+
         <div class="football-patch patch-2"></div>
+
         <div class="football-patch patch-3"></div>
+
         <div class="football-patch patch-4"></div>
 
     </div>
@@ -862,4 +615,3 @@ content += """
 """
 
 st.html(content)
-```
