@@ -1,7 +1,7 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slide 1
+# Slides 1–2
 # Initial state: blank
-# First interaction: display complete Slide 1
+# One interaction: advance by one presentation event
 
 import streamlit as st
 
@@ -22,8 +22,8 @@ st.set_page_config(
 # PRESENTATION STATE
 # ------------------------------------------------------------
 
-if "slide_1_visible" not in st.session_state:
-    st.session_state.slide_1_visible = False
+if "presentation_state" not in st.session_state:
+    st.session_state.presentation_state = 0
 
 
 # ------------------------------------------------------------
@@ -67,7 +67,10 @@ st.markdown(
         text-align: center;
     }
 
-    /* Slide title */
+    /* --------------------------------------------------------
+       SLIDE 1
+       -------------------------------------------------------- */
+
     .slide-title {
         font-family: Georgia, "Times New Roman", serif;
         font-size: clamp(2.2rem, 4vw, 4.5rem);
@@ -78,7 +81,6 @@ st.markdown(
         margin-bottom: 7vh;
     }
 
-    /* Byline */
     .by {
         font-family: Georgia, "Times New Roman", serif;
         font-size: clamp(1.4rem, 2vw, 2.2rem);
@@ -86,7 +88,6 @@ st.markdown(
         margin-bottom: 1.5vh;
     }
 
-    /* Author */
     .author {
         font-family: Georgia, "Times New Roman", serif;
         font-size: clamp(1.7rem, 2.5vw, 2.8rem);
@@ -95,12 +96,41 @@ st.markdown(
         letter-spacing: 0.02em;
     }
 
-    /*
-    Invisible interaction area.
+    /* --------------------------------------------------------
+       SLIDE 2
+       -------------------------------------------------------- */
 
-    It occupies the complete presentation canvas,
-    but has no visible border, text, or styling.
-    */
+    .slide2-title {
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2.2rem, 3.5vw, 4rem);
+        font-weight: 600;
+        line-height: 1.2;
+
+        margin-bottom: 5vh;
+    }
+
+    .event-list {
+        width: min(1100px, 88vw);
+
+        text-align: left;
+
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(1.15rem, 1.8vw, 2rem);
+        line-height: 1.55;
+    }
+
+    .event {
+        margin-bottom: 2.2vh;
+    }
+
+    .event strong {
+        font-weight: 700;
+    }
+
+    /* --------------------------------------------------------
+       INVISIBLE FULL-SCREEN INTERACTION AREA
+       -------------------------------------------------------- */
+
     div[data-testid="stButton"] button {
         position: fixed;
         inset: 0;
@@ -121,16 +151,33 @@ st.markdown(
 
 
 # ------------------------------------------------------------
+# ONE-ACTION ADVANCE CONTROL
+# ------------------------------------------------------------
+
+# The invisible button is present after Slide 1 appears.
+# Each click/tap advances exactly one presentation state.
+
+if st.session_state.presentation_state >= 1:
+
+    if st.button(
+        "advance",
+        key=f"advance_{st.session_state.presentation_state}",
+    ):
+        st.session_state.presentation_state += 1
+        st.rerun()
+
+
+# ------------------------------------------------------------
 # INITIAL BLANK STATE
 # ------------------------------------------------------------
 
-if not st.session_state.slide_1_visible:
+if st.session_state.presentation_state == 0:
 
-    # Invisible full-screen interaction button.
-    # Any mouse click / touch activates Slide 1.
+    # Completely blank presentation screen.
+    # First click/touch reveals Slide 1.
 
-    if st.button("advance", key="advance_slide_1"):
-        st.session_state.slide_1_visible = True
+    if st.button("start", key="start_presentation"):
+        st.session_state.presentation_state = 1
         st.rerun()
 
 
@@ -138,7 +185,7 @@ if not st.session_state.slide_1_visible:
 # SLIDE 1
 # ------------------------------------------------------------
 
-if st.session_state.slide_1_visible:
+elif st.session_state.presentation_state == 1:
 
     st.html(
         """
@@ -154,6 +201,57 @@ if st.session_state.slide_1_visible:
 
             <div class="author">
                 Dr. Dhabalendu Samanta
+            </div>
+
+        </div>
+        """
+    )
+
+
+# ------------------------------------------------------------
+# SLIDE 2
+# ------------------------------------------------------------
+
+elif st.session_state.presentation_state == 2:
+
+    st.html(
+        """
+        <div class="slide">
+
+            <div class="slide2-title">
+                The Event: Soccer Match
+            </div>
+
+            <div class="event-list">
+
+                <div class="event">
+                    <strong>(i)</strong>
+                    A Soccer match is about to kick off.
+                </div>
+
+                <div class="event">
+                    <strong>(ii)</strong>
+                    The referee inspects and finds that the air
+                    inside the football is insufficient.
+                </div>
+
+                <div class="event">
+                    <strong>(iii)</strong>
+                    <strong>Air is then pumped into the football.</strong>
+                </div>
+
+                <div class="event">
+                    <strong>(iv)</strong>
+                    After a short duration, pumping is successfully
+                    completed.
+                </div>
+
+                <div class="event">
+                    <strong>(v)</strong>
+                    The football is now fully ready for the match
+                    to kick off.
+                </div>
+
             </div>
 
         </div>
