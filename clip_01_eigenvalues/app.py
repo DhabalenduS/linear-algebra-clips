@@ -52,14 +52,12 @@ header,
     max-width: 100% !important;
 }
 
-.slide {
-    width: 100%;
-    min-height: 100vh;
-    box-sizing: border-box;
-    background: #ffffff;
-    position: relative;
-    overflow: hidden;
-}
+</style>
+""",
+unsafe_allow_html=True,
+```
+
+)
 
 
 /* ========================================================
