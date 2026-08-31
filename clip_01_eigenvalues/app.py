@@ -443,7 +443,7 @@ elif st.session_state.presentation_state == 1:
 
 elif 2 <= st.session_state.presentation_state <= 7:
 
-```
+
 state = st.session_state.presentation_state
 
 content = """
