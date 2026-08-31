@@ -389,12 +389,12 @@ unsafe_allow_html=True,
 # ============================================================
 
 if st.session_state.presentation_state < 10:
-if st.button(
-    "advance",
-    key="advance_button",
-):
-st.session_state.presentation_state += 1
-st.rerun()
+    if st.button(
+        "advance",
+        key="advance_button",
+    ):
+        st.session_state.presentation_state += 1
+        st.rerun()
 
 # ============================================================
 
