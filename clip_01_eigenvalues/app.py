@@ -1,7 +1,7 @@
 # Clip 01 — Eigenvalues and Eigenvectors
 # Slides 1–2
-# Initial state: blank
-# One interaction: advance by one presentation event
+# One action → one visual event
+# Slide 2 uses cumulative content reveal
 
 import streamlit as st
 
@@ -21,6 +21,15 @@ st.set_page_config(
 # ------------------------------------------------------------
 # PRESENTATION STATE
 # ------------------------------------------------------------
+
+# State 0 = blank
+# State 1 = complete Slide 1
+# State 2 = Slide 2 heading
+# State 3 = Slide 2 + point (i)
+# State 4 = Slide 2 + points (i)–(ii)
+# State 5 = Slide 2 + points (i)–(iii)
+# State 6 = Slide 2 + points (i)–(iv)
+# State 7 = complete Slide 2
 
 if "presentation_state" not in st.session_state:
     st.session_state.presentation_state = 0
@@ -151,13 +160,10 @@ st.markdown(
 
 
 # ------------------------------------------------------------
-# ONE-ACTION ADVANCE CONTROL
+# ADVANCE PRESENTATION
 # ------------------------------------------------------------
 
-# The invisible button is present after Slide 1 appears.
-# Each click/tap advances exactly one presentation state.
-
-if st.session_state.presentation_state >= 1:
+if st.session_state.presentation_state < 7:
 
     if st.button(
         "advance",
@@ -168,21 +174,19 @@ if st.session_state.presentation_state >= 1:
 
 
 # ------------------------------------------------------------
-# INITIAL BLANK STATE
+# STATE 0 — BLANK
 # ------------------------------------------------------------
 
 if st.session_state.presentation_state == 0:
 
-    # Completely blank presentation screen.
-    # First click/touch reveals Slide 1.
+    # Completely blank screen.
+    # The invisible button above waits for the first interaction.
 
-    if st.button("start", key="start_presentation"):
-        st.session_state.presentation_state = 1
-        st.rerun()
+    pass
 
 
 # ------------------------------------------------------------
-# SLIDE 1
+# STATE 1 — SLIDE 1
 # ------------------------------------------------------------
 
 elif st.session_state.presentation_state == 1:
@@ -209,13 +213,16 @@ elif st.session_state.presentation_state == 1:
 
 
 # ------------------------------------------------------------
-# SLIDE 2
+# STATES 2–7 — SLIDE 2 CUMULATIVE BUILD
 # ------------------------------------------------------------
 
-elif st.session_state.presentation_state == 2:
+elif 2 <= st.session_state.presentation_state <= 7:
 
-    st.html(
-        """
+    state = st.session_state.presentation_state
+
+    # Heading is always visible from State 2 onward.
+
+    slide2_content = """
         <div class="slide">
 
             <div class="slide2-title">
@@ -223,38 +230,75 @@ elif st.session_state.presentation_state == 2:
             </div>
 
             <div class="event-list">
+    """
 
+    # --------------------------------------------------------
+    # POINT (i)
+    # --------------------------------------------------------
+
+    if state >= 3:
+        slide2_content += """
                 <div class="event">
                     <strong>(i)</strong>
                     A Soccer match is about to kick off.
                 </div>
+        """
 
+    # --------------------------------------------------------
+    # POINT (ii)
+    # --------------------------------------------------------
+
+    if state >= 4:
+        slide2_content += """
                 <div class="event">
                     <strong>(ii)</strong>
                     The referee inspects and finds that the air
                     inside the football is insufficient.
                 </div>
+        """
 
+    # --------------------------------------------------------
+    # POINT (iii)
+    # --------------------------------------------------------
+
+    if state >= 5:
+        slide2_content += """
                 <div class="event">
                     <strong>(iii)</strong>
                     <strong>Air is then pumped into the football.</strong>
                 </div>
+        """
 
+    # --------------------------------------------------------
+    # POINT (iv)
+    # --------------------------------------------------------
+
+    if state >= 6:
+        slide2_content += """
                 <div class="event">
                     <strong>(iv)</strong>
                     After a short duration, pumping is successfully
                     completed.
                 </div>
+        """
 
+    # --------------------------------------------------------
+    # POINT (v)
+    # --------------------------------------------------------
+
+    if state >= 7:
+        slide2_content += """
                 <div class="event">
                     <strong>(v)</strong>
                     The football is now fully ready for the match
                     to kick off.
                 </div>
+        """
 
+    slide2_content += """
             </div>
 
         </div>
-        """
-    )
+    """
 
+    st.html(slide2_content)
