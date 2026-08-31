@@ -1,5 +1,5 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-
+# This commit is just to re-ansure the code. 
 # Slides 1–3
 
 # Stable Slides 1–2 + first three visual events of Slide 3
