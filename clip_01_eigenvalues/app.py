@@ -4,9 +4,9 @@
 
 # One action → one visual event
 
-# Cumulative presentation
-
 # Slide 3: Visualization of Soccer Match
+
+# Current stage: Heading → Ground → Football
 
 import streamlit as st
 
@@ -55,25 +55,21 @@ initial_sidebar_state="collapsed",
 
 # 10 = Slide 3 + football
 
-# 11 = Slide 3 + P and O
+#
 
-# 12 = Slide 3 + OP arrow
+# Future:
 
-# 13 = First pumping
+# 11 = P(x,y,z) + O(0,0,0)
 
-# 14 = "Visualize Again"
+# 12 = OP ray with front arrow
 
-# 15 = Second pumping
+# 13 = first pumping
 
-# 16 = Observation (i)
+# 14 = Visualize Again
 
-# 17 = Observation (ii)
+# 15 = second pumping
 
-# 18 = Observation (iii)
-
-# 19 = Conclusion (i)
-
-# 20 = Conclusion (ii)
+# 16–20 = observations and conclusions
 
 if "presentation_state" not in st.session_state:
 st.session_state.presentation_state = 0
@@ -88,6 +84,10 @@ st.markdown(
 """ <style>
 
 ```
+/* ========================================================
+   HIDE STREAMLIT INTERFACE
+   ======================================================== */
+
 #MainMenu,
 footer,
 header,
@@ -96,11 +96,21 @@ header,
     visibility: hidden;
 }
 
+
+/* ========================================================
+   REMOVE DEFAULT STREAMLIT SPACING
+   ======================================================== */
+
 .block-container {
     padding: 0 !important;
     margin: 0 !important;
     max-width: 100% !important;
 }
+
+
+/* ========================================================
+   COMMON PRESENTATION CANVAS
+   ======================================================== */
 
 .slide {
     width: 100%;
@@ -216,86 +226,107 @@ header,
     overflow: hidden;
 }
 
+
+/* --------------------------------------------------------
+   SLIDE 3 HEADING
+   -------------------------------------------------------- */
+
 .slide3-title {
     position: absolute;
-    top: 5vh;
+    top: 6vh;
     left: 50%;
     transform: translateX(-50%);
     width: 90vw;
+
     text-align: center;
+
     font-size: clamp(2rem, 3.2vw, 3.7rem);
     font-weight: 600;
     line-height: 1.2;
+
     z-index: 20;
 }
 
 
-/* ========================================================
+/* --------------------------------------------------------
    FOOTBALL GROUND
-   ======================================================== */
+   -------------------------------------------------------- */
 
 .football-ground {
     position: absolute;
-    left: 5vw;
-    top: 20vh;
-    width: 57vw;
-    height: 65vh;
+
+    left: 7vw;
+    top: 19vh;
+
+    width: 66vw;
+    height: 68vh;
 
     background:
         repeating-linear-gradient(
             90deg,
-            #4d9b4d 0px,
-            #4d9b4d 45px,
-            #55a655 45px,
-            #55a655 90px
+            #3f963f 0px,
+            #3f963f 55px,
+            #459e45 55px,
+            #459e45 110px
         );
 
     border: 5px solid #ffffff;
-    border-radius: 1.5vh;
+    border-radius: 2vh;
 
     box-shadow:
-        0 1.2vh 2.5vh rgba(0,0,0,0.18),
-        inset 0 0 0 2px rgba(0,0,0,0.15);
+        0 1.5vh 3vh rgba(0,0,0,0.18),
+        inset 0 0 0 2px rgba(0,0,0,0.12);
 
     overflow: hidden;
+
     z-index: 5;
 }
 
 
-/* Outer field markings */
+/* --------------------------------------------------------
+   OUTER FIELD MARKING
+   -------------------------------------------------------- */
 
 .field-line {
     position: absolute;
+
     border: 3px solid rgba(255,255,255,0.95);
+
     box-sizing: border-box;
 }
 
-.field-boundary {
-    inset: 2.5%;
-}
 
-
-/* Halfway line */
+/* --------------------------------------------------------
+   HALF WAY LINE
+   -------------------------------------------------------- */
 
 .half-line {
     position: absolute;
+
     left: 50%;
-    top: 2.5%;
+    top: 0;
+
     width: 3px;
-    height: 95%;
+    height: 100%;
+
     background: rgba(255,255,255,0.95);
+
     transform: translateX(-50%);
 }
 
 
-/* Centre circle */
+/* --------------------------------------------------------
+   CENTRE CIRCLE
+   -------------------------------------------------------- */
 
 .centre-circle {
     position: absolute;
+
     left: 50%;
     top: 50%;
-    width: 19vh;
-    height: 19vh;
+
+    width: 17vh;
+    height: 17vh;
 
     border: 3px solid rgba(255,255,255,0.95);
     border-radius: 50%;
@@ -304,15 +335,18 @@ header,
 }
 
 
-/* Centre spot */
+/* --------------------------------------------------------
+   CENTRE SPOT
+   -------------------------------------------------------- */
 
 .centre-spot {
     position: absolute;
+
     left: 50%;
     top: 50%;
 
-    width: 1.1vh;
-    height: 1.1vh;
+    width: 10px;
+    height: 10px;
 
     background: #ffffff;
     border-radius: 50%;
@@ -321,120 +355,154 @@ header,
 }
 
 
-/* Penalty areas */
+/* --------------------------------------------------------
+   PENALTY AREAS
+   -------------------------------------------------------- */
 
 .penalty-area-left {
     position: absolute;
-    left: 2.5%;
-    top: 28%;
-    width: 15%;
-    height: 44%;
+
+    left: 0;
+    top: 27%;
+
+    width: 16%;
+    height: 46%;
 
     border: 3px solid rgba(255,255,255,0.95);
     border-left: none;
+
     box-sizing: border-box;
 }
 
 .penalty-area-right {
     position: absolute;
-    right: 2.5%;
-    top: 28%;
-    width: 15%;
-    height: 44%;
+
+    right: 0;
+    top: 27%;
+
+    width: 16%;
+    height: 46%;
 
     border: 3px solid rgba(255,255,255,0.95);
     border-right: none;
+
     box-sizing: border-box;
 }
 
 
-/* Goal areas */
+/* --------------------------------------------------------
+   GOAL AREAS
+   -------------------------------------------------------- */
 
 .goal-area-left {
     position: absolute;
-    left: 2.5%;
-    top: 40%;
+
+    left: 0;
+    top: 37%;
+
     width: 7%;
-    height: 20%;
+    height: 26%;
 
     border: 3px solid rgba(255,255,255,0.95);
     border-left: none;
+
     box-sizing: border-box;
 }
 
 .goal-area-right {
     position: absolute;
-    right: 2.5%;
-    top: 40%;
+
+    right: 0;
+    top: 37%;
+
     width: 7%;
-    height: 20%;
+    height: 26%;
 
     border: 3px solid rgba(255,255,255,0.95);
     border-right: none;
-    box-sizing: border-box;
-}
-
-
-/* Penalty spots */
-
-.penalty-spot-left,
-.penalty-spot-right {
-    position: absolute;
-
-    width: 1vh;
-    height: 1vh;
-
-    background: #ffffff;
-    border-radius: 50%;
-
-    top: 50%;
-    transform: translateY(-50%);
-}
-
-.penalty-spot-left {
-    left: 13%;
-}
-
-.penalty-spot-right {
-    right: 13%;
-}
-
-
-/* Goals */
-
-.goal-left,
-.goal-right {
-    position: absolute;
-
-    top: 42%;
-    width: 2.5%;
-    height: 16%;
-
-    border: 3px solid #ffffff;
-    background: rgba(255,255,255,0.18);
 
     box-sizing: border-box;
 }
+
+
+/* --------------------------------------------------------
+   GOALS
+   -------------------------------------------------------- */
 
 .goal-left {
-    left: -0.5%;
-    border-left: none;
+    position: absolute;
+
+    left: -1.2%;
+    top: 43%;
+
+    width: 1.5%;
+    height: 14%;
+
+    border: 3px solid #ffffff;
+    background: rgba(255,255,255,0.12);
+
+    box-sizing: border-box;
 }
 
 .goal-right {
-    right: -0.5%;
-    border-right: none;
+    position: absolute;
+
+    right: -1.2%;
+    top: 43%;
+
+    width: 1.5%;
+    height: 14%;
+
+    border: 3px solid #ffffff;
+    background: rgba(255,255,255,0.12);
+
+    box-sizing: border-box;
+}
+
+
+/* --------------------------------------------------------
+   CORNER ARCS
+   -------------------------------------------------------- */
+
+.corner {
+    position: absolute;
+
+    width: 3vh;
+    height: 3vh;
+
+    border: 2px solid rgba(255,255,255,0.9);
+    border-radius: 50%;
+}
+
+.corner-tl {
+    left: -1.5vh;
+    top: -1.5vh;
+}
+
+.corner-tr {
+    right: -1.5vh;
+    top: -1.5vh;
+}
+
+.corner-bl {
+    left: -1.5vh;
+    bottom: -1.5vh;
+}
+
+.corner-br {
+    right: -1.5vh;
+    bottom: -1.5vh;
 }
 
 
 /* ========================================================
-   THREE-DIMENSIONAL FOOTBALL
+   FOOTBALL
    ======================================================== */
 
 .football {
     position: absolute;
 
-    left: 28vw;
+    left: 39vw;
     top: 49vh;
 
     width: 13vh;
@@ -444,276 +512,66 @@ header,
 
     background:
         radial-gradient(
-            circle at 32% 25%,
+            circle at 31% 28%,
             #ffffff 0%,
-            #ffffff 12%,
-            #f1f1f1 30%,
-            #d8d8d8 58%,
-            #a8a8a8 82%,
-            #777777 100%
+            #ffffff 32%,
+            transparent 33%
+        ),
+        radial-gradient(
+            circle at 70% 70%,
+            #d8d8d8 0%,
+            #f5f5f5 58%,
+            #bdbdbd 100%
         );
 
-    border: 2px solid #555555;
+    border: 2px solid #222222;
 
     box-shadow:
-        inset -1.5vh -1.5vh 2vh rgba(0,0,0,0.30),
-        inset 1vh 1vh 1.5vh rgba(255,255,255,0.80),
-        0 1.2vh 2vh rgba(0,0,0,0.28);
+        0 1vh 2vh rgba(0,0,0,0.28);
 
-    z-index: 10;
+    z-index: 15;
 }
 
 
-/* Black pentagonal patches */
+/* --------------------------------------------------------
+   FOOTBALL BLACK PATCHES
+   -------------------------------------------------------- */
 
-.football::before {
-    content: "";
-
+.football-patch {
     position: absolute;
 
-    width: 3.2vh;
-    height: 3.2vh;
-
-    left: 50%;
-    top: 50%;
-
-    transform: translate(-50%, -50%) rotate(12deg);
+    width: 2.8vh;
+    height: 2.8vh;
 
     background: #151515;
 
     clip-path: polygon(
         50% 0%,
-        97% 35%,
-        79% 91%,
-        21% 91%,
-        3% 35%
+        95% 35%,
+        78% 90%,
+        22% 90%,
+        5% 35%
     );
-
-    border-radius: 12%;
 }
 
-
-.football::after {
-    content: "";
-
-    position: absolute;
-
-    width: 2.2vh;
-    height: 2.2vh;
-
-    left: 22%;
-    top: 55%;
-
-    background: #202020;
-
-    clip-path: polygon(
-        50% 0%,
-        97% 35%,
-        79% 91%,
-        21% 91%,
-        3% 35%
-    );
-
-    border-radius: 10%;
-
-    box-shadow:
-        6vh -3vh 0 -0.1vh #202020,
-        5.2vh 4.2vh 0 -0.1vh #202020,
-        -1vh -4.5vh 0 -0.1vh #202020;
+.patch-1 {
+    left: 5vh;
+    top: 4.7vh;
 }
 
-
-/* Small shadow beneath football */
-
-.football-shadow {
-    position: absolute;
-
-    left: 28.8vw;
-    top: 61vh;
-
-    width: 11vh;
-    height: 2.8vh;
-
-    background: rgba(0,0,0,0.25);
-
-    border-radius: 50%;
-
-    filter: blur(4px);
-
-    z-index: 8;
+.patch-2 {
+    left: 2.2vh;
+    top: 7.8vh;
 }
 
-
-/* ========================================================
-   P, O AND OP — UNCHANGED FOR NOW
-   ======================================================== */
-
-.point-p {
-    position: absolute;
-    left: 31vw;
-    top: 45vh;
-    font-size: clamp(1.1rem, 1.7vw, 1.8rem);
-    font-weight: 700;
-    z-index: 15;
-    white-space: nowrap;
+.patch-3 {
+    left: 8.1vh;
+    top: 8vh;
 }
 
-.point-o {
-    position: absolute;
-    left: 32vw;
-    top: 66vh;
-    font-size: clamp(1.1rem, 1.7vw, 1.8rem);
-    font-weight: 700;
-    z-index: 15;
-}
-
-.ray {
-    position: absolute;
-    left: 32.5vw;
-    top: 55vh;
-    width: 15vw;
-    height: 4px;
-    background: #222222;
-    transform-origin: left center;
-    z-index: 12;
-}
-
-.ray-arrow {
-    position: absolute;
-    right: -1px;
-    top: -9px;
-    font-size: 2rem;
-    line-height: 1;
-    font-weight: 700;
-}
-
-
-/* ========================================================
-   PUMP — UNCHANGED FOR NOW
-   ======================================================== */
-
-.pump-panel {
-    position: absolute;
-    right: 6vw;
-    top: 27vh;
-    width: 27vw;
-    min-height: 35vh;
-    text-align: center;
-}
-
-.pump-title {
-    font-size: clamp(1.5rem, 2.3vw, 2.5rem);
-    font-weight: 700;
-    margin-bottom: 4vh;
-}
-
-.pump {
-    position: relative;
-    width: 7vw;
-    height: 25vh;
-    margin: auto;
-}
-
-.pump-cylinder {
-    position: absolute;
-    left: 50%;
-    top: 3vh;
-    transform: translateX(-50%);
-    width: 4vw;
-    height: 13vh;
-    border: 3px solid #333333;
-    border-radius: 1vh;
-    background: #eeeeee;
-}
-
-.pump-handle {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    transform: translateX(-50%);
-    width: 8vw;
-    height: 3px;
-    background: #333333;
-}
-
-.pump-rod {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    width: 3px;
-    height: 5vh;
-    background: #333333;
-}
-
-.pump-hose {
-    position: absolute;
-    left: 50%;
-    top: 16vh;
-    width: 10vw;
-    height: 5vh;
-    border-bottom: 4px solid #333333;
-    border-radius: 0 0 5vw 5vw;
-}
-
-.pumping-animation {
-    animation: pumpAction 0.9s ease-in-out infinite alternate;
-    transform-origin: center;
-}
-
-@keyframes pumpAction {
-    from {
-        transform: translateY(0);
-    }
-    to {
-        transform: translateY(5vh);
-    }
-}
-
-
-/* ========================================================
-   OBSERVATION / CONCLUSION — UNCHANGED
-   ======================================================== */
-
-.analysis-panel {
-    position: absolute;
-    right: 4vw;
-    top: 18vh;
-    width: 34vw;
-    text-align: left;
-    font-size: clamp(1rem, 1.35vw, 1.45rem);
-    line-height: 1.4;
-    z-index: 30;
-}
-
-.analysis-heading {
-    font-size: clamp(1.4rem, 2vw, 2.1rem);
-    font-weight: 700;
-    margin-bottom: 2vh;
-}
-
-.analysis-point {
-    margin-bottom: 2vh;
-}
-
-.analysis-point strong {
-    font-weight: 700;
-}
-
-.conclusion {
-    margin-top: 3vh;
-    padding-top: 2vh;
-    border-top: 2px solid #dddddd;
-}
-
-.visualize-again {
-    position: absolute;
-    right: 7vw;
-    top: 70vh;
-    width: 30vw;
-    text-align: center;
-    font-size: clamp(1.4rem, 2vw, 2rem);
-    font-weight: 700;
-    z-index: 40;
+.patch-4 {
+    left: 5.1vh;
+    top: 9.5vh;
 }
 
 
@@ -722,10 +580,11 @@ header,
    ======================================================== */
 
 .reveal {
-    animation: revealEvent 0.5s ease-out both;
+    animation: revealEvent 0.55s ease-out both;
 }
 
 @keyframes revealEvent {
+
     from {
         opacity: 0;
         transform: translateY(10px);
@@ -735,6 +594,7 @@ header,
         opacity: 1;
         transform: translateY(0);
     }
+
 }
 
 
@@ -744,11 +604,16 @@ header,
 
 div[data-testid="stButton"] button {
     position: fixed;
+
     inset: 0;
+
     width: 100vw;
     height: 100vh;
+
     opacity: 0;
+
     z-index: 9999;
+
     cursor: pointer;
 }
 
@@ -765,7 +630,7 @@ unsafe_allow_html=True,
 
 # ============================================================
 
-if st.session_state.presentation_state < 20:
+if st.session_state.presentation_state < 10:
 
 ```
 if st.button(
@@ -778,7 +643,7 @@ if st.button(
 
 # ============================================================
 
-# STATE 0 — BLANK
+# STATE 0 — COMPLETELY BLANK
 
 # ============================================================
 
@@ -921,11 +786,11 @@ st.html(content)
 
 # ============================================================
 
-# STATES 8–20 — SLIDE 3
+# STATES 8–10 — SLIDE 3
 
 # ============================================================
 
-elif 8 <= st.session_state.presentation_state <= 20:
+elif 8 <= st.session_state.presentation_state <= 10:
 
 ```
 state = st.session_state.presentation_state
@@ -939,16 +804,16 @@ content = """
 """
 
 
-# --------------------------------------------------------
-# CLICK 2 — FOOTBALL GROUND
-# --------------------------------------------------------
+# ========================================================
+# STATE 9 — FOOTBALL GROUND
+# ========================================================
 
 if state >= 9:
 
-    content += """
-    <div class="football-ground reveal">
+    ground_reveal = "reveal" if state == 9 else ""
 
-        <div class="field-line field-boundary"></div>
+    content += f"""
+    <div class="football-ground {ground_reveal}">
 
         <div class="half-line"></div>
 
@@ -962,240 +827,35 @@ if state >= 9:
         <div class="goal-area-left"></div>
         <div class="goal-area-right"></div>
 
-        <div class="penalty-spot-left"></div>
-        <div class="penalty-spot-right"></div>
-
         <div class="goal-left"></div>
         <div class="goal-right"></div>
+
+        <div class="corner corner-tl"></div>
+        <div class="corner corner-tr"></div>
+        <div class="corner corner-bl"></div>
+        <div class="corner corner-br"></div>
 
     </div>
     """
 
 
-# --------------------------------------------------------
-# CLICK 3 — FOOTBALL
-# --------------------------------------------------------
+# ========================================================
+# STATE 10 — BLACK-AND-WHITE FOOTBALL
+# ========================================================
 
 if state >= 10:
 
     content += """
-    <div class="football-shadow reveal"></div>
+    <div class="football reveal">
 
-    <div class="football reveal"></div>
-    """
-
-
-# --------------------------------------------------------
-# CLICK 4 — P AND O
-# --------------------------------------------------------
-
-if state >= 11:
-
-    content += """
-    <div class="point-p reveal">
-        P(x,y,z)
-    </div>
-
-    <div class="point-o reveal">
-        O(0,0,0)
-    </div>
-    """
-
-
-# --------------------------------------------------------
-# CLICK 5 — OP RAY WITH FRONT ARROW
-# --------------------------------------------------------
-
-if state >= 12:
-
-    content += """
-    <div class="ray reveal">
-        <div class="ray-arrow">▶</div>
-    </div>
-    """
-
-
-# --------------------------------------------------------
-# CLICK 6 — FIRST PUMPING
-# --------------------------------------------------------
-
-if state == 13:
-
-    content += """
-    <div class="pump-panel reveal">
-
-        <div class="pump-title">
-            Pumping
-        </div>
-
-        <div class="pump pumping-animation">
-
-            <div class="pump-handle"></div>
-
-            <div class="pump-rod"></div>
-
-            <div class="pump-cylinder"></div>
-
-            <div class="pump-hose"></div>
-
-        </div>
+        <div class="football-patch patch-1"></div>
+        <div class="football-patch patch-2"></div>
+        <div class="football-patch patch-3"></div>
+        <div class="football-patch patch-4"></div>
 
     </div>
     """
 
-
-# --------------------------------------------------------
-# AFTER FIRST PUMPING — VISUALIZE AGAIN
-# --------------------------------------------------------
-
-if state == 14:
-
-    content += """
-    <div class="visualize-again reveal">
-        Visualize Again
-    </div>
-    """
-
-
-# --------------------------------------------------------
-# SECOND / FINAL PUMPING
-# --------------------------------------------------------
-
-if state >= 15:
-
-    content += """
-    <div class="pump-panel reveal">
-
-        <div class="pump-title">
-            Pumping
-        </div>
-
-        <div class="pump pumping-animation">
-
-            <div class="pump-handle"></div>
-
-            <div class="pump-rod"></div>
-
-            <div class="pump-cylinder"></div>
-
-            <div class="pump-hose"></div>
-
-        </div>
-
-    </div>
-
-    <div class="point-p reveal">
-        P(x,y,z)
-    </div>
-
-    <div class="point-o reveal">
-        O(0,0,0)
-    </div>
-
-    <div class="ray reveal">
-        <div class="ray-arrow">▶</div>
-    </div>
-    """
-
-
-# --------------------------------------------------------
-# OBSERVATION PANEL
-# --------------------------------------------------------
-
-if state >= 16:
-
-    content += """
-    <div class="analysis-panel">
-
-        <div class="analysis-heading">
-            Observation:
-        </div>
-    """
-
-    if state >= 16:
-
-        reveal = "reveal" if state == 16 else ""
-
-        content += f"""
-        <div class="analysis-point {reveal}">
-            <strong>(i)</strong>
-            Throughout the pumping process, the point
-            <strong>P</strong> is moving in the direction
-            <strong>OP</strong> and finally reaches
-            <strong>P'</strong>.
-        </div>
-        """
-
-    if state >= 17:
-
-        reveal = "reveal" if state == 17 else ""
-
-        content += f"""
-        <div class="analysis-point {reveal}">
-            <strong>(ii)</strong>
-            The point <strong>P</strong> is scaled by a factor of
-            <strong>λ = OP'/OP</strong>.
-        </div>
-        """
-
-    if state >= 18:
-
-        reveal = "reveal" if state == 18 else ""
-
-        content += f"""
-        <div class="analysis-point {reveal}">
-            <strong>(iii)</strong>
-            The point <strong>P</strong> is non-zero.
-        </div>
-        """
-
-    if state >= 19:
-
-        content += """
-        <div class="conclusion">
-
-            <div class="analysis-heading">
-                Conclusion:
-            </div>
-        """
-
-        if state >= 19:
-
-            reveal = "reveal" if state == 19 else ""
-
-            content += f"""
-            <div class="analysis-point {reveal}">
-                <strong>(i)</strong>
-                The non-zero point <strong>P</strong> does not
-                change its direction while moving towards
-                <strong>P'</strong>, and is therefore defined as
-                an <strong>eigenvector</strong> corresponding to
-                the eigenvalue <strong>λ</strong>.
-            </div>
-            """
-
-        if state >= 20:
-
-            reveal = "reveal" if state == 20 else ""
-
-            content += f"""
-            <div class="analysis-point {reveal}">
-                <strong>(ii)</strong>
-                All other points on the surface of the football
-                also do not change their direction and are scaled
-                by a factor of <strong>λ</strong>. Therefore, they
-                are eigenvectors corresponding to the eigenvalue
-                <strong>λ</strong>.
-            </div>
-            """
-
-        content += """
-        </div>
-        """
-
-    content += """
-    </div>
-    """
 
 content += """
 </div>
