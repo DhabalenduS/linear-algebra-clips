@@ -406,38 +406,34 @@ if st.session_state.presentation_state == 0:
     pass
 
 # ============================================================
-
 # STATE 1 — SLIDE 1
-
 # ============================================================
 
 elif st.session_state.presentation_state == 1:
 
+    st.html(
+        """
+        <div class="slide">
 
-st.html(
-    """
-    <div class="slide">
+            <div class="slide1-content">
 
-        <div class="slide1-content">
+                <div class="slide-title">
+                    Welcome to The Essence of Eigenvalues and Eigenvectors
+                </div>
 
-            <div class="slide-title">
-                Welcome to The Essence of Eigenvalues and Eigenvectors
-            </div>
+                <div class="by">
+                    By
+                </div>
 
-            <div class="by">
-                By
-            </div>
+                <div class="author">
+                    Dr. Dhabalendu Samanta
+                </div>
 
-            <div class="author">
-                Dr. Dhabalendu Samanta
             </div>
 
         </div>
-
-    </div>
-    """
-)
-
+        """
+    )
 
 # ============================================================
 
