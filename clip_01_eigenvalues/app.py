@@ -617,8 +617,8 @@ elif 8 <= st.session_state.presentation_state <= 10:
 # CLICK 3 — FOOTBALL
 # ========================================================
 
-if state >= 10:
+    if state >= 10:
 
-    content += """
-    <div class="football reveal"></div>
-    """
+        content += """
+        <div class="football reveal"></div>
+        """
