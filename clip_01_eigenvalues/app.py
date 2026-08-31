@@ -378,7 +378,7 @@ div[data-testid="stButton"] button {
 </style>
 """,
 unsafe_allow_html=True,
-```
+
 
 )
 
@@ -413,7 +413,7 @@ pass
 
 elif st.session_state.presentation_state == 1:
 
-```
+
 st.html(
     """
     <div class="slide">
@@ -437,7 +437,7 @@ st.html(
     </div>
     """
 )
-```
+
 
 # ============================================================
 
