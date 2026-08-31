@@ -116,10 +116,10 @@ st.html(
     </div>
     """
 )
-```
+
 
 ### `requirements.txt`
 
-```text
+
 streamlit==1.48.0
-```
+
