@@ -9,7 +9,7 @@ import streamlit as st
 # ------------------------------------------------------------
 
 st.set_page_config(
-    page_title="The Essence of Eigenvalues and Eigenvectors",
+    page_title="Welcome to The Essence of Eigenvalues and Eigenvectors",
     page_icon="📐",
     layout="wide",
     initial_sidebar_state="collapsed",
