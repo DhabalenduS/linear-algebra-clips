@@ -1,6 +1,3 @@
-### `app.py`
-
-```python
 # Clip 01 — Eigenvalues and Eigenvectors
 # First commit — 31 August 2026, 2:20 PM
 
