@@ -1,6 +1,6 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (Finalized up to Slide 3: Clicks 1 through 5 - High-Impact Bold Blue)
-# 3rd Commit for slide 3 for click 4 and 5
+# Slides 1–3 (Finalized up to Slide 3: Clicks 1 through 5 - High Visual Impact)
+#4th Commit for slide 3 for click 4, and  5 
 import streamlit as st
 
 st.set_page_config(
@@ -415,23 +415,34 @@ header,
     z-index: 3;
 }
 
-/* ==================== FOREGROUND MATH & VECTOR OVERLAY ==================== */
+/* ==================== HIGH-IMPACT VECTOR OVERLAY ==================== */
 
-.math-stage {
+.math-pitch-canvas {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 44vh;
-    height: 44vh;
-    transform: translate(-50%, -50%);
-    z-index: 100; /* Brought to the absolute front */
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 50;
     pointer-events: none;
 }
 
-.math-text-blue {
+.math-badge {
     font-family: Georgia, "Times New Roman", serif;
+    font-size: 24px;
     font-weight: 800;
-    fill: #1d4ed8; /* Bold Royal Blue */
+    fill: #1d4ed8;
+    paint-order: stroke fill;
+    stroke: #ffffff;
+    stroke-width: 6px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.vector-badge {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 26px;
+    font-weight: 800;
+    fill: #1e40af;
     paint-order: stroke fill;
     stroke: #ffffff;
     stroke-width: 6px;
@@ -662,42 +673,44 @@ elif 8 <= st.session_state.presentation_state <= 12:
             """
 
         # ========================================================
-        # CLICKS 4 & 5: FOREGROUND BOLD BLUE VECTOR & MATH OVERLAY
+        # CLICKS 4 & 5: HIGH-IMPACT MATHEMATICAL VECTOR CANVAS
+        # Pitch Center is exactly at (500, 300)
+        # Point P in 1st Quadrant on ball perimeter is at (550, 245)
         # ========================================================
         if state >= 11:
             overlay_svg = """
-            <svg class="math-stage reveal" viewBox="-200 -200 400 400">
+            <svg class="math-pitch-canvas" viewBox="0 0 1000 600">
                 <defs>
-                    <!-- Bold Royal Blue Vector Arrowhead -->
-                    <marker id="blueRayArrow" markerWidth="14" markerHeight="14" refX="9" refY="4.5" orient="auto">
+                    <!-- Bold Vector Arrowhead -->
+                    <marker id="boldBlueArrow" markerWidth="14" markerHeight="14" refX="9" refY="4.5" orient="auto">
                         <path d="M 0 0 L 11 4.5 L 0 9 Z" fill="#1d4ed8" />
                     </marker>
-                    <!-- Subtle Drop Shadow for Vector -->
-                    <filter id="mathShadow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="2" dy="2" stdDeviation="2" flood-color="#000000" flood-opacity="0.3"/>
+                    <!-- Shadow for High Contrast -->
+                    <filter id="vectorGlow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.4"/>
                     </filter>
                 </defs>
             """
 
-            # CLICK 5 (State 12): Bold Royal Blue Vector Ray OP with Arrowhead and Label
+            # CLICK 5 (State 12): Bold Vector Ray OP from Center O(500, 300) to Surface P(550, 245)
             if state >= 12:
                 overlay_svg += """
-                <!-- Ray OP Vector Line -->
-                <line x1="0" y1="0" x2="68" y2="-58" stroke="#1d4ed8" stroke-width="5.5" stroke-linecap="round" marker-end="url(#blueRayArrow)" filter="url(#mathShadow)" />
+                <!-- Solid 6px Vector Beam OP -->
+                <line x1="500" y1="300" x2="550" y2="245" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round" marker-end="url(#boldBlueArrow)" filter="url(#vectorGlow)" />
                 
                 <!-- Vector Label OP with Overhead Arrow -->
-                <text x="18" y="-42" class="math-text-blue" font-size="22">OP&#8407;</text>
+                <text x="502" y="260" class="vector-badge" filter="url(#vectorGlow)">OP&#8407;</text>
                 """
 
             # CLICK 4 (State 11+): Bold Blue Center Origin O(0,0,0) and Surface Point P(x,y,z)
             overlay_svg += """
-                <!-- Center Origin O(0,0,0) -->
-                <circle cx="0" cy="0" r="8" fill="#1d4ed8" stroke="#ffffff" stroke-width="3" filter="url(#mathShadow)" />
-                <text x="-125" y="32" class="math-text-blue" font-size="20">O(0, 0, 0)</text>
+                <!-- Center Origin O(0,0,0) at (500, 300) -->
+                <circle cx="500" cy="300" r="9" fill="#1d4ed8" stroke="#ffffff" stroke-width="3" filter="url(#vectorGlow)" />
+                <text x="370" y="340" class="math-badge" filter="url(#vectorGlow)">O(0, 0, 0)</text>
 
-                <!-- Surface Point P(x,y,z) in 1st Quadrant -->
-                <circle cx="68" cy="-58" r="9" fill="#1d4ed8" stroke="#ffffff" stroke-width="3" filter="url(#mathShadow)" />
-                <text x="82" y="-68" class="math-text-blue" font-size="22">P(x, y, z)</text>
+                <!-- Surface Point P(x,y,z) at (550, 245) -->
+                <circle cx="550" cy="245" r="10" fill="#1d4ed8" stroke="#ffffff" stroke-width="3" filter="url(#vectorGlow)" />
+                <text x="568" y="235" class="math-badge" filter="url(#vectorGlow)">P(x, y, z)</text>
             </svg>
             """
             content += overlay_svg
