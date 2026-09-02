@@ -496,7 +496,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Full-Scale Expanded Football Ground
+                // CLICK 2 (State >= 9): Full Edge-to-Edge Football Ground
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
@@ -504,7 +504,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pCanvas.height = 1400;
                     const ctx = pCanvas.getContext('2d');
 
-                    // 1. Continuous Lawn Stripes (Edge-to-Edge)
+                    // 1. Lawn Stripes
                     const stripes = 14;
                     const sh = 1400 / stripes;
                     for (let i = 0; i < stripes; i++) {{
@@ -512,19 +512,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Extended Boundary Lines (Expanded to cover almost the entire ground)
-                    const mx = 180;
-                    const my = 130;
-                    const pw = 2048 - (2 * mx); // 1688
-                    const ph = 1400 - (2 * my); // 1140
+                    // 2. Full Edge-to-Edge Expansion (Minimal margin)
+                    const mx = 45;
+                    const my = 35;
+                    const pw = 2048 - (2 * mx); // 1958
+                    const ph = 1400 - (2 * my); // 1330
                     const cx = 2048 / 2;
                     const cy = 1400 / 2;
 
                     ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 14;
+                    ctx.lineWidth = 15;
                     ctx.lineCap = 'round';
 
-                    // Full Outer Boundary
+                    // Full Outer Boundary (Expanded to card edges)
                     ctx.strokeRect(mx, my, pw, ph);
 
                     // Halfway Line
@@ -535,30 +535,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // Center Circle & Center Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 200, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 240, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 18, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Left Penalty Box & Goal Box (Expanded Proportions)
-                    ctx.strokeRect(mx, cy - 270, 270, 540);
-                    ctx.strokeRect(mx, cy - 110, 95, 220);
+                    // Left Penalty Box & Goal Box
+                    ctx.strokeRect(mx, cy - 320, 320, 640);
+                    ctx.strokeRect(mx, cy - 130, 110, 260);
                     ctx.beginPath();
-                    ctx.arc(mx + 195, cy, 110, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 230, cy, 130, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
-                    // Right Penalty Box & Goal Box (Expanded Proportions)
-                    ctx.strokeRect(mx + pw - 270, cy - 270, 270, 540);
-                    ctx.strokeRect(mx + pw - 95, cy - 110, 95, 220);
+                    // Right Penalty Box & Goal Box
+                    ctx.strokeRect(mx + pw - 320, cy - 320, 320, 640);
+                    ctx.strokeRect(mx + pw - 110, cy - 130, 110, 260);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 195, cy, 110, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 230, cy, 130, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
                     // All 4 Corner Arcs
-                    const r = 34;
+                    const r = 45;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
