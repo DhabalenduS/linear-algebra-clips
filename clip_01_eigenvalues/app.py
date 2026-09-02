@@ -440,7 +440,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     width: 100%;
                     height: 100%;
                     overflow: hidden;
-                    background: #237427;
+                    background: #28792c;
                 }}
                 #canvas3d {{
                     width: 100%;
@@ -463,9 +463,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Calibrated Overhead TV Camera (Wide FOV to ensure 100% of the field is in view)
-                const camera = new THREE.PerspectiveCamera(46, w / h, 0.1, 1000);
-                camera.position.set(0, 31, 2.0);
+                // Calibrated TV Camera (Fills 100% of the stage)
+                const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
+                camera.position.set(0, 29, 2.0);
                 camera.lookAt(0, 0, 0);
 
                 const renderer = new THREE.WebGLRenderer({{
@@ -496,7 +496,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Perfectly Framed 4-Border Football Ground
+                // CLICK 2 (State >= 9): Full-Bleed Edge-to-Edge Football Pitch
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
@@ -504,7 +504,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pCanvas.height = 1440;
                     const ctx = pCanvas.getContext('2d');
 
-                    // 1. Lawn Stripes
+                    // 1. Lawn Stripes (Edge-to-Edge)
                     const stripes = 12;
                     const sh = 1440 / stripes;
                     for (let i = 0; i < stripes; i++) {{
@@ -512,7 +512,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Proportional Safe Margins (Ensures all 4 borders stay inside screen)
+                    // 2. Balanced Boundary Inset
                     const mx = 120;
                     const my = 90;
                     const pw = 2048 - (2 * mx); // 1808
@@ -568,7 +568,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 if (currentState >= 9) {{
-                    const pitchGeo = new THREE.PlaneGeometry(28, 19.7);
+                    // Scaled plane so striped grass fills 100% of the stage container
+                    const pitchGeo = new THREE.PlaneGeometry(38, 26.5);
                     const pitchMat = new THREE.MeshStandardMaterial({{
                         map: createPitchTexture(),
                         roughness: 0.85,
