@@ -1,6 +1,6 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (Finalized up to Slide 3: Clicks 1 through 5 - High Visual Impact)
-#4th Commit for slide 3 for click 4, and  5 
+# Slides 1–3 (Finalized up to Slide 3: Clicks 1 through 5 - Precision CSS Math Overlay)
+# 5th Commit for Slide 3 for click 4 and 5 
 import streamlit as st
 
 st.set_page_config(
@@ -415,39 +415,113 @@ header,
     z-index: 3;
 }
 
-/* ==================== HIGH-IMPACT VECTOR OVERLAY ==================== */
+/* ==================== BULLETPROOF CSS MATH OVERLAYS ==================== */
 
-.math-pitch-canvas {
+/* Center Origin Marker & Badge */
+.point-origin {
     position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 50;
-    pointer-events: none;
+    left: 50%;
+    top: 50%;
+    width: 1.8vh;
+    height: 1.8vh;
+    background: #1d4ed8;
+    border: 2.5px solid #ffffff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 10px rgba(29, 78, 216, 0.8), 0 2px 6px rgba(0,0,0,0.4);
+    z-index: 60;
 }
 
-.math-badge {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 24px;
+.badge-origin {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-125%, 35%);
+    background: #ffffff;
+    border: 2px solid #1d4ed8;
+    color: #1d4ed8;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: clamp(0.9rem, 1.4vw, 1.25rem);
     font-weight: 800;
-    fill: #1d4ed8;
-    paint-order: stroke fill;
-    stroke: #ffffff;
-    stroke-width: 6px;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    font-family: Georgia, serif;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    z-index: 65;
 }
 
-.vector-badge {
-    font-family: Georgia, "Times New Roman", serif;
-    font-size: 26px;
+/* Surface Point P Marker & Badge */
+.point-surface {
+    position: absolute;
+    left: calc(50% + 5vh);
+    top: calc(50% - 5vh);
+    width: 2vh;
+    height: 2vh;
+    background: #1d4ed8;
+    border: 2.5px solid #ffffff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px rgba(29, 78, 216, 0.9), 0 2px 6px rgba(0,0,0,0.4);
+    z-index: 60;
+}
+
+.badge-surface {
+    position: absolute;
+    left: calc(50% + 5vh);
+    top: calc(50% - 5vh);
+    transform: translate(25%, -110%);
+    background: #ffffff;
+    border: 2px solid #1d4ed8;
+    color: #1d4ed8;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: clamp(0.9rem, 1.4vw, 1.25rem);
     font-weight: 800;
-    fill: #1e40af;
-    paint-order: stroke fill;
-    stroke: #ffffff;
-    stroke-width: 6px;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    font-family: Georgia, serif;
+    white-space: nowrap;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    z-index: 65;
+}
+
+/* Ray OP Vector Line & Arrowhead */
+.vector-ray-op {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7.1vh;
+    height: 5px;
+    background: #1d4ed8;
+    transform-origin: 0% 50%;
+    transform: rotate(-45deg);
+    box-shadow: 0 0 8px rgba(29, 78, 216, 0.7);
+    z-index: 55;
+}
+
+/* Vector Arrowhead at the tip */
+.vector-ray-op::after {
+    content: "";
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 7px solid transparent;
+    border-bottom: 7px solid transparent;
+    border-left: 12px solid #1d4ed8;
+}
+
+.badge-ray-op {
+    position: absolute;
+    left: calc(50% + 1.2vh);
+    top: calc(50% - 3.8vh);
+    background: #1d4ed8;
+    color: #ffffff;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-size: clamp(0.85rem, 1.2vw, 1.1rem);
+    font-weight: 800;
+    font-family: Georgia, serif;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    z-index: 65;
 }
 
 /* ==================== REVEAL ANIMATIONS ==================== */
@@ -673,47 +747,28 @@ elif 8 <= st.session_state.presentation_state <= 12:
             """
 
         # ========================================================
-        # CLICKS 4 & 5: HIGH-IMPACT MATHEMATICAL VECTOR CANVAS
-        # Pitch Center is exactly at (500, 300)
-        # Point P in 1st Quadrant on ball perimeter is at (550, 245)
+        # CLICK 4 (State 11+): O(0,0,0) and Surface P(x,y,z)
         # ========================================================
         if state >= 11:
-            overlay_svg = """
-            <svg class="math-pitch-canvas" viewBox="0 0 1000 600">
-                <defs>
-                    <!-- Bold Vector Arrowhead -->
-                    <marker id="boldBlueArrow" markerWidth="14" markerHeight="14" refX="9" refY="4.5" orient="auto">
-                        <path d="M 0 0 L 11 4.5 L 0 9 Z" fill="#1d4ed8" />
-                    </marker>
-                    <!-- Shadow for High Contrast -->
-                    <filter id="vectorGlow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="2" dy="3" stdDeviation="3" flood-color="#000000" flood-opacity="0.4"/>
-                    </filter>
-                </defs>
+            content += """
+            <!-- Center Origin O(0,0,0) -->
+            <div class="point-origin"></div>
+            <div class="badge-origin">O(0, 0, 0)</div>
+
+            <!-- Surface Point P(x,y,z) -->
+            <div class="point-surface"></div>
+            <div class="badge-surface">P(x, y, z)</div>
             """
 
-            # CLICK 5 (State 12): Bold Vector Ray OP from Center O(500, 300) to Surface P(550, 245)
-            if state >= 12:
-                overlay_svg += """
-                <!-- Solid 6px Vector Beam OP -->
-                <line x1="500" y1="300" x2="550" y2="245" stroke="#1d4ed8" stroke-width="6" stroke-linecap="round" marker-end="url(#boldBlueArrow)" filter="url(#vectorGlow)" />
-                
-                <!-- Vector Label OP with Overhead Arrow -->
-                <text x="502" y="260" class="vector-badge" filter="url(#vectorGlow)">OP&#8407;</text>
-                """
-
-            # CLICK 4 (State 11+): Bold Blue Center Origin O(0,0,0) and Surface Point P(x,y,z)
-            overlay_svg += """
-                <!-- Center Origin O(0,0,0) at (500, 300) -->
-                <circle cx="500" cy="300" r="9" fill="#1d4ed8" stroke="#ffffff" stroke-width="3" filter="url(#vectorGlow)" />
-                <text x="370" y="340" class="math-badge" filter="url(#vectorGlow)">O(0, 0, 0)</text>
-
-                <!-- Surface Point P(x,y,z) at (550, 245) -->
-                <circle cx="550" cy="245" r="10" fill="#1d4ed8" stroke="#ffffff" stroke-width="3" filter="url(#vectorGlow)" />
-                <text x="568" y="235" class="math-badge" filter="url(#vectorGlow)">P(x, y, z)</text>
-            </svg>
+        # ========================================================
+        # CLICK 5 (State 12): Vector Ray OP with Arrowhead & Badge
+        # ========================================================
+        if state >= 12:
+            content += """
+            <!-- Vector Ray OP -->
+            <div class="vector-ray-op"></div>
+            <div class="badge-ray-op">OP&#8407;</div>
             """
-            content += overlay_svg
 
         content += """
         </div>
