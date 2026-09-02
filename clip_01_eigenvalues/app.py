@@ -1,9 +1,7 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (Finalized up to Slide 3: Clicks 1, 2, and 3)
-# This is first commit using Google Studi AI for slide 3 - Click 1, click 2, Click 3
+# Slides 1–3 (Finalizing up to Slide 3: Clicks 1, 2, and 3)
+# 1st Commit to Finalize up to Slide 3: Clicks 1, 2, and 3
 import streamlit as st
-import os
-import base64
 
 st.set_page_config(
     page_title="",
@@ -13,31 +11,6 @@ st.set_page_config(
 )
 
 st.session_state.setdefault("presentation_state", 0)
-
-# Helper function to load tutor photo if available
-def get_tutor_photo_html():
-    for fname in ["tutor.jpg", "tutor.png", "profile.png", "profile.jpg"]:
-        if os.path.exists(fname):
-            with open(fname, "rb") as img_file:
-                b64_data = base64.b64encode(img_file.read()).decode()
-                return f"""
-                <div class="tutor-card">
-                    <img src="data:image/png;base64,{b64_data}" class="tutor-photo" />
-                    <div>
-                        <div class="tutor-name">Dr. Dhabalendu Samanta</div>
-                        <div class="tutor-sub">Linear Algebra Expert</div>
-                    </div>
-                </div>
-                """
-    return """
-    <div class="tutor-card">
-        <div class="tutor-avatar">👨‍🏫</div>
-        <div>
-            <div class="tutor-name">Dr. Dhabalendu Samanta</div>
-            <div class="tutor-sub">Linear Algebra Expert</div>
-        </div>
-    </div>
-    """
 
 st.markdown(
 """
@@ -175,49 +148,15 @@ header,
     z-index: 20;
 }
 
-/* LEFT PANEL (40% width area) */
+/* LEFT PANEL (40% width area reserved for Observations & Conclusions) */
 .slide3-left-panel {
     position: absolute;
-    left: 5vw;
+    left: 4vw;
     top: 19vh;
-    width: 32vw;
+    width: 33vw;
     height: 68vh;
     z-index: 30;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-}
-
-.tutor-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: #f8fafc;
-    border: 1.5px solid #e2e8f0;
-    padding: 10px 16px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.tutor-photo {
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #2b6cb0;
-}
-
-.tutor-avatar {
-    font-size: 32px;
-}
-
-.tutor-name {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1a365d;
-}
-
-.tutor-sub {
-    font-size: 0.8rem;
-    color: #4a5568;
+    font-family: Georgia, "Times New Roman", serif;
 }
 
 /* RIGHT PANEL (60% width area): FOOTBALL GROUND */
@@ -390,84 +329,26 @@ header,
     border-radius: 100% 0 0 0;
 }
 
-/* ==================== FOOTBALL ==================== */
+/* ==================== 3D FOOTBALL ==================== */
 
-.football {
+.football-container {
     position: absolute;
-    /* Exact centre of the 60% right football ground */
+    /* Exactly at the centre of the soccer ground */
     left: calc(40vw + 27.5vw);
     top: calc(19vh + 34vh);
-
-    width: 13vh;
-    height: 13vh;
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle at 32% 27%,
-            #ffffff 0%,
-            #ffffff 12%,
-            #eeeeee 28%,
-            #cfcfcf 58%,
-            #8f8f8f 82%,
-            #555555 100%
-        );
-
-    border: 2px solid #222222;
-
-    box-shadow:
-        0.8vh 1vh 1.8vh rgba(0,0,0,0.30),
-        inset -1.2vh -1.2vh 2vh rgba(0,0,0,0.22),
-        inset 1vh 0.8vh 1.5vh rgba(255,255,255,0.55);
-
+    width: 14vh;
+    height: 14vh;
+    transform: translate(-50%, -50%);
     z-index: 15;
-
-    transform: translate(-50%, -50%);
+    filter: drop-shadow(0.8vh 1.2vh 1.4vh rgba(0,0,0,0.38));
 }
 
-/* Black pentagonal panels */
-.football::before {
-    content: "";
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 3.4vh;
-    height: 3.4vh;
-    background: #111111;
-    clip-path: polygon(
-        50% 0%,
-        97% 35%,
-        79% 90%,
-        21% 90%,
-        3% 35%
-    );
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0.2vh 0.4vh rgba(0,0,0,0.35);
+.football-svg {
+    width: 100%;
+    height: 100%;
 }
 
-/* Additional black panels */
-.football::after {
-    content: "";
-    position: absolute;
-    width: 2.4vh;
-    height: 2.4vh;
-    left: 1.8vh;
-    top: 6.8vh;
-    background: #151515;
-    clip-path: polygon(
-        50% 0%,
-        95% 35%,
-        78% 90%,
-        22% 90%,
-        5% 35%
-    );
-    box-shadow:
-        6.4vh -4.2vh 0 -0.1vh #151515,
-        5.8vh 3.5vh 0 -0.1vh #151515;
-}
-
-/* ==================== REVEAL ==================== */
+/* ==================== REVEAL ANIMATION ==================== */
 
 .reveal {
     animation: revealEvent 0.55s ease-out both;
@@ -484,7 +365,7 @@ header,
     }
 }
 
-/* ==================== FULL SCREEN CONTROL ==================== */
+/* ==================== FULL SCREEN CLICK CONTROL ==================== */
 
 div[data-testid="stButton"] button {
     position: fixed;
@@ -632,18 +513,16 @@ elif 8 <= st.session_state.presentation_state <= 10:
 
     state = st.session_state.presentation_state
 
-    # CLICK 1 (State 8): Centered Title + Permanent Left Tutor Photo
-    content = f"""
+    # CLICK 1 (State 8): Centered Title + Clean Reserved Left Panel
+    content = """
     <div class="slide3">
         <div class="slide3-title">
             Visualization of Soccer Match
         </div>
-        <div class="slide3-left-panel">
-            {get_tutor_photo_html()}
-        </div>
+        <div class="slide3-left-panel"></div>
     """
 
-    # CLICK 2 (State 9): Beautiful Green Ground on Right Panel (60%)
+    # CLICK 2 (State 9): Green Football Pitch on Right Panel (60%)
     if state >= 9:
         reveal = "reveal" if state == 9 else ""
         content += f"""
@@ -664,10 +543,63 @@ elif 8 <= st.session_state.presentation_state <= 10:
         </div>
         """
 
-    # CLICK 3 (State 10): Black-and-White Football at the Center Mark
+    # CLICK 3 (State 10): 3D Black-and-White Soccer Ball at Center
     if state >= 10:
         content += """
-        <div class="football reveal"></div>
+        <div class="football-container reveal">
+            <svg class="football-svg" viewBox="0 0 200 200">
+                <defs>
+                    <!-- Spherical 3D Shading -->
+                    <radialGradient id="ballShading" cx="35%" cy="30%" r="65%">
+                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
+                        <stop offset="50%" stop-color="#dddddd" stop-opacity="0.2" />
+                        <stop offset="85%" stop-color="#222222" stop-opacity="0.6" />
+                        <stop offset="100%" stop-color="#050505" stop-opacity="0.95" />
+                    </radialGradient>
+                    <clipPath id="ballClip">
+                        <circle cx="100" cy="100" r="96" />
+                    </clipPath>
+                </defs>
+
+                <!-- Base Sphere Background -->
+                <circle cx="100" cy="100" r="96" fill="#f4f4f4" stroke="#222222" stroke-width="3" />
+
+                <!-- Classic Soccer Ball Geometry (Clipped to Sphere) -->
+                <g clip-path="url(#ballClip)">
+                    <!-- Central Pentagonal Patch -->
+                    <polygon points="100,68 126,86 116,118 84,118 74,86" fill="#181818" stroke="#333" stroke-width="2"/>
+
+                    <!-- Seam Lines radiating outward from center pentagon -->
+                    <line x1="100" y1="68" x2="100" y2="30" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="126" y1="86" x2="162" y2="72" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="116" y1="118" x2="148" y2="152" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="84" y1="118" x2="52" y2="152" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
+                    <line x1="74" y1="86" x2="38" y2="72" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
+
+                    <!-- Surrounding Outer Black Pentagons (Spherical Perspective) -->
+                    <!-- Top Patch -->
+                    <polygon points="82,0 118,0 126,20 100,30 74,20" fill="#181818" stroke="#333" stroke-width="2"/>
+                    <!-- Top-Right Patch -->
+                    <polygon points="162,72 188,52 205,75 190,105 168,102" fill="#181818" stroke="#333" stroke-width="2"/>
+                    <!-- Bottom-Right Patch -->
+                    <polygon points="148,152 172,142 180,178 145,200 125,182" fill="#181818" stroke="#333" stroke-width="2"/>
+                    <!-- Bottom-Left Patch -->
+                    <polygon points="52,152 75,182 55,200 20,178 28,142" fill="#181818" stroke="#333" stroke-width="2"/>
+                    <!-- Top-Left Patch -->
+                    <polygon points="38,72 32,102 10,105 -5,75 12,52" fill="#181818" stroke="#333" stroke-width="2"/>
+
+                    <!-- Additional Hexagonal Seam Lines Connecting Outer Panels -->
+                    <line x1="74" y1="20" x2="38" y2="72" stroke="#444" stroke-width="3.5"/>
+                    <line x1="126" y1="20" x2="162" y2="72" stroke="#444" stroke-width="3.5"/>
+                    <line x1="168" y1="102" x2="148" y2="152" stroke="#444" stroke-width="3.5"/>
+                    <line x1="125" y1="182" x2="75" y2="182" stroke="#444" stroke-width="3.5"/>
+                    <line x1="52" y1="152" x2="32" y2="102" stroke="#444" stroke-width="3.5"/>
+
+                    <!-- 3D Volume Light & Shadow Overlay -->
+                    <circle cx="100" cy="100" r="96" fill="url(#ballShading)" style="mix-blend-mode: multiply;" />
+                </g>
+            </svg>
+        </div>
         """
 
     content += """
