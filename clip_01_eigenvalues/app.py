@@ -1,6 +1,6 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (Finalizing up to Slide 3: Clicks 1, 2, and 3)
-# 1st Commit to Finalize up to Slide 3: Clicks 1, 2, and 3
+# Slides 1–3 (Finalized up to Slide 3: Clicks 1, 2, and 3)
+# 2nd to cimmote to finalize Slide 3: Clicks 1, 2, and 3
 import streamlit as st
 
 st.set_page_config(
@@ -148,7 +148,7 @@ header,
     z-index: 20;
 }
 
-/* LEFT PANEL (40% width area reserved for Observations & Conclusions) */
+/* LEFT PANEL (40% width area for Observations & Conclusions) */
 .slide3-left-panel {
     position: absolute;
     left: 4vw;
@@ -204,17 +204,6 @@ header,
     width: 17vh;
     height: 17vh;
     border: 3px solid rgba(255,255,255,0.95);
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.centre-spot {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 10px;
-    height: 10px;
-    background: #ffffff;
     border-radius: 50%;
     transform: translate(-50%, -50%);
 }
@@ -331,21 +320,96 @@ header,
 
 /* ==================== 3D FOOTBALL ==================== */
 
-.football-container {
+.soccer-ball {
     position: absolute;
-    /* Exactly at the centre of the soccer ground */
-    left: calc(40vw + 27.5vw);
-    top: calc(19vh + 34vh);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     width: 14vh;
     height: 14vh;
-    transform: translate(-50%, -50%);
-    z-index: 15;
-    filter: drop-shadow(0.8vh 1.2vh 1.4vh rgba(0,0,0,0.38));
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow:
+        inset -1.2vh -1.2vh 2.5vh rgba(0,0,0,0.55),
+        inset 1vh 1vh 2vh rgba(255,255,255,0.9),
+        0.8vh 1.4vh 2vh rgba(0,0,0,0.45);
+    border: 2px solid #222222;
+    overflow: hidden;
+    z-index: 25;
 }
 
-.football-svg {
-    width: 100%;
-    height: 100%;
+/* Central Black Pentagon */
+.patch-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4.2vh;
+    height: 4.2vh;
+    background: #111111;
+    transform: translate(-50%, -50%);
+    clip-path: polygon(50% 0%, 98% 35%, 79% 90%, 21% 90%, 2% 35%);
+    box-shadow: 0 0 2px #000;
+}
+
+/* Outer Black Pentagons positioned geometrically around the sphere */
+.patch-top {
+    position: absolute;
+    left: 50%;
+    top: -1.2vh;
+    width: 3.6vh;
+    height: 3.6vh;
+    background: #111111;
+    transform: translateX(-50%);
+    clip-path: polygon(50% 100%, 0% 40%, 20% 0%, 80% 0%, 100% 40%);
+}
+
+.patch-top-right {
+    position: absolute;
+    right: -1vh;
+    top: 2.8vh;
+    width: 3.4vh;
+    height: 3.4vh;
+    background: #111111;
+    clip-path: polygon(0% 40%, 60% 0%, 100% 30%, 80% 100%, 20% 80%);
+}
+
+.patch-top-left {
+    position: absolute;
+    left: -1vh;
+    top: 2.8vh;
+    width: 3.4vh;
+    height: 3.4vh;
+    background: #111111;
+    clip-path: polygon(100% 40%, 40% 0%, 0% 30%, 20% 100%, 80% 80%);
+}
+
+.patch-bottom-right {
+    position: absolute;
+    right: 0.2vh;
+    bottom: -0.6vh;
+    width: 3.6vh;
+    height: 3.6vh;
+    background: #111111;
+    clip-path: polygon(30% 0%, 80% 20%, 100% 80%, 40% 100%, 0% 50%);
+}
+
+.patch-bottom-left {
+    position: absolute;
+    left: 0.2vh;
+    bottom: -0.6vh;
+    width: 3.6vh;
+    height: 3.6vh;
+    background: #111111;
+    clip-path: polygon(70% 0%, 20% 20%, 0% 80%, 60% 100%, 100% 50%);
+}
+
+/* 3D Specular Highlight & Shading Layer */
+.ball-shading-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%);
+    pointer-events: none;
 }
 
 /* ==================== REVEAL ANIMATION ==================== */
@@ -385,7 +449,7 @@ unsafe_allow_html=True,
 # ADVANCE PRESENTATION
 # ============================================================
 
-if st.session_state.presentation_state < 10:
+if st.session_state.presentation_state < 20:
     if st.button(
         "advance",
         key="advance_button",
@@ -522,14 +586,13 @@ elif 8 <= st.session_state.presentation_state <= 10:
         <div class="slide3-left-panel"></div>
     """
 
-    # CLICK 2 (State 9): Green Football Pitch on Right Panel (60%)
+    # CLICK 2 (State 9): Clean Green Ground on Right Panel (60%)
     if state >= 9:
         reveal = "reveal" if state == 9 else ""
         content += f"""
         <div class="football-ground {reveal}">
             <div class="half-line"></div>
             <div class="centre-circle"></div>
-            <div class="centre-spot"></div>
             <div class="penalty-area-left"></div>
             <div class="penalty-area-right"></div>
             <div class="goal-area-left"></div>
@@ -540,65 +603,23 @@ elif 8 <= st.session_state.presentation_state <= 10:
             <div class="corner-tr"></div>
             <div class="corner-bl"></div>
             <div class="corner-br"></div>
-        </div>
         """
 
-    # CLICK 3 (State 10): 3D Black-and-White Soccer Ball at Center
-    if state >= 10:
+        # CLICK 3 (State 10): 3D Black-and-White Soccer Ball at Center
+        if state >= 10:
+            content += """
+            <div class="soccer-ball reveal">
+                <div class="patch-center"></div>
+                <div class="patch-top"></div>
+                <div class="patch-top-right"></div>
+                <div class="patch-top-left"></div>
+                <div class="patch-bottom-right"></div>
+                <div class="patch-bottom-left"></div>
+                <div class="ball-shading-overlay"></div>
+            </div>
+            """
+
         content += """
-        <div class="football-container reveal">
-            <svg class="football-svg" viewBox="0 0 200 200">
-                <defs>
-                    <!-- Spherical 3D Shading -->
-                    <radialGradient id="ballShading" cx="35%" cy="30%" r="65%">
-                        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.9" />
-                        <stop offset="50%" stop-color="#dddddd" stop-opacity="0.2" />
-                        <stop offset="85%" stop-color="#222222" stop-opacity="0.6" />
-                        <stop offset="100%" stop-color="#050505" stop-opacity="0.95" />
-                    </radialGradient>
-                    <clipPath id="ballClip">
-                        <circle cx="100" cy="100" r="96" />
-                    </clipPath>
-                </defs>
-
-                <!-- Base Sphere Background -->
-                <circle cx="100" cy="100" r="96" fill="#f4f4f4" stroke="#222222" stroke-width="3" />
-
-                <!-- Classic Soccer Ball Geometry (Clipped to Sphere) -->
-                <g clip-path="url(#ballClip)">
-                    <!-- Central Pentagonal Patch -->
-                    <polygon points="100,68 126,86 116,118 84,118 74,86" fill="#181818" stroke="#333" stroke-width="2"/>
-
-                    <!-- Seam Lines radiating outward from center pentagon -->
-                    <line x1="100" y1="68" x2="100" y2="30" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
-                    <line x1="126" y1="86" x2="162" y2="72" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
-                    <line x1="116" y1="118" x2="148" y2="152" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
-                    <line x1="84" y1="118" x2="52" y2="152" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
-                    <line x1="74" y1="86" x2="38" y2="72" stroke="#444" stroke-width="3.5" stroke-linecap="round"/>
-
-                    <!-- Surrounding Outer Black Pentagons (Spherical Perspective) -->
-                    <!-- Top Patch -->
-                    <polygon points="82,0 118,0 126,20 100,30 74,20" fill="#181818" stroke="#333" stroke-width="2"/>
-                    <!-- Top-Right Patch -->
-                    <polygon points="162,72 188,52 205,75 190,105 168,102" fill="#181818" stroke="#333" stroke-width="2"/>
-                    <!-- Bottom-Right Patch -->
-                    <polygon points="148,152 172,142 180,178 145,200 125,182" fill="#181818" stroke="#333" stroke-width="2"/>
-                    <!-- Bottom-Left Patch -->
-                    <polygon points="52,152 75,182 55,200 20,178 28,142" fill="#181818" stroke="#333" stroke-width="2"/>
-                    <!-- Top-Left Patch -->
-                    <polygon points="38,72 32,102 10,105 -5,75 12,52" fill="#181818" stroke="#333" stroke-width="2"/>
-
-                    <!-- Additional Hexagonal Seam Lines Connecting Outer Panels -->
-                    <line x1="74" y1="20" x2="38" y2="72" stroke="#444" stroke-width="3.5"/>
-                    <line x1="126" y1="20" x2="162" y2="72" stroke="#444" stroke-width="3.5"/>
-                    <line x1="168" y1="102" x2="148" y2="152" stroke="#444" stroke-width="3.5"/>
-                    <line x1="125" y1="182" x2="75" y2="182" stroke="#444" stroke-width="3.5"/>
-                    <line x1="52" y1="152" x2="32" y2="102" stroke="#444" stroke-width="3.5"/>
-
-                    <!-- 3D Volume Light & Shadow Overlay -->
-                    <circle cx="100" cy="100" r="96" fill="url(#ballShading)" style="mix-blend-mode: multiply;" />
-                </g>
-            </svg>
         </div>
         """
 
