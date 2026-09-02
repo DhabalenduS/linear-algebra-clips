@@ -1,6 +1,6 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (Finalized up to Slide 3: Clicks 1, 2, and 3 - Clean Ball Texture)
-# 4th commit to finalize slide 3 and click 3 Ball texture 
+# Slides 1–3 (Finalized up to Slide 3: Clicks 1 through 6)
+# 1st Commit for slide 3 for click 4, 5, 6
 import streamlit as st
 
 st.set_page_config(
@@ -408,7 +408,6 @@ header,
     z-index: 2;
 }
 
-/* 3D Specular Highlight & Volume Shading Layer */
 .ball-shading-overlay {
     position: absolute;
     inset: 0;
@@ -416,6 +415,35 @@ header,
     background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.52) 100%);
     pointer-events: none;
     z-index: 3;
+}
+
+/* ==================== VECTOR & MATH OVERLAY ==================== */
+
+.math-overlay {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 44vh;
+    height: 44vh;
+    transform: translate(-50%, -50%);
+    z-index: 40;
+    pointer-events: none;
+}
+
+.math-label {
+    font-family: "Times New Roman", Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    fill: #000000;
+    paint-order: stroke fill;
+    stroke: #ffffff;
+    stroke-width: 4px;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.math-label-sub {
+    font-size: 0.85rem;
 }
 
 /* ==================== REVEAL ANIMATIONS ==================== */
@@ -435,7 +463,6 @@ header,
     }
 }
 
-/* Dedicated Centered Reveal (Guarantees perfect center lock) */
 .reveal-center {
     animation: revealCenterEvent 0.55s ease-out both;
 }
@@ -592,10 +619,10 @@ elif 2 <= st.session_state.presentation_state <= 7:
     st.html(content)
 
 # ============================================================
-# STATES 8–10 — SLIDE 3 (CLICKS 1, 2, 3)
+# STATES 8–13 — SLIDE 3 (CLICKS 1 THROUGH 6)
 # ============================================================
 
-elif 8 <= st.session_state.presentation_state <= 10:
+elif 8 <= st.session_state.presentation_state <= 13:
 
     state = st.session_state.presentation_state
 
@@ -640,6 +667,55 @@ elif 8 <= st.session_state.presentation_state <= 10:
                 <div class="ball-shading-overlay"></div>
             </div>
             """
+
+        # CLICKS 4, 5, 6: Mathematical Vector Overlay (O, P, Ray OP, Scaled P')
+        if state >= 11:
+            overlay_svg = """
+            <svg class="math-overlay" viewBox="-200 -200 400 400">
+                <defs>
+                    <!-- Red Vector Arrowhead -->
+                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="7" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626" />
+                    </marker>
+                    <!-- Extended Ray Arrowhead -->
+                    <marker id="arrowhead-extended" markerWidth="10" markerHeight="10" refX="7" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626" />
+                    </marker>
+                </defs>
+            """
+
+            # CLICK 5 (State 12): Ray OP appears with Arrowhead
+            if state == 12:
+                overlay_svg += """
+                <line x1="0" y1="0" x2="68" y2="-48" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arrowhead)" />
+                """
+
+            # CLICK 6 (State 13): Ray OP extends outward and reaches P'
+            if state >= 13:
+                overlay_svg += """
+                <!-- Ray extended to P' -->
+                <line x1="0" y1="0" x2="116" y2="-82" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arrowhead-extended)" />
+                
+                <!-- Trajectory dash from P to P' -->
+                <line x1="68" y1="-48" x2="116" y2="-82" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="4,3" />
+
+                <!-- Point P' (Scaled position) -->
+                <circle cx="116" cy="-82" r="5.5" fill="#dc2626" stroke="#ffffff" stroke-width="2" />
+                <text x="126" y="-88" class="math-label">P'</text>
+                """
+
+            # CLICK 4 (State 11+): Origin O(0,0,0) and Point P(x,y,z) on ball surface
+            overlay_svg += """
+                <!-- Origin Point O(0,0,0) -->
+                <circle cx="0" cy="0" r="5" fill="#1e3a8a" stroke="#ffffff" stroke-width="2" />
+                <text x="-78" y="24" class="math-label">O(0, 0, 0)</text>
+
+                <!-- Surface Point P(x,y,z) -->
+                <circle cx="68" cy="-48" r="5.5" fill="#dc2626" stroke="#ffffff" stroke-width="2" />
+                <text x="78" y="-54" class="math-label">P(x, y, z)</text>
+            </svg>
+            """
+            content += overlay_svg
 
         content += """
         </div>
