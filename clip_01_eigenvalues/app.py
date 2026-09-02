@@ -463,10 +463,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Calibrated TV Camera (Centered framing, full-bleed pitch)
-                const camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 1000);
-                camera.position.set(0, 19.5, 16.5);
-                camera.lookAt(0, 0, 0.8);
+                // Elevated Broadcast TV Camera (Ensures true rectangles & 100% border visibility)
+                const camera = new THREE.PerspectiveCamera(34, w / h, 0.1, 1000);
+                camera.position.set(0, 23.5, 9.5);
+                camera.lookAt(0, 0, 0);
 
                 const renderer = new THREE.WebGLRenderer({{
                     canvas: canvas,
@@ -488,7 +488,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(hemiLight);
 
                 const floodLight = new THREE.DirectionalLight(0xffffff, 1.25);
-                floodLight.position.set(15, 28, 15);
+                floodLight.position.set(12, 28, 12);
                 floodLight.castShadow = true;
                 floodLight.shadow.mapSize.width = 2048;
                 floodLight.shadow.mapSize.height = 2048;
@@ -496,7 +496,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Edge-to-Edge Football Ground
+                // CLICK 2 (State >= 9): Complete Balanced Football Ground
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
@@ -504,7 +504,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pCanvas.height = 1400;
                     const ctx = pCanvas.getContext('2d');
 
-                    // 1. Continuous Lawn Stripes (Edge-to-Edge)
+                    // 1. Edge-to-Edge Lawn Stripes
                     const stripes = 12;
                     const sh = 1400 / stripes;
                     for (let i = 0; i < stripes; i++) {{
@@ -512,11 +512,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Symmetrical Boundary Insets
-                    const mx = 240;
-                    const my = 170;
-                    const pw = 2048 - (2 * mx); // 1568
-                    const ph = 1400 - (2 * my); // 1060
+                    // 2. Proportional Symmetrical Boundaries (Ensures complete visibility)
+                    const mx = 260;
+                    const my = 220;
+                    const pw = 2048 - (2 * mx); // 1528
+                    const ph = 1400 - (2 * my); // 960
                     const cx = 2048 / 2;
                     const cy = 1400 / 2;
 
@@ -524,7 +524,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.lineWidth = 14;
                     ctx.lineCap = 'round';
 
-                    // Full Outer Boundary
+                    // Full Outer Boundary (All 4 borders)
                     ctx.strokeRect(mx, my, pw, ph);
 
                     // Halfway Line
@@ -535,7 +535,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // Center Circle & Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 175, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 160, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
@@ -543,22 +543,22 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.arc(cx, cy, 14, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Left Penalty Box & Goal Box
-                    ctx.strokeRect(mx, cy - 270, 260, 540);
-                    ctx.strokeRect(mx, cy - 115, 95, 230);
+                    // Left Penalty Box & Goal Box (True Rectangles)
+                    ctx.strokeRect(mx, cy - 240, 240, 480);
+                    ctx.strokeRect(mx, cy - 100, 90, 200);
                     ctx.beginPath();
-                    ctx.arc(mx + 185, cy, 105, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 170, cy, 95, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
-                    // Right Penalty Box & Goal Box
-                    ctx.strokeRect(mx + pw - 260, cy - 270, 260, 540);
-                    ctx.strokeRect(mx + pw - 95, cy - 115, 95, 230);
+                    // Right Penalty Box & Goal Box (True Rectangles)
+                    ctx.strokeRect(mx + pw - 240, cy - 240, 240, 480);
+                    ctx.strokeRect(mx + pw - 90, cy - 100, 90, 200);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 185, cy, 105, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 170, cy, 95, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
-                    // 4 Corner Arcs
-                    const r = 28;
+                    // All 4 Corner Arcs
+                    const r = 26;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
@@ -568,8 +568,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 if (currentState >= 9) {{
-                    // Large full-bleed plane (eliminates any visible scene background)
-                    const pitchGeo = new THREE.PlaneGeometry(40, 27.3);
+                    const pitchGeo = new THREE.PlaneGeometry(36, 24.6);
                     const pitchMat = new THREE.MeshStandardMaterial({{
                         map: createPitchTexture(),
                         roughness: 0.85,
