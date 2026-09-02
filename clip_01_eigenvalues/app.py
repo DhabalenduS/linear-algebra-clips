@@ -1,8 +1,7 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (True WebGL 3D Visualization via Components)
-#  7th Commit for slide 3 for click 4 and 5
+# Slides 1–3 (Finalized up to Slide 3: Clicks 1 through 5 - Bulletproof Native Stage)
+# 8th commit for Slide 3 for Click 4 and 5
 import streamlit as st
-import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="",
@@ -149,6 +148,7 @@ header,
     z-index: 20;
 }
 
+/* LEFT PANEL (40% width area for Observations & Conclusions) */
 .slide3-left-panel {
     position: absolute;
     left: 4vw;
@@ -159,13 +159,369 @@ header,
     font-family: Georgia, "Times New Roman", serif;
 }
 
-.webgl-container {
+/* RIGHT PANEL (60% width area): FOOTBALL GROUND */
+.football-ground {
     position: absolute;
     left: 40vw;
     top: 19vh;
     width: 55vw;
     height: 68vh;
-    z-index: 10;
+
+    background:
+        repeating-linear-gradient(
+            90deg,
+            #3f963f 0px,
+            #3f963f 55px,
+            #459e45 55px,
+            #459e45 110px
+        );
+
+    border: 5px solid #ffffff;
+    border-radius: 2vh;
+
+    box-shadow:
+        0 1.5vh 3vh rgba(0,0,0,0.18),
+        inset 0 0 0 2px rgba(0,0,0,0.12);
+
+    overflow: hidden;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.half-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 3px;
+    height: 100%;
+    background: rgba(255,255,255,0.95);
+    transform: translateX(-50%);
+}
+
+.centre-circle {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 17vh;
+    height: 17vh;
+    border: 3px solid rgba(255,255,255,0.95);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.penalty-area-left {
+    position: absolute;
+    left: 0;
+    top: 27%;
+    width: 16%;
+    height: 46%;
+    border: 3px solid rgba(255,255,255,0.95);
+    border-left: none;
+    box-sizing: border-box;
+}
+
+.penalty-area-right {
+    position: absolute;
+    right: 0;
+    top: 27%;
+    width: 16%;
+    height: 46%;
+    border: 3px solid rgba(255,255,255,0.95);
+    border-right: none;
+    box-sizing: border-box;
+}
+
+.goal-area-left {
+    position: absolute;
+    left: 0;
+    top: 37%;
+    width: 7%;
+    height: 26%;
+    border: 3px solid rgba(255,255,255,0.95);
+    border-left: none;
+    box-sizing: border-box;
+}
+
+.goal-area-right {
+    position: absolute;
+    right: 0;
+    top: 37%;
+    width: 7%;
+    height: 26%;
+    border: 3px solid rgba(255,255,255,0.95);
+    border-right: none;
+    box-sizing: border-box;
+}
+
+.goal-left {
+    position: absolute;
+    left: -1.2%;
+    top: 43%;
+    width: 1.5%;
+    height: 14%;
+    border: 3px solid #ffffff;
+    background: rgba(255,255,255,0.12);
+    box-sizing: border-box;
+}
+
+.goal-right {
+    position: absolute;
+    right: -1.2%;
+    top: 43%;
+    width: 1.5%;
+    height: 14%;
+    border: 3px solid #ffffff;
+    background: rgba(255,255,255,0.12);
+    box-sizing: border-box;
+}
+
+.corner-tl {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 25px;
+    height: 25px;
+    border-right: 3px solid rgba(255,255,255,0.95);
+    border-bottom: 3px solid rgba(255,255,255,0.95);
+    border-radius: 0 0 100% 0;
+}
+
+.corner-tr {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 25px;
+    height: 25px;
+    border-left: 3px solid rgba(255,255,255,0.95);
+    border-bottom: 3px solid rgba(255,255,255,0.95);
+    border-radius: 0 0 0 100%;
+}
+
+.corner-bl {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 25px;
+    height: 25px;
+    border-right: 3px solid rgba(255,255,255,0.95);
+    border-top: 3px solid rgba(255,255,255,0.95);
+    border-radius: 0 100% 0 0;
+}
+
+.corner-br {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 25px;
+    height: 25px;
+    border-left: 3px solid rgba(255,255,255,0.95);
+    border-top: 3px solid rgba(255,255,255,0.95);
+    border-radius: 100% 0 0 0;
+}
+
+/* ==================== 3D FOOTBALL ==================== */
+
+.soccer-ball {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 14vh;
+    height: 14vh;
+    border-radius: 50%;
+    background: #fdfdfd;
+    box-shadow:
+        inset -1.5vh -1.5vh 3vh rgba(0,0,0,0.55),
+        inset 1vh 1vh 2.5vh rgba(255,255,255,0.9),
+        0.8vh 1.4vh 2vh rgba(0,0,0,0.42);
+    border: 2px solid #222222;
+    overflow: hidden;
+    z-index: 25;
+}
+
+.patch-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4.4vh;
+    height: 4.4vh;
+    background: #1c1c1c;
+    transform: translate(-50%, -50%);
+    clip-path: polygon(50% 0%, 98% 35%, 79% 90%, 21% 90%, 2% 35%);
+    z-index: 2;
+}
+
+.patch-top {
+    position: absolute;
+    left: 50%;
+    top: -1.2vh;
+    width: 3.8vh;
+    height: 3.8vh;
+    background: #1c1c1c;
+    transform: translateX(-50%);
+    clip-path: polygon(50% 100%, 0% 35%, 20% 0%, 80% 0%, 100% 35%);
+    z-index: 2;
+}
+
+.patch-top-right {
+    position: absolute;
+    right: -1vh;
+    top: 2.8vh;
+    width: 3.6vh;
+    height: 3.6vh;
+    background: #1c1c1c;
+    clip-path: polygon(0% 40%, 60% 0%, 100% 30%, 80% 100%, 20% 80%);
+    z-index: 2;
+}
+
+.patch-top-left {
+    position: absolute;
+    left: -1vh;
+    top: 2.8vh;
+    width: 3.6vh;
+    height: 3.6vh;
+    background: #1c1c1c;
+    clip-path: polygon(100% 40%, 40% 0%, 0% 30%, 20% 100%, 80% 80%);
+    z-index: 2;
+}
+
+.patch-bottom-right {
+    position: absolute;
+    right: 0.2vh;
+    bottom: -0.6vh;
+    width: 3.8vh;
+    height: 3.8vh;
+    background: #1c1c1c;
+    clip-path: polygon(30% 0%, 80% 20%, 100% 80%, 40% 100%, 0% 50%);
+    z-index: 2;
+}
+
+.patch-bottom-left {
+    position: absolute;
+    left: 0.2vh;
+    bottom: -0.6vh;
+    width: 3.8vh;
+    height: 3.8vh;
+    background: #1c1c1c;
+    clip-path: polygon(70% 0%, 20% 20%, 0% 80%, 60% 100%, 100% 50%);
+    z-index: 2;
+}
+
+.ball-shading-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.52) 100%);
+    pointer-events: none;
+    z-index: 3;
+}
+
+/* ==================== 3D MATHEMATICAL ELEMENTS ==================== */
+
+/* Center Origin Point O(0,0,0) */
+.point-origin {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 2vh;
+    height: 2vh;
+    background: #1d4ed8;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(29, 78, 216, 0.95), 0 3px 8px rgba(0,0,0,0.45);
+    z-index: 60;
+}
+
+.badge-origin {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-120%, 35%);
+    background: #ffffff;
+    border: 2.5px solid #1d4ed8;
+    color: #1d4ed8;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: clamp(1rem, 1.5vw, 1.35rem);
+    font-weight: 800;
+    font-family: Georgia, serif;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    z-index: 65;
+}
+
+/* Surface Point P(x,y,z) */
+.point-surface {
+    position: absolute;
+    left: calc(50% + 5vh);
+    top: calc(50% - 5vh);
+    width: 2.2vh;
+    height: 2.2vh;
+    background: #1d4ed8;
+    border: 3px solid #ffffff;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 16px rgba(29, 78, 216, 0.95), 0 3px 8px rgba(0,0,0,0.45);
+    z-index: 60;
+}
+
+.badge-surface {
+    position: absolute;
+    left: calc(50% + 5vh);
+    top: calc(50% - 5vh);
+    transform: translate(25%, -110%);
+    background: #ffffff;
+    border: 2.5px solid #1d4ed8;
+    color: #1d4ed8;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: clamp(1rem, 1.5vw, 1.35rem);
+    font-weight: 800;
+    font-family: Georgia, serif;
+    white-space: nowrap;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    z-index: 65;
+}
+
+/* Vector Ray OP */
+.vector-ray-op {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7.1vh;
+    height: 5.5px;
+    background: #1d4ed8;
+    transform-origin: 0% 50%;
+    transform: rotate(-45deg);
+    box-shadow: 0 0 10px rgba(29, 78, 216, 0.85);
+    z-index: 55;
+}
+
+.vector-ray-op::after {
+    content: "";
+    position: absolute;
+    right: -2px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 14px solid #1d4ed8;
+}
+
+.badge-ray-op {
+    position: absolute;
+    left: calc(50% + 1.2vh);
+    top: calc(50% - 4vh);
+    background: #1d4ed8;
+    color: #ffffff;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: clamp(0.9rem, 1.3vw, 1.15rem);
+    font-weight: 800;
+    font-family: Georgia, serif;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+    z-index: 65;
 }
 
 /* ==================== FULL SCREEN CLICK CONTROL ==================== */
@@ -304,302 +660,77 @@ elif 2 <= st.session_state.presentation_state <= 7:
     st.html(content)
 
 # ============================================================
-# STATES 8–12 — SLIDE 3 (TRUE WEBGL 3D COMPONENT)
+# STATES 8–12 — SLIDE 3 (CLICKS 1 THROUGH 5)
 # ============================================================
 
 elif 8 <= st.session_state.presentation_state <= 12:
 
     state = st.session_state.presentation_state
 
-    # Render Title and Left Panel
-    st.html(
-        """
-        <div class="slide3">
-            <div class="slide3-title">
-                Visualization of Soccer Match
-            </div>
-            <div class="slide3-left-panel"></div>
+    # CLICK 1 (State 8): Centered Title + Reserved Left Panel
+    content = """
+    <div class="slide3">
+        <div class="slide3-title">
+            Visualization of Soccer Match
         </div>
-        """
-    )
-
-    # 3D WebGL Three.js Component for Right Panel
-    three_js_html = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="utf-8">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-        <style>
-            html, body {{
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-                background: transparent;
-                pointer-events: none;
-            }}
-            #stage {{
-                width: 100%;
-                height: 100%;
-                position: relative;
-                border: 5px solid #ffffff;
-                border-radius: 16px;
-                box-sizing: border-box;
-                overflow: hidden;
-                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            }}
-            canvas {{
-                width: 100%;
-                height: 100%;
-                display: block;
-            }}
-            .math-badge {{
-                position: absolute;
-                background: #ffffff;
-                border: 2.5px solid #1d4ed8;
-                color: #1d4ed8;
-                padding: 4px 10px;
-                border-radius: 6px;
-                font-family: Georgia, serif;
-                font-size: 16px;
-                font-weight: bold;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                white-space: nowrap;
-                transform: translate(-50%, -50%);
-                display: none;
-            }}
-            .vector-badge {{
-                position: absolute;
-                background: #1d4ed8;
-                color: #ffffff;
-                padding: 3px 8px;
-                border-radius: 4px;
-                font-family: Georgia, serif;
-                font-size: 15px;
-                font-weight: bold;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-                transform: translate(-50%, -50%);
-                display: none;
-            }}
-        </style>
-    </head>
-    <body>
-        <div id="stage">
-            <canvas id="canvas3d"></canvas>
-            <div id="badge-o" class="math-badge">O(0, 0, 0)</div>
-            <div id="badge-p" class="math-badge">P(x, y, z)</div>
-            <div id="badge-op" class="vector-badge">OP&#8407;</div>
-        </div>
-
-        <script>
-            const currentState = {state};
-            const stage = document.getElementById('stage');
-            const canvas = document.getElementById('canvas3d');
-
-            const width = stage.clientWidth;
-            const height = stage.clientHeight;
-
-            // 1. Scene & Camera Setup
-            const scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x388e3c);
-
-            const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
-            camera.position.set(0, 16, 26);
-            camera.lookAt(0, 0, 0);
-
-            const renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true }});
-            renderer.setSize(width, height);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            renderer.shadowMap.enabled = true;
-            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-            // 2. Lighting
-            const ambient = new THREE.AmbientLight(0xffffff, 0.75);
-            scene.add(ambient);
-
-            const sun = new THREE.DirectionalLight(0xffffff, 1.1);
-            sun.position.set(15, 25, 15);
-            sun.castShadow = true;
-            scene.add(sun);
-
-            // CLICK 2 (State >= 9): Green Pitch Ground with Markings
-            if (currentState >= 9) {{
-                const pitchGeo = new THREE.PlaneGeometry(38, 24);
-                const pitchMat = new THREE.MeshStandardMaterial({{ color: 0x43a047, roughness: 0.85 }});
-                const pitch = new THREE.Mesh(pitchGeo, pitchMat);
-                pitch.rotation.x = -Math.PI / 2;
-                pitch.receiveShadow = true;
-                scene.add(pitch);
-
-                const lineMat = new THREE.MeshBasicMaterial({{ color: 0xffffff }});
-                
-                // Border lines
-                const borderGeo = new THREE.EdgesGeometry(pitchGeo);
-                const borderLines = new THREE.LineSegments(borderGeo, lineMat);
-                borderLines.rotation.x = -Math.PI / 2;
-                borderLines.position.y = 0.02;
-                scene.add(borderLines);
-
-                // Half line
-                const halfGeo = new THREE.PlaneGeometry(0.14, 24);
-                const halfLine = new THREE.Mesh(halfGeo, lineMat);
-                halfLine.rotation.x = -Math.PI / 2;
-                halfLine.position.y = 0.02;
-                scene.add(halfLine);
-
-                // Center Circle
-                const circleGeo = new THREE.RingGeometry(3.8, 3.96, 64);
-                const centerCircle = new THREE.Mesh(circleGeo, lineMat);
-                centerCircle.rotation.x = -Math.PI / 2;
-                centerCircle.position.y = 0.02;
-                scene.add(centerCircle);
-            }}
-
-            // CLICK 3 (State >= 10): 3D Volumetric Soccer Ball
-            let ball = null;
-            const ballRadius = 3.0;
-
-            if (currentState >= 10) {{
-                const texCanvas = document.createElement('canvas');
-                texCanvas.width = 1024;
-                texCanvas.height = 512;
-                const ctx = texCanvas.getContext('2d');
-
-                ctx.fillStyle = '#f8fafc';
-                ctx.fillRect(0, 0, 1024, 512);
-
-                ctx.fillStyle = '#181818';
-                function drawPentagon(cx, cy, r) {{
-                    ctx.beginPath();
-                    for (let i = 0; i < 5; i++) {{
-                        const a = (i * 2 * Math.PI / 5) - Math.PI / 2;
-                        const x = cx + r * Math.cos(a);
-                        const y = cy + r * Math.sin(a);
-                        if (i === 0) ctx.moveTo(x, y);
-                        else ctx.lineTo(x, y);
-                    }}
-                    ctx.closePath();
-                    ctx.fill();
-                }}
-
-                drawPentagon(512, 256, 72);
-                drawPentagon(220, 140, 56);
-                drawPentagon(804, 140, 56);
-                drawPentagon(220, 372, 56);
-                drawPentagon(804, 372, 56);
-                drawPentagon(512, 60, 50);
-                drawPentagon(512, 452, 50);
-
-                const texture = new THREE.CanvasTexture(texCanvas);
-                const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
-                const ballMat = new THREE.MeshStandardMaterial({{
-                    map: texture,
-                    roughness: 0.35,
-                    metalness: 0.1
-                }});
-
-                ball = new THREE.Mesh(ballGeo, ballMat);
-                ball.position.set(0, ballRadius, 0);
-                ball.castShadow = true;
-                scene.add(ball);
-            }}
-
-            // 3D Math Coordinates
-            const oPos = new THREE.Vector3(0, ballRadius, 0);
-            const pPos = new THREE.Vector3(
-                ballRadius * 0.72,
-                ballRadius + (ballRadius * 0.68),
-                ballRadius * 0.28
-            );
-
-            // CLICK 4 (State >= 11): Origin O(0,0,0) and Surface Point P(x,y,z)
-            if (currentState >= 11) {{
-                // Origin Point Core
-                const oGeo = new THREE.SphereGeometry(0.25, 32, 32);
-                const oMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
-                const oMesh = new THREE.Mesh(oGeo, oMat);
-                oMesh.position.copy(oPos);
-                scene.add(oMesh);
-
-                // Surface Point P
-                const pGeo = new THREE.SphereGeometry(0.28, 32, 32);
-                const pMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
-                const pMesh = new THREE.Mesh(pGeo, pMat);
-                pMesh.position.copy(pPos);
-                scene.add(pMesh);
-
-                // Make ball translucent so interior O(0,0,0) is clearly visible
-                if (ball) {{
-                    ball.material.transparent = true;
-                    ball.material.opacity = 0.85;
-                }}
-            }}
-
-            // CLICK 5 (State >= 12): 3D Vector Ray OP with Arrowhead
-            if (currentState >= 12) {{
-                const dir = new THREE.Vector3().subVectors(pPos, oPos);
-                const len = dir.length();
-                dir.normalize();
-
-                const arrow = new THREE.ArrowHelper(dir, oPos, len, 0x1d4ed8, 0.8, 0.45);
-                scene.add(arrow);
-            }}
-
-            // Project 3D Positions to HTML Badges
-            function toScreen(vec) {{
-                const v = vec.clone().project(camera);
-                return {{
-                    x: (v.x * 0.5 + 0.5) * width,
-                    y: (-(v.y * 0.5) + 0.5) * height
-                }};
-            }}
-
-            function updateBadges() {{
-                if (currentState >= 11) {{
-                    const oScr = toScreen(oPos);
-                    const bO = document.getElementById('badge-o');
-                    if (bO) {{
-                        bO.style.display = 'block';
-                        bO.style.left = (oScr.x - 70) + 'px';
-                        bO.style.top = (oScr.y + 35) + 'px';
-                    }}
-
-                    const pScr = toScreen(pPos);
-                    const bP = document.getElementById('badge-p');
-                    if (bP) {{
-                        bP.style.display = 'block';
-                        bP.style.left = (pScr.x + 65) + 'px';
-                        bP.style.top = (pScr.y - 25) + 'px';
-                    }}
-                }}
-
-                if (currentState >= 12) {{
-                    const mid = new THREE.Vector3().addVectors(oPos, pPos).multiplyScalar(0.5);
-                    const opScr = toScreen(mid);
-                    const bOP = document.getElementById('badge-op');
-                    if (bOP) {{
-                        bOP.style.display = 'block';
-                        bOP.style.left = (opScr.x + 25) + 'px';
-                        bOP.style.top = (opScr.y - 20) + 'px';
-                    }}
-                }}
-            }}
-
-            function animate() {{
-                requestAnimationFrame(animate);
-                renderer.render(scene, camera);
-                updateBadges();
-            }}
-            animate();
-        </script>
-    </body>
-    </html>
+        <div class="slide3-left-panel"></div>
     """
 
-    # Embed inside the right 60% panel container
-    with st.container():
-        st.markdown('<div class="webgl-container">', unsafe_allow_html=True)
-        components.html(three_js_html, height=520, scrolling=False)
-        st.markdown('</div>', unsafe_allow_html=True)
+    # CLICK 2 (State 9): Clean Green Ground on Right Panel (60%)
+    if state >= 9:
+        content += """
+        <div class="football-ground">
+            <div class="half-line"></div>
+            <div class="centre-circle"></div>
+            <div class="penalty-area-left"></div>
+            <div class="penalty-area-right"></div>
+            <div class="goal-area-left"></div>
+            <div class="goal-area-right"></div>
+            <div class="goal-left"></div>
+            <div class="goal-right"></div>
+            <div class="corner-tl"></div>
+            <div class="corner-tr"></div>
+            <div class="corner-bl"></div>
+            <div class="corner-br"></div>
+        """
+
+        # CLICK 3 (State 10): 3D Volumetric Soccer Ball at Center
+        if state >= 10:
+            content += """
+            <div class="soccer-ball">
+                <div class="patch-center"></div>
+                <div class="patch-top"></div>
+                <div class="patch-top-right"></div>
+                <div class="patch-top-left"></div>
+                <div class="patch-bottom-right"></div>
+                <div class="patch-bottom-left"></div>
+                <div class="ball-shading-overlay"></div>
+            </div>
+            """
+
+        # CLICK 4 (State 11+): Origin O(0,0,0) and Surface Point P(x,y,z)
+        if state >= 11:
+            content += """
+            <div class="point-origin"></div>
+            <div class="badge-origin">O(0, 0, 0)</div>
+
+            <div class="point-surface"></div>
+            <div class="badge-surface">P(x, y, z)</div>
+            """
+
+        # CLICK 5 (State 12): Vector Ray OP with Arrowhead and Badge
+        if state >= 12:
+            content += """
+            <div class="vector-ray-op"></div>
+            <div class="badge-ray-op">OP&#8407;</div>
+            """
+
+        content += """
+        </div>
+        """
+
+    content += """
+    </div>
+    """
+
+    st.html(content)
