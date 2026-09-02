@@ -1,7 +1,8 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (Finalized with True WebGL 3D Visualization)
-# 6th Commit for Slide 3 for click 4 and 5 
+# Slides 1–3 (True WebGL 3D Visualization via Components)
+#  7th Commit for slide 3 for click 4 and 5
 import streamlit as st
+import streamlit.components.v1 as components
 
 st.set_page_config(
     page_title="",
@@ -148,7 +149,6 @@ header,
     z-index: 20;
 }
 
-/* LEFT PANEL (40% width area for Observations & Conclusions) */
 .slide3-left-panel {
     position: absolute;
     left: 4vw;
@@ -159,56 +159,13 @@ header,
     font-family: Georgia, "Times New Roman", serif;
 }
 
-/* RIGHT PANEL (60% width area): 3D WEBGL STAGE */
-.webgl-stage-container {
+.webgl-container {
     position: absolute;
     left: 40vw;
     top: 19vh;
     width: 55vw;
     height: 68vh;
-    border: 5px solid #ffffff;
-    border-radius: 2vh;
-    box-shadow: 0 1.5vh 3vh rgba(0,0,0,0.18);
-    overflow: hidden;
-    background: #2e7d32;
-    z-index: 5;
-}
-
-#three-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-
-/* 3D Floating Mathematical Badges */
-.math-3d-badge {
-    position: absolute;
-    background: rgba(255, 255, 255, 0.95);
-    border: 2px solid #1d4ed8;
-    color: #1d4ed8;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-family: Georgia, serif;
-    font-size: 1.1rem;
-    font-weight: 800;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    pointer-events: none;
-    z-index: 40;
-    transition: all 0.3s ease;
-}
-
-.vector-3d-badge {
-    position: absolute;
-    background: #1d4ed8;
-    color: #ffffff;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-family: Georgia, serif;
-    font-size: 1rem;
-    font-weight: 800;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    pointer-events: none;
-    z-index: 40;
+    z-index: 10;
 }
 
 /* ==================== FULL SCREEN CLICK CONTROL ==================== */
@@ -347,248 +304,302 @@ elif 2 <= st.session_state.presentation_state <= 7:
     st.html(content)
 
 # ============================================================
-# STATES 8–12 — SLIDE 3 (TRUE WEBGL 3D)
+# STATES 8–12 — SLIDE 3 (TRUE WEBGL 3D COMPONENT)
 # ============================================================
 
 elif 8 <= st.session_state.presentation_state <= 12:
 
     state = st.session_state.presentation_state
 
-    # Include Three.js via CDN
-    content = f"""
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
-    <div class="slide3">
-        <div class="slide3-title">
-            Visualization of Soccer Match
+    # Render Title and Left Panel
+    st.html(
+        """
+        <div class="slide3">
+            <div class="slide3-title">
+                Visualization of Soccer Match
+            </div>
+            <div class="slide3-left-panel"></div>
         </div>
-        <div class="slide3-left-panel"></div>
+        """
+    )
 
-        <div class="webgl-stage-container" id="stage-container">
-            <canvas id="three-canvas"></canvas>
-            
-            <!-- Floating HTML badges synced with 3D points -->
-            <div id="badge-o" class="math-3d-badge" style="display: none;">O(0, 0, 0)</div>
-            <div id="badge-p" class="math-3d-badge" style="display: none;">P(x, y, z)</div>
-            <div id="badge-op" class="vector-3d-badge" style="display: none;">OP&#8407;</div>
+    # 3D WebGL Three.js Component for Right Panel
+    three_js_html = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="utf-8">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+        <style>
+            html, body {{
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background: transparent;
+                pointer-events: none;
+            }}
+            #stage {{
+                width: 100%;
+                height: 100%;
+                position: relative;
+                border: 5px solid #ffffff;
+                border-radius: 16px;
+                box-sizing: border-box;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            }}
+            canvas {{
+                width: 100%;
+                height: 100%;
+                display: block;
+            }}
+            .math-badge {{
+                position: absolute;
+                background: #ffffff;
+                border: 2.5px solid #1d4ed8;
+                color: #1d4ed8;
+                padding: 4px 10px;
+                border-radius: 6px;
+                font-family: Georgia, serif;
+                font-size: 16px;
+                font-weight: bold;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                white-space: nowrap;
+                transform: translate(-50%, -50%);
+                display: none;
+            }}
+            .vector-badge {{
+                position: absolute;
+                background: #1d4ed8;
+                color: #ffffff;
+                padding: 3px 8px;
+                border-radius: 4px;
+                font-family: Georgia, serif;
+                font-size: 15px;
+                font-weight: bold;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+                transform: translate(-50%, -50%);
+                display: none;
+            }}
+        </style>
+    </head>
+    <body>
+        <div id="stage">
+            <canvas id="canvas3d"></canvas>
+            <div id="badge-o" class="math-badge">O(0, 0, 0)</div>
+            <div id="badge-p" class="math-badge">P(x, y, z)</div>
+            <div id="badge-op" class="vector-badge">OP&#8407;</div>
         </div>
-    </div>
 
-    <script>
-    (function() {{
-        const container = document.getElementById('stage-container');
-        const canvas = document.getElementById('three-canvas');
-        const currentState = {state};
+        <script>
+            const currentState = {state};
+            const stage = document.getElementById('stage');
+            const canvas = document.getElementById('canvas3d');
 
-        if (!container || !canvas || typeof THREE === 'undefined') return;
+            const width = stage.clientWidth;
+            const height = stage.clientHeight;
 
-        const width = container.clientWidth;
-        const height = container.clientHeight;
+            // 1. Scene & Camera Setup
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x388e3c);
 
-        // 1. Scene & Camera
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x388e3c);
+            const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+            camera.position.set(0, 16, 26);
+            camera.lookAt(0, 0, 0);
 
-        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-        camera.position.set(0, 14, 22);
-        camera.lookAt(0, 0, 0);
+            const renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true }});
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-        const renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true }});
-        renderer.setSize(width, height);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            // 2. Lighting
+            const ambient = new THREE.AmbientLight(0xffffff, 0.75);
+            scene.add(ambient);
 
-        // 2. Studio Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
-        scene.add(ambientLight);
+            const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+            sun.position.set(15, 25, 15);
+            sun.castShadow = true;
+            scene.add(sun);
 
-        const dirLight = new THREE.DirectionalLight(0xffffff, 1.1);
-        dirLight.position.set(15, 25, 15);
-        dirLight.castShadow = true;
-        dirLight.shadow.mapSize.width = 1024;
-        dirLight.shadow.mapSize.height = 1024;
-        scene.add(dirLight);
+            // CLICK 2 (State >= 9): Green Pitch Ground with Markings
+            if (currentState >= 9) {{
+                const pitchGeo = new THREE.PlaneGeometry(38, 24);
+                const pitchMat = new THREE.MeshStandardMaterial({{ color: 0x43a047, roughness: 0.85 }});
+                const pitch = new THREE.Mesh(pitchGeo, pitchMat);
+                pitch.rotation.x = -Math.PI / 2;
+                pitch.receiveShadow = true;
+                scene.add(pitch);
 
-        // CLICK 2 (State >= 9): 3D Soccer Pitch
-        if (currentState >= 9) {{
-            // Pitch Ground Plane
-            const pitchGeo = new THREE.PlaneGeometry(36, 22);
-            const pitchMat = new THREE.MeshStandardMaterial({{
-                color: 0x43a047,
-                roughness: 0.8,
-                metalness: 0.1
-            }});
-            const pitch = new THREE.Mesh(pitchGeo, pitchMat);
-            pitch.rotation.x = -Math.PI / 2;
-            pitch.receiveShadow = true;
-            scene.add(pitch);
+                const lineMat = new THREE.MeshBasicMaterial({{ color: 0xffffff }});
+                
+                // Border lines
+                const borderGeo = new THREE.EdgesGeometry(pitchGeo);
+                const borderLines = new THREE.LineSegments(borderGeo, lineMat);
+                borderLines.rotation.x = -Math.PI / 2;
+                borderLines.position.y = 0.02;
+                scene.add(borderLines);
 
-            // Pitch Markings (Center Circle & Half Line)
-            const lineMat = new THREE.MeshBasicMaterial({{ color: 0xffffff }});
-            
-            // Half line
-            const lineGeo = new THREE.PlaneGeometry(0.12, 22);
-            const halfLine = new THREE.Mesh(lineGeo, lineMat);
-            halfLine.rotation.x = -Math.PI / 2;
-            halfLine.position.y = 0.02;
-            scene.add(halfLine);
+                // Half line
+                const halfGeo = new THREE.PlaneGeometry(0.14, 24);
+                const halfLine = new THREE.Mesh(halfGeo, lineMat);
+                halfLine.rotation.x = -Math.PI / 2;
+                halfLine.position.y = 0.02;
+                scene.add(halfLine);
 
-            // Center Circle
-            const circleGeo = new THREE.RingGeometry(3.6, 3.75, 64);
-            const centerCircle = new THREE.Mesh(circleGeo, lineMat);
-            centerCircle.rotation.x = -Math.PI / 2;
-            centerCircle.position.y = 0.02;
-            scene.add(centerCircle);
-        }}
+                // Center Circle
+                const circleGeo = new THREE.RingGeometry(3.8, 3.96, 64);
+                const centerCircle = new THREE.Mesh(circleGeo, lineMat);
+                centerCircle.rotation.x = -Math.PI / 2;
+                centerCircle.position.y = 0.02;
+                scene.add(centerCircle);
+            }}
 
-        // CLICK 3 (State >= 10): True 3D Volumetric Soccer Ball
-        let ball = null;
-        const ballRadius = 2.8;
+            // CLICK 3 (State >= 10): 3D Volumetric Soccer Ball
+            let ball = null;
+            const ballRadius = 3.0;
 
-        if (currentState >= 10) {{
-            // Procedural High-Res Classic Soccer Ball Texture
-            const texCanvas = document.createElement('canvas');
-            texCanvas.width = 1024;
-            texCanvas.height = 512;
-            const ctx = texCanvas.getContext('2d');
+            if (currentState >= 10) {{
+                const texCanvas = document.createElement('canvas');
+                texCanvas.width = 1024;
+                texCanvas.height = 512;
+                const ctx = texCanvas.getContext('2d');
 
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillRect(0, 0, 1024, 512);
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(0, 0, 1024, 512);
 
-            // Draw clean pentagonal dark patches
-            ctx.fillStyle = '#181818';
-            function drawPentagon(cx, cy, r) {{
-                ctx.beginPath();
-                for (let i = 0; i < 5; i++) {{
-                    const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
-                    const x = cx + r * Math.cos(angle);
-                    const y = cy + r * Math.sin(angle);
-                    if (i === 0) ctx.moveTo(x, y);
-                    else ctx.lineTo(x, y);
+                ctx.fillStyle = '#181818';
+                function drawPentagon(cx, cy, r) {{
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {{
+                        const a = (i * 2 * Math.PI / 5) - Math.PI / 2;
+                        const x = cx + r * Math.cos(a);
+                        const y = cy + r * Math.sin(a);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }}
+                    ctx.closePath();
+                    ctx.fill();
                 }}
-                ctx.closePath();
-                ctx.fill();
+
+                drawPentagon(512, 256, 72);
+                drawPentagon(220, 140, 56);
+                drawPentagon(804, 140, 56);
+                drawPentagon(220, 372, 56);
+                drawPentagon(804, 372, 56);
+                drawPentagon(512, 60, 50);
+                drawPentagon(512, 452, 50);
+
+                const texture = new THREE.CanvasTexture(texCanvas);
+                const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
+                const ballMat = new THREE.MeshStandardMaterial({{
+                    map: texture,
+                    roughness: 0.35,
+                    metalness: 0.1
+                }});
+
+                ball = new THREE.Mesh(ballGeo, ballMat);
+                ball.position.set(0, ballRadius, 0);
+                ball.castShadow = true;
+                scene.add(ball);
             }}
 
-            // Draw authentic pattern distribution
-            drawPentagon(512, 256, 68);
-            drawPentagon(220, 140, 52);
-            drawPentagon(804, 140, 52);
-            drawPentagon(220, 372, 52);
-            drawPentagon(804, 372, 52);
-            drawPentagon(512, 60, 48);
-            drawPentagon(512, 452, 48);
+            // 3D Math Coordinates
+            const oPos = new THREE.Vector3(0, ballRadius, 0);
+            const pPos = new THREE.Vector3(
+                ballRadius * 0.72,
+                ballRadius + (ballRadius * 0.68),
+                ballRadius * 0.28
+            );
 
-            const texture = new THREE.CanvasTexture(texCanvas);
-            const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
-            const ballMat = new THREE.MeshStandardMaterial({{
-                map: texture,
-                roughness: 0.35,
-                metalness: 0.12,
-                wireframe: false
-            }});
-
-            ball = new THREE.Mesh(ballGeo, ballMat);
-            ball.position.set(0, ballRadius, 0);
-            ball.castShadow = true;
-            ball.receiveShadow = true;
-            scene.add(ball);
-        }}
-
-        // CLICK 4 (State >= 11): Center Origin O(0,0,0) and Surface Point P(x,y,z)
-        const pPos = new THREE.Vector3(
-            ballRadius * Math.cos(Math.PI / 4) * 0.85,
-            ballRadius + (ballRadius * Math.sin(Math.PI / 4) * 0.85),
-            ballRadius * 0.35
-        );
-        const oPos = new THREE.Vector3(0, ballRadius, 0);
-
-        if (currentState >= 11) {{
-            // Origin Point O(0,0,0)
-            const oGeo = new THREE.SphereGeometry(0.24, 32, 32);
-            const oMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
-            const oMesh = new THREE.Mesh(oGeo, oMat);
-            oMesh.position.copy(oPos);
-            scene.add(oMesh);
-
-            // Surface Point P(x,y,z)
-            const pGeo = new THREE.SphereGeometry(0.26, 32, 32);
-            const pMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
-            const pMesh = new THREE.Mesh(pGeo, pMat);
-            pMesh.position.copy(pPos);
-            scene.add(pMesh);
-
-            // Make ball slightly translucent so interior O(0,0,0) is clearly visible
-            if (ball) {{
-                ball.material.transparent = true;
-                ball.material.opacity = 0.82;
-            }}
-        }}
-
-        // CLICK 5 (State >= 12): 3D Vector Ray OP with Arrowhead
-        if (currentState >= 12) {{
-            const dir = new THREE.Vector3().subVectors(pPos, oPos);
-            const length = dir.length();
-            dir.normalize();
-
-            // 3D Arrow Cylinder + Cone
-            const arrowColor = 0x1d4ed8;
-            const arrowHelper = new THREE.ArrowHelper(dir, oPos, length, arrowColor, 0.7, 0.4);
-            arrowHelper.line.material.linewidth = 4;
-            scene.add(arrowHelper);
-        }}
-
-        // Render loop & Projecting 3D Coordinates to Screen Badges
-        function toScreenPosition(objVec, camera) {{
-            const vector = objVec.clone();
-            vector.project(camera);
-            return {{
-                x: (vector.x * 0.5 + 0.5) * width,
-                y: (-(vector.y * 0.5) + 0.5) * height
-            }};
-        }}
-
-        function updateBadges() {{
+            // CLICK 4 (State >= 11): Origin O(0,0,0) and Surface Point P(x,y,z)
             if (currentState >= 11) {{
-                const oScr = toScreenPosition(oPos, camera);
-                const badgeO = document.getElementById('badge-o');
-                if (badgeO) {{
-                    badgeO.style.display = 'block';
-                    badgeO.style.left = (oScr.x - 120) + 'px';
-                    badgeO.style.top = (oScr.y + 10) + 'px';
-                }}
+                // Origin Point Core
+                const oGeo = new THREE.SphereGeometry(0.25, 32, 32);
+                const oMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
+                const oMesh = new THREE.Mesh(oGeo, oMat);
+                oMesh.position.copy(oPos);
+                scene.add(oMesh);
 
-                const pScr = toScreenPosition(pPos, camera);
-                const badgeP = document.getElementById('badge-p');
-                if (badgeP) {{
-                    badgeP.style.display = 'block';
-                    badgeP.style.left = (pScr.x + 20) + 'px';
-                    badgeP.style.top = (pScr.y - 25) + 'px';
+                // Surface Point P
+                const pGeo = new THREE.SphereGeometry(0.28, 32, 32);
+                const pMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
+                const pMesh = new THREE.Mesh(pGeo, pMat);
+                pMesh.position.copy(pPos);
+                scene.add(pMesh);
+
+                // Make ball translucent so interior O(0,0,0) is clearly visible
+                if (ball) {{
+                    ball.material.transparent = true;
+                    ball.material.opacity = 0.85;
                 }}
             }}
 
+            // CLICK 5 (State >= 12): 3D Vector Ray OP with Arrowhead
             if (currentState >= 12) {{
-                const midPos = new THREE.Vector3().addVectors(oPos, pPos).multiplyScalar(0.5);
-                const opScr = toScreenPosition(midPos, camera);
-                const badgeOP = document.getElementById('badge-op');
-                if (badgeOP) {{
-                    badgeOP.style.display = 'block';
-                    badgeOP.style.left = (opScr.x + 10) + 'px';
-                    badgeOP.style.top = (opScr.y - 30) + 'px';
+                const dir = new THREE.Vector3().subVectors(pPos, oPos);
+                const len = dir.length();
+                dir.normalize();
+
+                const arrow = new THREE.ArrowHelper(dir, oPos, len, 0x1d4ed8, 0.8, 0.45);
+                scene.add(arrow);
+            }}
+
+            // Project 3D Positions to HTML Badges
+            function toScreen(vec) {{
+                const v = vec.clone().project(camera);
+                return {{
+                    x: (v.x * 0.5 + 0.5) * width,
+                    y: (-(v.y * 0.5) + 0.5) * height
+                }};
+            }}
+
+            function updateBadges() {{
+                if (currentState >= 11) {{
+                    const oScr = toScreen(oPos);
+                    const bO = document.getElementById('badge-o');
+                    if (bO) {{
+                        bO.style.display = 'block';
+                        bO.style.left = (oScr.x - 70) + 'px';
+                        bO.style.top = (oScr.y + 35) + 'px';
+                    }}
+
+                    const pScr = toScreen(pPos);
+                    const bP = document.getElementById('badge-p');
+                    if (bP) {{
+                        bP.style.display = 'block';
+                        bP.style.left = (pScr.x + 65) + 'px';
+                        bP.style.top = (pScr.y - 25) + 'px';
+                    }}
+                }}
+
+                if (currentState >= 12) {{
+                    const mid = new THREE.Vector3().addVectors(oPos, pPos).multiplyScalar(0.5);
+                    const opScr = toScreen(mid);
+                    const bOP = document.getElementById('badge-op');
+                    if (bOP) {{
+                        bOP.style.display = 'block';
+                        bOP.style.left = (opScr.x + 25) + 'px';
+                        bOP.style.top = (opScr.y - 20) + 'px';
+                    }}
                 }}
             }}
-        }}
 
-        function animate() {{
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-            updateBadges();
-        }}
-        animate();
-
-    }})();
-    </script>
+            function animate() {{
+                requestAnimationFrame(animate);
+                renderer.render(scene, camera);
+                updateBadges();
+            }}
+            animate();
+        </script>
+    </body>
+    </html>
     """
 
-    st.html(content)
+    # Embed inside the right 60% panel container
+    with st.container():
+        st.markdown('<div class="webgl-container">', unsafe_allow_html=True)
+        components.html(three_js_html, height=520, scrolling=False)
+        st.markdown('</div>', unsafe_allow_html=True)
