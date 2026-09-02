@@ -1,6 +1,6 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (Finalized up to Slide 3: Clicks 1 through 6)
-# 1st Commit for slide 3 for click 4, 5, 6
+# Slides 1–3 (Finalized up to Slide 3: Clicks 1 through 5)
+#2nd Commit for slide 3 for click 4, and  5 
 import streamlit as st
 
 st.set_page_config(
@@ -318,7 +318,7 @@ header,
     border-radius: 100% 0 0 0;
 }
 
-/* ==================== CLEAN 3D FOOTBALL ==================== */
+/* ==================== 3D FOOTBALL ==================== */
 
 .soccer-ball {
     position: absolute;
@@ -336,9 +336,18 @@ header,
     border: 2px solid #222222;
     overflow: hidden;
     z-index: 25;
+    transition: opacity 0.6s ease, background 0.6s ease;
 }
 
-/* Central Soft Pentagon */
+/* Translucent 3D Inspection Mode for Click 4 & 5 */
+.soccer-ball.xray-mode {
+    background: rgba(253, 253, 253, 0.65);
+    box-shadow:
+        inset -1.5vh -1.5vh 3vh rgba(0,0,0,0.35),
+        inset 1vh 1vh 2.5vh rgba(255,255,255,0.95),
+        0 0 25px rgba(255,255,255,0.6);
+}
+
 .patch-center {
     position: absolute;
     left: 50%;
@@ -351,7 +360,6 @@ header,
     z-index: 2;
 }
 
-/* Surrounding 5 Soft Pentagons */
 .patch-top {
     position: absolute;
     left: 50%;
@@ -417,33 +425,28 @@ header,
     z-index: 3;
 }
 
-/* ==================== VECTOR & MATH OVERLAY ==================== */
+/* ==================== 3D MATH & VECTOR OVERLAY ==================== */
 
-.math-overlay {
+.math-stage {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 44vh;
-    height: 44vh;
+    width: 34vh;
+    height: 34vh;
     transform: translate(-50%, -50%);
     z-index: 40;
     pointer-events: none;
 }
 
-.math-label {
-    font-family: "Times New Roman", Georgia, serif;
-    font-size: 1.15rem;
-    font-weight: 700;
-    fill: #000000;
+.math-text {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: bold;
+    fill: #111827;
     paint-order: stroke fill;
     stroke: #ffffff;
-    stroke-width: 4px;
+    stroke-width: 5px;
     stroke-linecap: round;
     stroke-linejoin: round;
-}
-
-.math-label-sub {
-    font-size: 0.85rem;
 }
 
 /* ==================== REVEAL ANIMATIONS ==================== */
@@ -619,10 +622,10 @@ elif 2 <= st.session_state.presentation_state <= 7:
     st.html(content)
 
 # ============================================================
-# STATES 8–13 — SLIDE 3 (CLICKS 1 THROUGH 6)
+# STATES 8–12 — SLIDE 3 (CLICKS 1 THROUGH 5)
 # ============================================================
 
-elif 8 <= st.session_state.presentation_state <= 13:
+elif 8 <= st.session_state.presentation_state <= 12:
 
     state = st.session_state.presentation_state
 
@@ -654,10 +657,11 @@ elif 8 <= st.session_state.presentation_state <= 13:
             <div class="corner-br"></div>
         """
 
-        # CLICK 3 (State 10): Clean 3D Soccer Ball at Dead Center
+        # CLICK 3, 4, 5: 3D Soccer Ball (shifts to X-Ray Translucent on Clicks 4 & 5)
         if state >= 10:
-            content += """
-            <div class="soccer-ball reveal-center">
+            xray_class = "xray-mode" if state >= 11 else ""
+            content += f"""
+            <div class="soccer-ball reveal-center {xray_class}">
                 <div class="patch-center"></div>
                 <div class="patch-top"></div>
                 <div class="patch-top-right"></div>
@@ -668,51 +672,48 @@ elif 8 <= st.session_state.presentation_state <= 13:
             </div>
             """
 
-        # CLICKS 4, 5, 6: Mathematical Vector Overlay (O, P, Ray OP, Scaled P')
+        # ========================================================
+        # CLICKS 4 & 5: 3D MATHEMATICAL VECTOR & POINT OVERLAY
+        # ========================================================
         if state >= 11:
+            # Ball radius in SVG coordinates = 68 units
+            # Point P in 1st Quadrant on Surface (angled at 40 degrees): (52, -44)
             overlay_svg = """
-            <svg class="math-overlay" viewBox="-200 -200 400 400">
+            <svg class="math-stage reveal" viewBox="-150 -150 300 300">
                 <defs>
-                    <!-- Red Vector Arrowhead -->
-                    <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="7" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626" />
+                    <!-- Sharp Crimson Vector Arrowhead -->
+                    <marker id="rayArrow" markerWidth="12" markerHeight="12" refX="8" refY="4" orient="auto">
+                        <path d="M 0 0 L 10 4 L 0 8 Z" fill="#e11d48" />
                     </marker>
-                    <!-- Extended Ray Arrowhead -->
-                    <marker id="arrowhead-extended" markerWidth="10" markerHeight="10" refX="7" refY="3.5" orient="auto">
-                        <polygon points="0 0, 10 3.5, 0 7" fill="#dc2626" />
-                    </marker>
+                    <!-- Core Glow Filter -->
+                    <filter id="coreGlow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#2563eb" flood-opacity="0.8"/>
+                    </filter>
+                    <!-- Surface Point Glow -->
+                    <filter id="pointGlow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="4" flood-color="#e11d48" flood-opacity="0.9"/>
+                    </filter>
                 </defs>
             """
 
-            # CLICK 5 (State 12): Ray OP appears with Arrowhead
-            if state == 12:
+            # CLICK 5 (State 12): Glowing Vector Ray OP shooting from Core O to Surface P
+            if state >= 12:
                 overlay_svg += """
-                <line x1="0" y1="0" x2="68" y2="-48" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arrowhead)" />
+                <!-- Internal Ray Segment (Interior of 3D Ball) -->
+                <line x1="0" y1="0" x2="52" y2="-44" stroke="#e11d48" stroke-width="4.5" stroke-linecap="round" marker-end="url(#rayArrow)" />
+                <line x1="0" y1="0" x2="52" y2="-44" stroke="#fecdd3" stroke-width="2" stroke-dasharray="4,3" />
                 """
 
-            # CLICK 6 (State 13): Ray OP extends outward and reaches P'
-            if state >= 13:
-                overlay_svg += """
-                <!-- Ray extended to P' -->
-                <line x1="0" y1="0" x2="116" y2="-82" stroke="#dc2626" stroke-width="3.5" marker-end="url(#arrowhead-extended)" />
-                
-                <!-- Trajectory dash from P to P' -->
-                <line x1="68" y1="-48" x2="116" y2="-82" stroke="#fbbf24" stroke-width="2.5" stroke-dasharray="4,3" />
-
-                <!-- Point P' (Scaled position) -->
-                <circle cx="116" cy="-82" r="5.5" fill="#dc2626" stroke="#ffffff" stroke-width="2" />
-                <text x="126" y="-88" class="math-label">P'</text>
-                """
-
-            # CLICK 4 (State 11+): Origin O(0,0,0) and Point P(x,y,z) on ball surface
+            # CLICK 4 (State 11+): Internal Core O(0,0,0) and 1st-Quadrant Surface Point P(x,y,z)
             overlay_svg += """
-                <!-- Origin Point O(0,0,0) -->
-                <circle cx="0" cy="0" r="5" fill="#1e3a8a" stroke="#ffffff" stroke-width="2" />
-                <text x="-78" y="24" class="math-label">O(0, 0, 0)</text>
+                <!-- Internal Center Origin O(0,0,0) -->
+                <circle cx="0" cy="0" r="7" fill="#1d4ed8" stroke="#ffffff" stroke-width="2.5" filter="url(#coreGlow)" />
+                <text x="-95" y="24" class="math-text" font-size="16">O(0, 0, 0)</text>
 
-                <!-- Surface Point P(x,y,z) -->
-                <circle cx="68" cy="-48" r="5.5" fill="#dc2626" stroke="#ffffff" stroke-width="2" />
-                <text x="78" y="-54" class="math-label">P(x, y, z)</text>
+                <!-- Surface Point P(x,y,z) in 1st Quadrant on the Football Shell -->
+                <circle cx="52" cy="-44" r="8" fill="#e11d48" stroke="#ffffff" stroke-width="2.5" filter="url(#pointGlow)" />
+                <circle cx="52" cy="-44" r="13" fill="none" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="3,3" opacity="0.85" />
+                <text x="64" y="-52" class="math-text" font-size="18">P(x, y, z)</text>
             </svg>
             """
             content += overlay_svg
