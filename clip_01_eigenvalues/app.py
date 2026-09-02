@@ -212,10 +212,17 @@ header,
     pointer-events: none;
 }
 
-/* CRUCIAL FIX: Let clicks fall through iframes to the advance button */
 iframe {
+    position: fixed !important;
+    left: 43vw !important;
+    top: 14vh !important;
+    width: 53.5vw !important;
+    height: 80vh !important;
+    z-index: 25 !important;
+    border: 3px solid #e2e8f0 !important;
+    border-radius: 16px !important;
     pointer-events: none !important;
-    border: none !important;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
 }
 
 /* ==================== FULL SCREEN CLICK CONTROL ==================== */
@@ -433,19 +440,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     width: 100%;
                     height: 100%;
                     overflow: hidden;
-                    background: transparent;
+                    background: radial-gradient(circle at 50% 45%, #1e293b 0%, #090d16 100%);
                 }}
-                #stage {{
-                    width: 100%;
-                    height: 100%;
-                    position: relative;
-                    border: 4px solid #ffffff;
-                    border-radius: 16px;
-                    overflow: hidden;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
-                    background: radial-gradient(circle at 50% 40%, #1a2936 0%, #080d14 100%);
-                }}
-                canvas {{
+                #canvas3d {{
                     width: 100%;
                     height: 100%;
                     display: block;
@@ -453,35 +450,32 @@ elif 8 <= st.session_state.presentation_state <= 18:
             </style>
         </head>
         <body>
-            <div id="stage">
-                <canvas id="canvas3d"></canvas>
-            </div>
+            <canvas id="canvas3d"></canvas>
 
             <script>
                 const currentState = {state};
-                const stage = document.getElementById('stage');
                 const canvas = document.getElementById('canvas3d');
 
-                // 1. Scene & Cinematic Broadcast Camera Setup
+                // 1. Scene & Cinematic Broadcast Camera
                 const scene = new THREE.Scene();
+                const w = window.innerWidth;
+                const h = window.innerHeight;
 
-                // Accurate initial sizing inside Streamlit's iframe
-                const width = stage.clientWidth || window.innerWidth;
-                const height = stage.clientHeight || 580;
-
-                const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+                const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 1000);
                 camera.position.set(0, 8.5, 17.5);
-                camera.lookAt(0, 2.5, 0);
+                camera.lookAt(0, 2.4, 0);
 
-                const renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true, alpha: true }});
-                renderer.setSize(width, height);
+                const renderer = new THREE.WebGLRenderer({{
+                    canvas: canvas,
+                    antialias: true,
+                    alpha: false
+                }});
+                renderer.setSize(w, h);
                 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 renderer.shadowMap.enabled = true;
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-                renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.15;
 
-                // 2. Broadcast Lighting Rig
+                // 2. Broadcast Studio Lighting
                 const ambient = new THREE.AmbientLight(0xffffff, 0.7);
                 scene.add(ambient);
 
@@ -493,36 +487,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 sun.castShadow = true;
                 sun.shadow.mapSize.width = 2048;
                 sun.shadow.mapSize.height = 2048;
-                sun.shadow.bias = -0.0005;
                 scene.add(sun);
 
                 const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.4);
                 rimLight.position.set(-12, 10, -10);
                 scene.add(rimLight);
 
-                // ============================================================
-                // CLICK 2 (State >= 9): 3D Striped Football Pitch Ground
-                // ============================================================
+                // CLICK 2 (State >= 9): 3D Football Ground
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
                     pCanvas.width = 2048;
                     pCanvas.height = 2048;
                     const ctx = pCanvas.getContext('2d');
 
-                    // Grass Stripes
                     const stripes = 14;
-                    const h = 2048 / stripes;
+                    const sh = 2048 / stripes;
                     for (let i = 0; i < stripes; i++) {{
                         ctx.fillStyle = (i % 2 === 0) ? '#2e7d32' : '#388e3c';
-                        ctx.fillRect(0, i * h, 2048, h);
+                        ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // White Pitch Markings
-                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
                     ctx.lineWidth = 18;
                     ctx.strokeRect(80, 80, 1888, 1888);
 
-                    // Center Line & Circle
                     ctx.beginPath();
                     ctx.moveTo(80, 1024);
                     ctx.lineTo(1968, 1024);
@@ -544,7 +532,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const pitchGeo = new THREE.PlaneGeometry(28, 28);
                     const pitchMat = new THREE.MeshStandardMaterial({{
                         map: createPitchTexture(),
-                        roughness: 0.82,
+                        roughness: 0.8,
                         metalness: 0.05
                     }});
                     const pitch = new THREE.Mesh(pitchGeo, pitchMat);
@@ -554,9 +542,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(pitch);
                 }}
 
-                // ============================================================
                 // CLICK 3 (State >= 10): 3D Classic Black-and-White Soccer Ball
-                // ============================================================
                 let ball = null;
                 const ballRadius = 2.6;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
@@ -567,11 +553,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     bCanvas.height = 1024;
                     const ctx = bCanvas.getContext('2d');
 
-                    // Base Clean Leather
                     ctx.fillStyle = '#f8fafc';
                     ctx.fillRect(0, 0, 2048, 1024);
 
-                    // Geometric Hexagonal/Pentagonal Pattern
                     ctx.fillStyle = '#0f172a';
                     function drawPentagon(cx, cy, r) {{
                         ctx.beginPath();
@@ -624,7 +608,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 function animate() {{
                     requestAnimationFrame(animate);
 
-                    // Subtle TV-Grade ambient rotation in step 3
                     if (ball && currentState === 10) {{
                         ball.rotation.y += 0.003;
                     }}
@@ -633,20 +616,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
                 animate();
 
-                // Responsive Window Resize Handler
                 window.addEventListener('resize', () => {{
-                    const w = stage.clientWidth || window.innerWidth;
-                    const h = stage.clientHeight || 580;
-                    camera.aspect = w / h;
+                    camera.aspect = window.innerWidth / window.innerHeight;
                     camera.updateProjectionMatrix();
-                    renderer.setSize(w, h);
+                    renderer.setSize(window.innerWidth, window.innerHeight);
                 }});
             </script>
         </body>
         </html>
         """
 
-        # Embed the WebGL container with full click-through capability
-        st.markdown('<div class="webgl-stage-box">', unsafe_allow_html=True)
         components.html(three_js_code, height=620, scrolling=False)
-        st.markdown('</div>', unsafe_allow_html=True)
