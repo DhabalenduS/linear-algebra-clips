@@ -458,14 +458,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                 // 1. Scene Setup
                 const scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x237427);
+                scene.background = new THREE.Color(0x28792c);
 
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Calibrated Broadcast TV Camera
-                const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 1000);
-                camera.position.set(0, 30, 3.0);
+                // Calibrated Overhead TV Camera (Wide FOV to ensure 100% of the field is in view)
+                const camera = new THREE.PerspectiveCamera(46, w / h, 0.1, 1000);
+                camera.position.set(0, 31, 2.0);
                 camera.lookAt(0, 0, 0);
 
                 const renderer = new THREE.WebGLRenderer({{
@@ -496,69 +496,69 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Full Edge-to-Edge Football Ground
+                // CLICK 2 (State >= 9): Perfectly Framed 4-Border Football Ground
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
                     pCanvas.width = 2048;
-                    pCanvas.height = 1400;
+                    pCanvas.height = 1440;
                     const ctx = pCanvas.getContext('2d');
 
                     // 1. Lawn Stripes
-                    const stripes = 14;
-                    const sh = 1400 / stripes;
+                    const stripes = 12;
+                    const sh = 1440 / stripes;
                     for (let i = 0; i < stripes; i++) {{
                         ctx.fillStyle = (i % 2 === 0) ? '#28792c' : '#308e36';
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Full Edge-to-Edge Expansion (Minimal margin)
-                    const mx = 45;
-                    const my = 35;
-                    const pw = 2048 - (2 * mx); // 1958
-                    const ph = 1400 - (2 * my); // 1330
+                    // 2. Proportional Safe Margins (Ensures all 4 borders stay inside screen)
+                    const mx = 120;
+                    const my = 90;
+                    const pw = 2048 - (2 * mx); // 1808
+                    const ph = 1440 - (2 * my); // 1260
                     const cx = 2048 / 2;
-                    const cy = 1400 / 2;
+                    const cy = 1440 / 2;
 
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 15;
                     ctx.lineCap = 'round';
 
-                    // Full Outer Boundary (Expanded to card edges)
+                    // 1. Full Outer Boundary (Top, Bottom, Left, Right)
                     ctx.strokeRect(mx, my, pw, ph);
 
-                    // Halfway Line
+                    // 2. Halfway Line
                     ctx.beginPath();
                     ctx.moveTo(cx, my);
                     ctx.lineTo(cx, my + ph);
                     ctx.stroke();
 
-                    // Center Circle & Center Spot
+                    // 3. Center Circle & Center Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 240, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 210, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 18, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 16, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Left Penalty Box & Goal Box
-                    ctx.strokeRect(mx, cy - 320, 320, 640);
-                    ctx.strokeRect(mx, cy - 130, 110, 260);
+                    // 4. Left Penalty Box & Goal Box
+                    ctx.strokeRect(mx, cy - 290, 290, 580);
+                    ctx.strokeRect(mx, cy - 120, 100, 240);
                     ctx.beginPath();
-                    ctx.arc(mx + 230, cy, 130, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 210, cy, 120, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
-                    // Right Penalty Box & Goal Box
-                    ctx.strokeRect(mx + pw - 320, cy - 320, 320, 640);
-                    ctx.strokeRect(mx + pw - 110, cy - 130, 110, 260);
+                    // 5. Right Penalty Box & Goal Box
+                    ctx.strokeRect(mx + pw - 290, cy - 290, 290, 580);
+                    ctx.strokeRect(mx + pw - 100, cy - 120, 100, 240);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 230, cy, 130, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 210, cy, 120, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
-                    // All 4 Corner Arcs
-                    const r = 45;
+                    // 6. All 4 Corner Arcs
+                    const r = 38;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
@@ -568,7 +568,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 if (currentState >= 9) {{
-                    const pitchGeo = new THREE.PlaneGeometry(36, 24.6);
+                    const pitchGeo = new THREE.PlaneGeometry(28, 19.7);
                     const pitchMat = new THREE.MeshStandardMaterial({{
                         map: createPitchTexture(),
                         roughness: 0.85,
