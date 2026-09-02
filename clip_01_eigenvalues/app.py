@@ -440,7 +440,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     width: 100%;
                     height: 100%;
                     overflow: hidden;
-                    background: #153318;
+                    background: #237427;
                 }}
                 #canvas3d {{
                     width: 100%;
@@ -458,15 +458,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                 // 1. Scene Setup
                 const scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x183b1c);
+                scene.background = new THREE.Color(0x237427);
 
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Calibrated TV Broadcast Camera (Ensures ALL 4 borders & corners are visible)
-                const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 1000);
-                camera.position.set(0, 16.5, 17.5);
-                camera.lookAt(0, 0, 0);
+                // Calibrated TV Camera (Centered framing, full-bleed pitch)
+                const camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 1000);
+                camera.position.set(0, 19.5, 16.5);
+                camera.lookAt(0, 0, 0.8);
 
                 const renderer = new THREE.WebGLRenderer({{
                     canvas: canvas,
@@ -478,17 +478,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.shadowMap.enabled = true;
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.1;
+                renderer.toneMappingExposure = 1.12;
 
-                // 2. Balanced Stadium Studio Lighting
-                const ambient = new THREE.AmbientLight(0xffffff, 0.8);
+                // 2. Broadcast Lighting Rig
+                const ambient = new THREE.AmbientLight(0xffffff, 0.85);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.5);
+                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.55);
                 scene.add(hemiLight);
 
-                const floodLight = new THREE.DirectionalLight(0xffffff, 1.2);
-                floodLight.position.set(15, 25, 15);
+                const floodLight = new THREE.DirectionalLight(0xffffff, 1.25);
+                floodLight.position.set(15, 28, 15);
                 floodLight.castShadow = true;
                 floodLight.shadow.mapSize.width = 2048;
                 floodLight.shadow.mapSize.height = 2048;
@@ -496,46 +496,46 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Complete Beautiful Football Ground
+                // CLICK 2 (State >= 9): Edge-to-Edge Football Ground
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
                     pCanvas.width = 2048;
-                    pCanvas.height = 1280;
+                    pCanvas.height = 1400;
                     const ctx = pCanvas.getContext('2d');
 
-                    // Base Stadium Turf with Horizontal Stripes (no perspective skew)
-                    const stripes = 10;
-                    const sh = 1280 / stripes;
+                    // 1. Continuous Lawn Stripes (Edge-to-Edge)
+                    const stripes = 12;
+                    const sh = 1400 / stripes;
                     for (let i = 0; i < stripes; i++) {{
-                        ctx.fillStyle = (i % 2 === 0) ? '#28792c' : '#2f8b34';
+                        ctx.fillStyle = (i % 2 === 0) ? '#28792c' : '#308e36';
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // Margins to leave a lush green border around the boundary lines
-                    const mx = 140;
-                    const my = 100;
-                    const pw = 2048 - (2 * mx); // 1768
-                    const ph = 1280 - (2 * my); // 1080
+                    // 2. Symmetrical Boundary Insets
+                    const mx = 240;
+                    const my = 170;
+                    const pw = 2048 - (2 * mx); // 1568
+                    const ph = 1400 - (2 * my); // 1060
                     const cx = 2048 / 2;
-                    const cy = 1280 / 2;
+                    const cy = 1400 / 2;
 
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 14;
                     ctx.lineCap = 'round';
 
-                    // 1. Full Outer Boundary (All 4 borders)
+                    // Full Outer Boundary
                     ctx.strokeRect(mx, my, pw, ph);
 
-                    // 2. Halfway Line
+                    // Halfway Line
                     ctx.beginPath();
                     ctx.moveTo(cx, my);
                     ctx.lineTo(cx, my + ph);
                     ctx.stroke();
 
-                    // 3. Center Circle & Spot
+                    // Center Circle & Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 180, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 175, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
@@ -543,22 +543,22 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.arc(cx, cy, 14, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 4. Left Penalty Box & Goal Box
-                    ctx.strokeRect(mx, cy - 280, 280, 560);
-                    ctx.strokeRect(mx, cy - 120, 100, 240);
+                    // Left Penalty Box & Goal Box
+                    ctx.strokeRect(mx, cy - 270, 260, 540);
+                    ctx.strokeRect(mx, cy - 115, 95, 230);
                     ctx.beginPath();
-                    ctx.arc(mx + 200, cy, 110, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 185, cy, 105, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
-                    // 5. Right Penalty Box & Goal Box
-                    ctx.strokeRect(mx + pw - 280, cy - 280, 280, 560);
-                    ctx.strokeRect(mx + pw - 100, cy - 120, 100, 240);
+                    // Right Penalty Box & Goal Box
+                    ctx.strokeRect(mx + pw - 260, cy - 270, 260, 540);
+                    ctx.strokeRect(mx + pw - 95, cy - 115, 95, 230);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 200, cy, 110, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 185, cy, 105, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
-                    // 6. All 4 Corner Arcs
-                    const r = 30;
+                    // 4 Corner Arcs
+                    const r = 28;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
@@ -568,7 +568,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 if (currentState >= 9) {{
-                    const pitchGeo = new THREE.PlaneGeometry(24, 15);
+                    // Large full-bleed plane (eliminates any visible scene background)
+                    const pitchGeo = new THREE.PlaneGeometry(40, 27.3);
                     const pitchMat = new THREE.MeshStandardMaterial({{
                         map: createPitchTexture(),
                         roughness: 0.85,
