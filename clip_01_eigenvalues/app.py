@@ -463,9 +463,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Elevated Broadcast TV Camera (Ensures true rectangles & 100% border visibility)
-                const camera = new THREE.PerspectiveCamera(34, w / h, 0.1, 1000);
-                camera.position.set(0, 23.5, 9.5);
+                // Calibrated TV Camera (Perpendicular overhead to eliminate trapezoidal distortion)
+                const camera = new THREE.PerspectiveCamera(32, w / h, 0.1, 1000);
+                camera.position.set(0, 28, 2.8);
                 camera.lookAt(0, 0, 0);
 
                 const renderer = new THREE.WebGLRenderer({{
@@ -481,14 +481,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMappingExposure = 1.12;
 
                 // 2. Broadcast Lighting Rig
-                const ambient = new THREE.AmbientLight(0xffffff, 0.85);
+                const ambient = new THREE.AmbientLight(0xffffff, 0.88);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.55);
+                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.5);
                 scene.add(hemiLight);
 
-                const floodLight = new THREE.DirectionalLight(0xffffff, 1.25);
-                floodLight.position.set(12, 28, 12);
+                const floodLight = new THREE.DirectionalLight(0xffffff, 1.2);
+                floodLight.position.set(10, 30, 10);
                 floodLight.castShadow = true;
                 floodLight.shadow.mapSize.width = 2048;
                 floodLight.shadow.mapSize.height = 2048;
@@ -496,7 +496,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Complete Balanced Football Ground
+                // CLICK 2 (State >= 9): Symmetrical, Fully Framed Football Ground
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
@@ -512,11 +512,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Proportional Symmetrical Boundaries (Ensures complete visibility)
-                    const mx = 260;
-                    const my = 220;
-                    const pw = 2048 - (2 * mx); // 1528
-                    const ph = 1400 - (2 * my); // 960
+                    // 2. Symmetrical Margins (Ensures all 4 borders & corners fit inside)
+                    const mx = 340;
+                    const my = 240;
+                    const pw = 2048 - (2 * mx); // 1368
+                    const ph = 1400 - (2 * my); // 920
                     const cx = 2048 / 2;
                     const cy = 1400 / 2;
 
@@ -524,7 +524,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.lineWidth = 14;
                     ctx.lineCap = 'round';
 
-                    // Full Outer Boundary (All 4 borders)
+                    // Full Outer Boundary (Top, Bottom, Left, Right)
                     ctx.strokeRect(mx, my, pw, ph);
 
                     // Halfway Line
@@ -533,9 +533,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.lineTo(cx, my + ph);
                     ctx.stroke();
 
-                    // Center Circle & Spot
+                    // Center Circle & Center Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 160, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 150, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
@@ -543,18 +543,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.arc(cx, cy, 14, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Left Penalty Box & Goal Box (True Rectangles)
-                    ctx.strokeRect(mx, cy - 240, 240, 480);
-                    ctx.strokeRect(mx, cy - 100, 90, 200);
+                    // Left Penalty Box & Goal Box (Perfect Rectangles)
+                    ctx.strokeRect(mx, cy - 220, 220, 440);
+                    ctx.strokeRect(mx, cy - 90, 80, 180);
                     ctx.beginPath();
-                    ctx.arc(mx + 170, cy, 95, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 160, cy, 90, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
-                    // Right Penalty Box & Goal Box (True Rectangles)
-                    ctx.strokeRect(mx + pw - 240, cy - 240, 240, 480);
-                    ctx.strokeRect(mx + pw - 90, cy - 100, 90, 200);
+                    // Right Penalty Box & Goal Box (Perfect Rectangles)
+                    ctx.strokeRect(mx + pw - 220, cy - 220, 220, 440);
+                    ctx.strokeRect(mx + pw - 80, cy - 90, 80, 180);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 170, cy, 95, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 160, cy, 90, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
                     // All 4 Corner Arcs
