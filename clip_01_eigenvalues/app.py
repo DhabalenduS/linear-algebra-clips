@@ -463,7 +463,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Calibrated TV Camera (Fills 100% of the stage)
+                // Calibrated TV Camera
                 const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
                 camera.position.set(0, 29, 2.0);
                 camera.lookAt(0, 0, 0);
@@ -496,7 +496,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Full-Bleed Edge-to-Edge Football Pitch
+                // CLICK 2 (State >= 9): Football Pitch with Balanced Green Border
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
@@ -504,7 +504,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pCanvas.height = 1440;
                     const ctx = pCanvas.getContext('2d');
 
-                    // 1. Lawn Stripes (Edge-to-Edge)
+                    // 1. Edge-to-Edge Lawn Stripes
                     const stripes = 12;
                     const sh = 1440 / stripes;
                     for (let i = 0; i < stripes; i++) {{
@@ -512,16 +512,16 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Balanced Boundary Inset
-                    const mx = 120;
-                    const my = 90;
-                    const pw = 2048 - (2 * mx); // 1808
-                    const ph = 1440 - (2 * my); // 1260
+                    // 2. Inset Margins (Ensures clear green border around all 4 white lines)
+                    const mx = 340;
+                    const my = 240;
+                    const pw = 2048 - (2 * mx); // 1368
+                    const ph = 1440 - (2 * my); // 960
                     const cx = 2048 / 2;
                     const cy = 1440 / 2;
 
                     ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 15;
+                    ctx.lineWidth = 14;
                     ctx.lineCap = 'round';
 
                     // 1. Full Outer Boundary (Top, Bottom, Left, Right)
@@ -535,30 +535,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // 3. Center Circle & Center Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 210, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 160, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 16, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
                     ctx.fill();
 
                     // 4. Left Penalty Box & Goal Box
-                    ctx.strokeRect(mx, cy - 290, 290, 580);
-                    ctx.strokeRect(mx, cy - 120, 100, 240);
+                    ctx.strokeRect(mx, cy - 230, 220, 460);
+                    ctx.strokeRect(mx, cy - 90, 80, 180);
                     ctx.beginPath();
-                    ctx.arc(mx + 210, cy, 120, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 160, cy, 90, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
                     // 5. Right Penalty Box & Goal Box
-                    ctx.strokeRect(mx + pw - 290, cy - 290, 290, 580);
-                    ctx.strokeRect(mx + pw - 100, cy - 120, 100, 240);
+                    ctx.strokeRect(mx + pw - 220, cy - 230, 220, 460);
+                    ctx.strokeRect(mx + pw - 80, cy - 90, 80, 180);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 210, cy, 120, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 160, cy, 90, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
                     // 6. All 4 Corner Arcs
-                    const r = 38;
+                    const r = 30;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
@@ -568,7 +568,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 if (currentState >= 9) {{
-                    // Scaled plane so striped grass fills 100% of the stage container
                     const pitchGeo = new THREE.PlaneGeometry(38, 26.5);
                     const pitchMat = new THREE.MeshStandardMaterial({{
                         map: createPitchTexture(),
