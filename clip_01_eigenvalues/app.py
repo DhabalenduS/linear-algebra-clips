@@ -463,9 +463,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Calibrated TV Camera (Perpendicular overhead to eliminate trapezoidal distortion)
-                const camera = new THREE.PerspectiveCamera(32, w / h, 0.1, 1000);
-                camera.position.set(0, 28, 2.8);
+                // Calibrated TV Camera (Generous framing ensures 100% border visibility on all screens)
+                const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
+                camera.position.set(0, 32, 3.2);
                 camera.lookAt(0, 0, 0);
 
                 const renderer = new THREE.WebGLRenderer({{
@@ -488,7 +488,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(hemiLight);
 
                 const floodLight = new THREE.DirectionalLight(0xffffff, 1.2);
-                floodLight.position.set(10, 30, 10);
+                floodLight.position.set(10, 35, 10);
                 floodLight.castShadow = true;
                 floodLight.shadow.mapSize.width = 2048;
                 floodLight.shadow.mapSize.height = 2048;
@@ -496,7 +496,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Symmetrical, Fully Framed Football Ground
+                // CLICK 2 (State >= 9): Complete 4-Border Football Ground
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
@@ -504,19 +504,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pCanvas.height = 1400;
                     const ctx = pCanvas.getContext('2d');
 
-                    // 1. Edge-to-Edge Lawn Stripes
-                    const stripes = 12;
+                    // 1. Continuous Lawn Stripes (Edge-to-Edge)
+                    const stripes = 14;
                     const sh = 1400 / stripes;
                     for (let i = 0; i < stripes; i++) {{
                         ctx.fillStyle = (i % 2 === 0) ? '#28792c' : '#308e36';
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Symmetrical Margins (Ensures all 4 borders & corners fit inside)
-                    const mx = 340;
-                    const my = 240;
-                    const pw = 2048 - (2 * mx); // 1368
-                    const ph = 1400 - (2 * my); // 920
+                    // 2. Safe-Frame Margins (Guarantees all 4 borders stay inside screen)
+                    const mx = 480;
+                    const my = 350;
+                    const pw = 2048 - (2 * mx); // 1088
+                    const ph = 1400 - (2 * my); // 700
                     const cx = 2048 / 2;
                     const cy = 1400 / 2;
 
@@ -535,30 +535,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // Center Circle & Center Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 150, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 130, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 14, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 13, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Left Penalty Box & Goal Box (Perfect Rectangles)
-                    ctx.strokeRect(mx, cy - 220, 220, 440);
-                    ctx.strokeRect(mx, cy - 90, 80, 180);
+                    // Left Penalty Box & Goal Box
+                    ctx.strokeRect(mx, cy - 180, 180, 360);
+                    ctx.strokeRect(mx, cy - 75, 65, 150);
                     ctx.beginPath();
-                    ctx.arc(mx + 160, cy, 90, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 130, cy, 75, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
-                    // Right Penalty Box & Goal Box (Perfect Rectangles)
-                    ctx.strokeRect(mx + pw - 220, cy - 220, 220, 440);
-                    ctx.strokeRect(mx + pw - 80, cy - 90, 80, 180);
+                    // Right Penalty Box & Goal Box
+                    ctx.strokeRect(mx + pw - 180, cy - 180, 180, 360);
+                    ctx.strokeRect(mx + pw - 65, cy - 75, 65, 150);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 160, cy, 90, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 130, cy, 75, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
                     // All 4 Corner Arcs
-                    const r = 26;
+                    const r = 24;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
@@ -585,7 +585,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 3 (State >= 10): 3D Classic Black-and-White Soccer Ball
                 // ============================================================
                 let ball = null;
-                const ballRadius = 2.2;
+                const ballRadius = 2.0;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
                 function createSoccerBallTexture() {{
