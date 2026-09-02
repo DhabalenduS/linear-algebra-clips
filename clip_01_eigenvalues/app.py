@@ -1,6 +1,6 @@
 # Clip 01 — Eigenvalues and Eigenvectors
-# Slides 1–3 (Finalized up to Slide 3: Clicks 1, 2, and 3)
-# 3rd commit to finalize slide 3: click 1, 2, 3
+# Slides 1–3 (Finalized up to Slide 3: Clicks 1, 2, and 3 - Clean Ball Texture)
+# 4th commit to finalize slide 3 and click 3 Ball texture 
 import streamlit as st
 
 st.set_page_config(
@@ -318,7 +318,7 @@ header,
     border-radius: 100% 0 0 0;
 }
 
-/* ==================== 3D FOOTBALL ==================== */
+/* ==================== CLEAN 3D FOOTBALL ==================== */
 
 .soccer-ball {
     position: absolute;
@@ -330,35 +330,35 @@ header,
     border-radius: 50%;
     background: #fdfdfd;
     box-shadow:
-        inset -1.5vh -1.5vh 3vh rgba(0,0,0,0.6),
+        inset -1.5vh -1.5vh 3vh rgba(0,0,0,0.55),
         inset 1vh 1vh 2.5vh rgba(255,255,255,0.9),
-        0.8vh 1.4vh 2vh rgba(0,0,0,0.45);
-    border: 2.5px solid #1a1a1a;
+        0.8vh 1.4vh 2vh rgba(0,0,0,0.42);
+    border: 2px solid #222222;
     overflow: hidden;
     z-index: 25;
 }
 
-/* Central Black Pentagon */
+/* Central Soft Pentagon */
 .patch-center {
     position: absolute;
     left: 50%;
     top: 50%;
     width: 4.4vh;
     height: 4.4vh;
-    background: #151515;
+    background: #1c1c1c;
     transform: translate(-50%, -50%);
     clip-path: polygon(50% 0%, 98% 35%, 79% 90%, 21% 90%, 2% 35%);
     z-index: 2;
 }
 
-/* Surrounding 5 Black Pentagons */
+/* Surrounding 5 Soft Pentagons */
 .patch-top {
     position: absolute;
     left: 50%;
     top: -1.2vh;
     width: 3.8vh;
     height: 3.8vh;
-    background: #151515;
+    background: #1c1c1c;
     transform: translateX(-50%);
     clip-path: polygon(50% 100%, 0% 35%, 20% 0%, 80% 0%, 100% 35%);
     z-index: 2;
@@ -370,7 +370,7 @@ header,
     top: 2.8vh;
     width: 3.6vh;
     height: 3.6vh;
-    background: #151515;
+    background: #1c1c1c;
     clip-path: polygon(0% 40%, 60% 0%, 100% 30%, 80% 100%, 20% 80%);
     z-index: 2;
 }
@@ -381,7 +381,7 @@ header,
     top: 2.8vh;
     width: 3.6vh;
     height: 3.6vh;
-    background: #151515;
+    background: #1c1c1c;
     clip-path: polygon(100% 40%, 40% 0%, 0% 30%, 20% 100%, 80% 80%);
     z-index: 2;
 }
@@ -392,7 +392,7 @@ header,
     bottom: -0.6vh;
     width: 3.8vh;
     height: 3.8vh;
-    background: #151515;
+    background: #1c1c1c;
     clip-path: polygon(30% 0%, 80% 20%, 100% 80%, 40% 100%, 0% 50%);
     z-index: 2;
 }
@@ -403,56 +403,9 @@ header,
     bottom: -0.6vh;
     width: 3.8vh;
     height: 3.8vh;
-    background: #151515;
+    background: #1c1c1c;
     clip-path: polygon(70% 0%, 20% 20%, 0% 80%, 60% 100%, 100% 50%);
     z-index: 2;
-}
-
-/* Stitched Seam Lines connecting the pentagons */
-.seam {
-    position: absolute;
-    background: #555555;
-    z-index: 1;
-}
-
-.seam-1 {
-    width: 2px;
-    height: 2.6vh;
-    left: 50%;
-    top: 2.5vh;
-    transform: translateX(-50%);
-}
-
-.seam-2 {
-    width: 2.8vh;
-    height: 2px;
-    left: 8.8vh;
-    top: 5.6vh;
-    transform: rotate(25deg);
-}
-
-.seam-3 {
-    width: 2.8vh;
-    height: 2px;
-    right: 8.8vh;
-    top: 5.6vh;
-    transform: rotate(-25deg);
-}
-
-.seam-4 {
-    width: 2.8vh;
-    height: 2px;
-    left: 7.8vh;
-    bottom: 3.8vh;
-    transform: rotate(-45deg);
-}
-
-.seam-5 {
-    width: 2.8vh;
-    height: 2px;
-    right: 7.8vh;
-    bottom: 3.8vh;
-    transform: rotate(45deg);
 }
 
 /* 3D Specular Highlight & Volume Shading Layer */
@@ -460,7 +413,7 @@ header,
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.55) 100%);
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45) 0%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.52) 100%);
     pointer-events: none;
     z-index: 3;
 }
@@ -482,7 +435,7 @@ header,
     }
 }
 
-/* Dedicated Centered Reveal (Fixes the off-center bug) */
+/* Dedicated Centered Reveal (Guarantees perfect center lock) */
 .reveal-center {
     animation: revealCenterEvent 0.55s ease-out both;
 }
@@ -646,7 +599,7 @@ elif 8 <= st.session_state.presentation_state <= 10:
 
     state = st.session_state.presentation_state
 
-    # CLICK 1 (State 8): Centered Title + Clean Reserved Left Panel
+    # CLICK 1 (State 8): Centered Title + Reserved Left Panel
     content = """
     <div class="slide3">
         <div class="slide3-title">
@@ -674,7 +627,7 @@ elif 8 <= st.session_state.presentation_state <= 10:
             <div class="corner-br"></div>
         """
 
-        # CLICK 3 (State 10): 3D Black-and-White Soccer Ball at Dead Center
+        # CLICK 3 (State 10): Clean 3D Soccer Ball at Dead Center
         if state >= 10:
             content += """
             <div class="soccer-ball reveal-center">
@@ -684,11 +637,6 @@ elif 8 <= st.session_state.presentation_state <= 10:
                 <div class="patch-top-left"></div>
                 <div class="patch-bottom-right"></div>
                 <div class="patch-bottom-left"></div>
-                <div class="seam seam-1"></div>
-                <div class="seam seam-2"></div>
-                <div class="seam seam-3"></div>
-                <div class="seam seam-4"></div>
-                <div class="seam seam-5"></div>
                 <div class="ball-shading-overlay"></div>
             </div>
             """
