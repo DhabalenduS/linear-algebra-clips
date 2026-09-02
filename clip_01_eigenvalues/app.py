@@ -1,6 +1,6 @@
 # Clip 01 — Eigenvalues and Eigenvectors
 # Slides 1–3 Complete Implementation (True TV-Grade WebGL 3D Visualization)
-# 10th Commit for slide 3
+# 12th Commit for slide 3
 import streamlit as st
 import streamlit.components.v1 as components
 
@@ -424,9 +424,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
             <meta charset="utf-8">
             <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
             <style>
-                html, body {{
+                * {{
+                    box-sizing: border-box;
                     margin: 0;
                     padding: 0;
+                }}
+                html, body {{
                     width: 100%;
                     height: 100%;
                     overflow: hidden;
@@ -438,61 +441,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     position: relative;
                     border: 4px solid #ffffff;
                     border-radius: 16px;
-                    box-sizing: border-box;
                     overflow: hidden;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+                    background: radial-gradient(circle at 50% 40%, #1a2936 0%, #080d14 100%);
                 }}
                 canvas {{
                     width: 100%;
                     height: 100%;
                     display: block;
                 }}
-                .math-badge {{
-                    position: absolute;
-                    background: rgba(255, 255, 255, 0.96);
-                    border: 2px solid #1d4ed8;
-                    color: #1d4ed8;
-                    padding: 3px 8px;
-                    border-radius: 7px;
-                    font-family: Georgia, serif;
-                    font-size: 14px;
-                    font-weight: 800;
-                    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
-                    white-space: nowrap;
-                    transform: translate(-50%, -50%);
-                    display: none;
-                    pointer-events: none;
-                    z-index: 100;
-                }}
-                .vector-badge {{
-                    position: absolute;
-                    background: #1d4ed8;
-                    color: #ffffff;
-                    padding: 3px 7px;
-                    border-radius: 5px;
-                    font-family: Georgia, serif;
-                    font-size: 13px;
-                    font-weight: 800;
-                    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-                    transform: translate(-50%, -50%);
-                    display: none;
-                    pointer-events: none;
-                    z-index: 100;
-                }}
-                .pumped-badge {{
-                    background: #dc2626 !important;
-                    border: 2px solid #fee2e2 !important;
-                    color: #ffffff !important;
-                }}
             </style>
         </head>
         <body>
             <div id="stage">
                 <canvas id="canvas3d"></canvas>
-                <div id="badge-o" class="math-badge">O(0, 0, 0)</div>
-                <div id="badge-p" class="math-badge">P(x, y, z)</div>
-                <div id="badge-p-prime" class="math-badge pumped-badge">P'(x', y', z')</div>
-                <div id="badge-op" class="vector-badge">OP&#8407;</div>
             </div>
 
             <script>
@@ -500,85 +462,117 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const stage = document.getElementById('stage');
                 const canvas = document.getElementById('canvas3d');
 
-                const width = stage.clientWidth;
-                const height = stage.clientHeight;
-
-                // 1. Scene & Camera Setup
+                // 1. Scene & Cinematic Broadcast Camera Setup
                 const scene = new THREE.Scene();
-                scene.background = new THREE.Color(0x388e3c);
 
-                const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
-                camera.position.set(0, 16, 26);
-                camera.lookAt(0, 3.2, 0);
+                // Accurate initial sizing inside Streamlit's iframe
+                const width = stage.clientWidth || window.innerWidth;
+                const height = stage.clientHeight || 580;
 
-                const renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true }});
+                const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+                camera.position.set(0, 8.5, 17.5);
+                camera.lookAt(0, 2.5, 0);
+
+                const renderer = new THREE.WebGLRenderer({{ canvas: canvas, antialias: true, alpha: true }});
                 renderer.setSize(width, height);
                 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 renderer.shadowMap.enabled = true;
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                renderer.toneMapping = THREE.ACESFilmicToneMapping;
+                renderer.toneMappingExposure = 1.15;
 
-                // 2. Studio Lighting
-                const ambient = new THREE.AmbientLight(0xffffff, 0.85);
+                // 2. Broadcast Lighting Rig
+                const ambient = new THREE.AmbientLight(0xffffff, 0.7);
                 scene.add(ambient);
 
-                const sun = new THREE.DirectionalLight(0xffffff, 1.25);
-                sun.position.set(16, 28, 16);
+                const hemiLight = new THREE.HemisphereLight(0xddeeff, 0x142a12, 0.5);
+                scene.add(hemiLight);
+
+                const sun = new THREE.DirectionalLight(0xffffff, 1.3);
+                sun.position.set(12, 22, 14);
                 sun.castShadow = true;
-                sun.shadow.mapSize.width = 1024;
-                sun.shadow.mapSize.height = 1024;
+                sun.shadow.mapSize.width = 2048;
+                sun.shadow.mapSize.height = 2048;
+                sun.shadow.bias = -0.0005;
                 scene.add(sun);
 
-                // CLICK 2 (State >= 9): 3D Soccer Pitch Ground
-                const pitchGeo = new THREE.PlaneGeometry(42, 26);
-                const pitchMat = new THREE.MeshStandardMaterial({{ color: 0x43a047, roughness: 0.85 }});
-                const pitch = new THREE.Mesh(pitchGeo, pitchMat);
-                pitch.rotation.x = -Math.PI / 2;
-                pitch.receiveShadow = true;
-                scene.add(pitch);
+                const rimLight = new THREE.DirectionalLight(0x38bdf8, 0.4);
+                rimLight.position.set(-12, 10, -10);
+                scene.add(rimLight);
 
-                const lineMat = new THREE.MeshBasicMaterial({{ color: 0xffffff }});
-                
-                const borderGeo = new THREE.EdgesGeometry(pitchGeo);
-                const borderLines = new THREE.LineSegments(borderGeo, lineMat);
-                borderLines.rotation.x = -Math.PI / 2;
-                borderLines.position.y = 0.02;
-                scene.add(borderLines);
+                // ============================================================
+                // CLICK 2 (State >= 9): 3D Striped Football Pitch Ground
+                // ============================================================
+                function createPitchTexture() {{
+                    const pCanvas = document.createElement('canvas');
+                    pCanvas.width = 2048;
+                    pCanvas.height = 2048;
+                    const ctx = pCanvas.getContext('2d');
 
-                const halfGeo = new THREE.PlaneGeometry(0.14, 26);
-                const halfLine = new THREE.Mesh(halfGeo, lineMat);
-                halfLine.rotation.x = -Math.PI / 2;
-                halfLine.position.y = 0.02;
-                scene.add(halfLine);
+                    // Grass Stripes
+                    const stripes = 14;
+                    const h = 2048 / stripes;
+                    for (let i = 0; i < stripes; i++) {{
+                        ctx.fillStyle = (i % 2 === 0) ? '#2e7d32' : '#388e3c';
+                        ctx.fillRect(0, i * h, 2048, h);
+                    }}
 
-                const circleGeo = new THREE.RingGeometry(3.8, 3.96, 64);
-                const centerCircle = new THREE.Mesh(circleGeo, lineMat);
-                centerCircle.rotation.x = -Math.PI / 2;
-                centerCircle.position.y = 0.02;
-                scene.add(centerCircle);
+                    // White Pitch Markings
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+                    ctx.lineWidth = 18;
+                    ctx.strokeRect(80, 80, 1888, 1888);
 
-                // CLICK 3 (State >= 10): True 3D Soccer Ball
+                    // Center Line & Circle
+                    ctx.beginPath();
+                    ctx.moveTo(80, 1024);
+                    ctx.lineTo(1968, 1024);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.arc(1024, 1024, 380, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(1024, 1024, 20, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    return new THREE.CanvasTexture(pCanvas);
+                }}
+
+                if (currentState >= 9) {{
+                    const pitchGeo = new THREE.PlaneGeometry(28, 28);
+                    const pitchMat = new THREE.MeshStandardMaterial({{
+                        map: createPitchTexture(),
+                        roughness: 0.82,
+                        metalness: 0.05
+                    }});
+                    const pitch = new THREE.Mesh(pitchGeo, pitchMat);
+                    pitch.rotation.x = -Math.PI / 2;
+                    pitch.position.y = 0;
+                    pitch.receiveShadow = true;
+                    scene.add(pitch);
+                }}
+
+                // ============================================================
+                // CLICK 3 (State >= 10): 3D Classic Black-and-White Soccer Ball
+                // ============================================================
                 let ball = null;
-                const ballRadius = 3.0;
-                const lambdaFactor = 1.45; // Scaling factor lambda = 1.45
-                const oPos = new THREE.Vector3(0, 3.2, 0);
+                const ballRadius = 2.6;
+                const oPos = new THREE.Vector3(0, ballRadius, 0);
 
-                // Initial surface point vector relative to origin
-                const relP = new THREE.Vector3(ballRadius * 0.70, ballRadius * 0.65, ballRadius * 0.28);
-                const pPos = new THREE.Vector3().addVectors(oPos, relP);
-                const pPrimePos = new THREE.Vector3().addVectors(oPos, relP.clone().multiplyScalar(lambdaFactor));
+                function createSoccerBallTexture() {{
+                    const bCanvas = document.createElement('canvas');
+                    bCanvas.width = 2048;
+                    bCanvas.height = 1024;
+                    const ctx = bCanvas.getContext('2d');
 
-                let currentPPos = pPos.clone();
-
-                if (currentState >= 10) {{
-                    const texCanvas = document.createElement('canvas');
-                    texCanvas.width = 1024;
-                    texCanvas.height = 512;
-                    const ctx = texCanvas.getContext('2d');
-
+                    // Base Clean Leather
                     ctx.fillStyle = '#f8fafc';
-                    ctx.fillRect(0, 0, 1024, 512);
+                    ctx.fillRect(0, 0, 2048, 1024);
 
-                    ctx.fillStyle = '#1c1c1c';
+                    // Geometric Hexagonal/Pentagonal Pattern
+                    ctx.fillStyle = '#0f172a';
                     function drawPentagon(cx, cy, r) {{
                         ctx.beginPath();
                         for (let i = 0; i < 5; i++) {{
@@ -590,191 +584,63 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                         ctx.closePath();
                         ctx.fill();
+                        ctx.strokeStyle = '#334155';
+                        ctx.lineWidth = 5;
+                        ctx.stroke();
                     }}
 
-                    drawPentagon(512, 256, 72);
-                    drawPentagon(220, 140, 56);
-                    drawPentagon(804, 140, 56);
-                    drawPentagon(220, 372, 56);
-                    drawPentagon(804, 372, 56);
-                    drawPentagon(512, 60, 50);
-                    drawPentagon(512, 452, 50);
+                    const rows = 4;
+                    const cols = 8;
+                    for (let r = 0; r < rows; r++) {{
+                        for (let c = 0; c < cols; c++) {{
+                            if ((r + c) % 2 === 0) {{
+                                drawPentagon((c + 0.5) * (2048 / cols), (r + 0.5) * (1024 / rows), 68);
+                            }}
+                        }}
+                    }}
 
-                    const texture = new THREE.CanvasTexture(texCanvas);
+                    const tex = new THREE.CanvasTexture(bCanvas);
+                    tex.wrapS = THREE.RepeatWrapping;
+                    tex.wrapT = THREE.ClampToEdgeWrapping;
+                    return tex;
+                }}
+
+                if (currentState >= 10) {{
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
                     const ballMat = new THREE.MeshStandardMaterial({{
-                        map: texture,
-                        roughness: 0.35,
-                        metalness: 0.1,
-                        transparent: currentState >= 11,
-                        opacity: currentState >= 11 ? 0.82 : 1.0
+                        map: createSoccerBallTexture(),
+                        roughness: 0.32,
+                        metalness: 0.12
                     }});
 
                     ball = new THREE.Mesh(ballGeo, ballMat);
                     ball.position.copy(oPos);
                     ball.castShadow = true;
+                    ball.receiveShadow = true;
                     scene.add(ball);
                 }}
 
-                // CLICK 4 (State >= 11): Origin O(0,0,0) and Surface Point P Markers
-                let oMesh = null;
-                let pMesh = null;
-                let pPrimeMesh = null;
-
-                if (currentState >= 11) {{
-                    const oGeo = new THREE.SphereGeometry(0.24, 32, 32);
-                    const oMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
-                    oMesh = new THREE.Mesh(oGeo, oMat);
-                    oMesh.position.copy(oPos);
-                    scene.add(oMesh);
-
-                    const pGeo = new THREE.SphereGeometry(0.26, 32, 32);
-                    const pMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
-                    pMesh = new THREE.Mesh(pGeo, pMat);
-                    pMesh.position.copy(pPos);
-                    scene.add(pMesh);
-                }}
-
-                // CLICK 5 (State >= 12): Vector Arrow Ray OP
-                let arrow = null;
-                if (currentState >= 12) {{
-                    const dir = new THREE.Vector3().subVectors(pPos, oPos);
-                    const len = dir.length();
-                    dir.normalize();
-
-                    arrow = new THREE.ArrowHelper(dir, oPos, len, 0x1d4ed8, 0.8, 0.45);
-                    scene.add(arrow);
-                }}
-
-                // CLICK 6 (State >= 13): Pumping Animation & Sound
-                let pumpProgress = currentState >= 14 ? 1.0 : (currentState === 13 ? 0.0 : 0.0);
-
-                // Synthesized Air Pumping Audio (Web Audio API)
-                function playPumpingSound() {{
-                    try {{
-                        const AudioContext = window.AudioContext || window.webkitAudioContext;
-                        if (!AudioContext) return;
-                        const actx = new AudioContext();
-                        const dur = 1.6;
-                        const bufferSize = actx.sampleRate * dur;
-                        const buffer = actx.createBuffer(1, bufferSize, actx.sampleRate);
-                        const output = buffer.getChannelData(0);
-                        for (let i = 0; i < bufferSize; i++) {{
-                            output[i] = (Math.random() * 2 - 1) * Math.exp(-2.2 * (i / bufferSize));
-                        }}
-                        const whiteNoise = actx.createBufferSource();
-                        whiteNoise.buffer = buffer;
-
-                        const filter = actx.createBiquadFilter();
-                        filter.type = "lowpass";
-                        filter.frequency.setValueAtTime(320, actx.currentTime);
-                        filter.frequency.linearRampToValueAtTime(950, actx.currentTime + 0.6);
-                        filter.frequency.exponentialRampToValueAtTime(180, actx.currentTime + dur);
-
-                        const gainNode = actx.createGain();
-                        gainNode.gain.setValueAtTime(0.01, actx.currentTime);
-                        gainNode.gain.linearRampToValueAtTime(0.35, actx.currentTime + 0.3);
-                        gainNode.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
-
-                        whiteNoise.connect(filter);
-                        filter.connect(gainNode);
-                        gainNode.connect(actx.destination);
-                        whiteNoise.start();
-                    }} catch(e) {{}}
-                }}
-
-                if (currentState === 13) {{
-                    playPumpingSound();
-                }}
-
-                if (currentState >= 13) {{
-                    // P' Point marker at final inflated destination
-                    const pPrimeGeo = new THREE.SphereGeometry(0.28, 32, 32);
-                    const pPrimeMat = new THREE.MeshBasicMaterial({{ color: 0xdc2626 }});
-                    pPrimeMesh = new THREE.Mesh(pPrimeGeo, pPrimeMat);
-                    pPrimeMesh.position.copy(pPrimePos);
-                    scene.add(pPrimeMesh);
-                }}
-
-                // Project 3D positions to 2D UI Screen Badges
-                function toScreen(vec) {{
-                    const v = vec.clone().project(camera);
-                    return {{
-                        x: (v.x * 0.5 + 0.5) * width,
-                        y: (-(v.y * 0.5) + 0.5) * height
-                    }};
-                }}
-
-                function updateBadges() {{
-                    if (currentState >= 11) {{
-                        const oScr = toScreen(oPos);
-                        const bO = document.getElementById('badge-o');
-                        if (bO) {{
-                            bO.style.display = 'block';
-                            bO.style.left = (oScr.x - 70) + 'px';
-                            bO.style.top = (oScr.y + 30) + 'px';
-                        }}
-
-                        const pScr = toScreen(pPos);
-                        const bP = document.getElementById('badge-p');
-                        if (bP) {{
-                            bP.style.display = 'block';
-                            bP.style.left = (pScr.x - 55) + 'px';
-                            bP.style.top = (pScr.y - 25) + 'px';
-                        }}
-                    }}
-
-                    if (currentState >= 12 && arrow) {{
-                        const mid = new THREE.Vector3().addVectors(oPos, currentPPos).multiplyScalar(0.5);
-                        const opScr = toScreen(mid);
-                        const bOP = document.getElementById('badge-op');
-                        if (bOP) {{
-                            bOP.style.display = 'block';
-                            bOP.style.left = (opScr.x + 24) + 'px';
-                            bOP.style.top = (opScr.y - 18) + 'px';
-                        }}
-                    }}
-
-                    if (currentState >= 13 && pumpProgress > 0.6) {{
-                        const pPrimeScr = toScreen(pPrimePos);
-                        const bPPrime = document.getElementById('badge-p-prime');
-                        if (bPPrime) {{
-                            bPPrime.style.display = 'block';
-                            bPPrime.style.left = (pPrimeScr.x + 65) + 'px';
-                            bPPrime.style.top = (pPrimeScr.y - 22) + 'px';
-                        }}
-                    }}
-                }}
-
+                // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
 
-                    // Smooth Pumping Easing
-                    if (currentState === 13 && pumpProgress < 1.0) {{
-                        pumpProgress += 0.018;
-                        if (pumpProgress > 1.0) pumpProgress = 1.0;
-                    }}
-
-                    if (currentState >= 13 && ball) {{
-                        const currentScale = 1.0 + (lambdaFactor - 1.0) * pumpProgress;
-                        ball.scale.set(currentScale, currentScale, currentScale);
-
-                        // Current animated P vector
-                        currentPPos.copy(oPos).add(relP.clone().multiplyScalar(currentScale));
-
-                        if (arrow) {{
-                            const dir = new THREE.Vector3().subVectors(currentPPos, oPos);
-                            const len = dir.length();
-                            dir.normalize();
-                            arrow.setDirection(dir);
-                            arrow.setLength(len, 0.8, 0.45);
-                        }}
+                    // Subtle TV-Grade ambient rotation in step 3
+                    if (ball && currentState === 10) {{
+                        ball.rotation.y += 0.003;
                     }}
 
                     renderer.render(scene, camera);
-                    updateBadges();
                 }}
                 animate();
+
+                // Responsive Window Resize Handler
+                window.addEventListener('resize', () => {{
+                    const w = stage.clientWidth || window.innerWidth;
+                    const h = stage.clientHeight || 580;
+                    camera.aspect = w / h;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(w, h);
+                }});
             </script>
         </body>
         </html>
