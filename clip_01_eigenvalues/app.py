@@ -463,9 +463,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Calibrated TV Camera (Generous framing ensures 100% border visibility on all screens)
-                const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
-                camera.position.set(0, 32, 3.2);
+                // Calibrated Broadcast TV Camera
+                const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 1000);
+                camera.position.set(0, 30, 3.0);
                 camera.lookAt(0, 0, 0);
 
                 const renderer = new THREE.WebGLRenderer({{
@@ -496,7 +496,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Complete 4-Border Football Ground
+                // CLICK 2 (State >= 9): Full-Scale Expanded Football Ground
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
@@ -512,11 +512,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Safe-Frame Margins (Guarantees all 4 borders stay inside screen)
-                    const mx = 480;
-                    const my = 350;
-                    const pw = 2048 - (2 * mx); // 1088
-                    const ph = 1400 - (2 * my); // 700
+                    // 2. Extended Boundary Lines (Expanded to cover almost the entire ground)
+                    const mx = 180;
+                    const my = 130;
+                    const pw = 2048 - (2 * mx); // 1688
+                    const ph = 1400 - (2 * my); // 1140
                     const cx = 2048 / 2;
                     const cy = 1400 / 2;
 
@@ -524,7 +524,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.lineWidth = 14;
                     ctx.lineCap = 'round';
 
-                    // Full Outer Boundary (Top, Bottom, Left, Right)
+                    // Full Outer Boundary
                     ctx.strokeRect(mx, my, pw, ph);
 
                     // Halfway Line
@@ -535,30 +535,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // Center Circle & Center Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 130, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 200, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 13, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 15, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Left Penalty Box & Goal Box
-                    ctx.strokeRect(mx, cy - 180, 180, 360);
-                    ctx.strokeRect(mx, cy - 75, 65, 150);
+                    // Left Penalty Box & Goal Box (Expanded Proportions)
+                    ctx.strokeRect(mx, cy - 270, 270, 540);
+                    ctx.strokeRect(mx, cy - 110, 95, 220);
                     ctx.beginPath();
-                    ctx.arc(mx + 130, cy, 75, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 195, cy, 110, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
-                    // Right Penalty Box & Goal Box
-                    ctx.strokeRect(mx + pw - 180, cy - 180, 180, 360);
-                    ctx.strokeRect(mx + pw - 65, cy - 75, 65, 150);
+                    // Right Penalty Box & Goal Box (Expanded Proportions)
+                    ctx.strokeRect(mx + pw - 270, cy - 270, 270, 540);
+                    ctx.strokeRect(mx + pw - 95, cy - 110, 95, 220);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 130, cy, 75, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 195, cy, 110, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
                     // All 4 Corner Arcs
-                    const r = 24;
+                    const r = 34;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
