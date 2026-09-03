@@ -511,7 +511,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const stripes = 10;
                     const sh = 1536 / stripes;
                     for (let i = 0; i < stripes; i++) {{
-                        ctx.fillStyle = (i % 2 === 0) ? '#48a853' : '#56b862';
+                        ctx.fillStyle = (i % 2 === 0) ? '#28792c' : '#308e36';
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
