@@ -583,127 +583,84 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 3 (State >= 10): True TV-Grade 3D FIFA Classic Soccer Ball
+                // CLICK 3 (State >= 10): True 3D Geometric FIFA Match Ball
                 // ============================================================
-                let ball = null;
+                let ballGroup = null;
                 const ballRadius = 2.0;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
-                function createSoccerBallTexture() {{
-                    const bCanvas = document.createElement('canvas');
-                    bCanvas.width = 2048;
-                    bCanvas.height = 1024;
-                    const ctx = bCanvas.getContext('2d');
+                if (currentState >= 10) {{
+                    ballGroup = new THREE.Group();
+                    ballGroup.position.copy(oPos);
 
-                    // 1. Base White Leather Panel Background
-                    ctx.fillStyle = '#f8fafc';
-                    ctx.fillRect(0, 0, 2048, 1024);
+                    // 1. Base White Leather Sphere
+                    const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
+                    const ballMat = new THREE.MeshStandardMaterial({{
+                        color: 0xf8fafc,
+                        roughness: 0.28,
+                        metalness: 0.05
+                    }});
+                    const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                    whiteBall.castShadow = true;
+                    whiteBall.receiveShadow = false;
+                    ballGroup.add(whiteBall);
 
-                    // 2. Exact 3D Icosahedron Vertices for 12 Symmetric Pentagons
-                    const phi = (1 + Math.sqrt(5)) / 2; // Golden Ratio
+                    // 2. Exact 12 Icosahedral 3D Pentagon Coordinates
+                    const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
                         [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
                         [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
                     ];
 
-                    // Normalize vertices to 3D Unit Sphere
                     const icoVerts = rawVerts.map(v => {{
                         const len = Math.hypot(v[0], v[1], v[2]);
-                        return [v[0] / len, v[1] / len, v[2] / len];
+                        return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
                     }});
 
-                    // 3. Draw Connecting Hexagonal Stitch Seams
-                    ctx.strokeStyle = '#94a3b8';
-                    ctx.lineWidth = 6;
+                    // 3. Black Pentagon 3D Material
+                    const pentagonMat = new THREE.MeshStandardMaterial({{
+                        color: 0x0f172a, // Deep Leather Black
+                        roughness: 0.35,
+                        metalness: 0.08,
+                        side: THREE.DoubleSide
+                    }});
+
+                    const pentagonRadius = 0.58;
+
+                    // Place 12 True 3D Pentagons on the Sphere Surface
+                    icoVerts.forEach(v => {{
+                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+
+                        // Position slightly above sphere surface to prevent z-fighting
+                        pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
+
+                        // Orient pentagon to sit flush on the sphere surface normal
+                        pentMesh.lookAt(v.clone().multiplyScalar(ballRadius * 2));
+                        ballGroup.add(pentMesh);
+                    }});
+
+                    // 4. Draw 3D Seam Lines Connecting Neighbors (Forms the 20 Hexagons)
+                    const lineMat = new THREE.LineBasicMaterial({{ color: 0x94a3b8, linewidth: 2 }});
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
-                            const d = Math.hypot(
-                                icoVerts[i][0] - icoVerts[j][0],
-                                icoVerts[i][1] - icoVerts[j][1],
-                                icoVerts[i][2] - icoVerts[j][2]
-                            );
-                            // Neighboring vertices on icosahedron
-                            if (d < 1.1) {{
-                                const u1 = 0.5 + Math.atan2(icoVerts[i][2], icoVerts[i][0]) / (2 * Math.PI);
-                                const v1 = 0.5 - Math.asin(icoVerts[i][1]) / Math.PI;
-                                const u2 = 0.5 + Math.atan2(icoVerts[j][2], icoVerts[j][0]) / (2 * Math.PI);
-                                const v2 = 0.5 - Math.asin(icoVerts[j][1]) / Math.PI;
-
-                                if (Math.abs(u1 - u2) < 0.5) {{
-                                    ctx.beginPath();
-                                    ctx.moveTo(u1 * 2048, v1 * 1024);
-                                    ctx.lineTo(u2 * 2048, v2 * 1024);
-                                    ctx.stroke();
-                                }}
+                            if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
+                                const p1 = icoVerts[i].clone().multiplyScalar(ballRadius * 1.001);
+                                const p2 = icoVerts[j].clone().multiplyScalar(ballRadius * 1.001);
+                                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+                                const seam = new THREE.Line(lineGeo, lineMat);
+                                ballGroup.add(seam);
                             }}
                         }}
                     }}
 
-                    // 4. Draw 12 Black Pentagons with Dark Leather Stitching
-                    function drawProjectedPentagon(u, v, size) {{
-                        const px = u * 2048;
-                        const py = v * 1024;
+                    // Orient the ball so a classic pentagon faces the TV camera
+                    ballGroup.rotation.x = 0.35;
+                    ballGroup.rotation.y = 0.55;
+                    ballGroup.rotation.z = -0.20;
 
-                        // Wrap seamless edges
-                        const xOffsets = [0, -2048, 2048];
-                        xOffsets.forEach(ox => {{
-                            ctx.beginPath();
-                            for (let k = 0; k < 5; k++) {{
-                                const a = (k * 2 * Math.PI / 5) - Math.PI / 2;
-                                const x = px + ox + size * Math.cos(a);
-                                const y = py + size * Math.sin(a);
-                                if (k === 0) ctx.moveTo(x, y);
-                                else ctx.lineTo(x, y);
-                            }}
-                            ctx.closePath();
-                            ctx.fillStyle = '#0f172a'; // Deep Black Panel
-                            ctx.fill();
-
-                            ctx.strokeStyle = '#334155'; // Dark Seam Outline
-                            ctx.lineWidth = 8;
-                            ctx.stroke();
-                        }});
-                    }}
-
-                    icoVerts.forEach(v => {{
-                        const u = 0.5 + Math.atan2(v[2], v[0]) / (2 * Math.PI);
-                        const lat = Math.asin(v[1]);
-                        const v_coord = 0.5 - lat / Math.PI;
-                        // Correct size for spherical latitude projection
-                        const size = 68 * Math.cos(lat * 0.4);
-                        drawProjectedPentagon(u, v_coord, size);
-                    }});
-
-                    const tex = new THREE.CanvasTexture(bCanvas);
-                    tex.wrapS = THREE.RepeatWrapping;
-                    tex.wrapT = THREE.ClampToEdgeWrapping;
-                    return tex;
-                }}
-
-                if (currentState >= 10) {{
-                    const soccerTex = createSoccerBallTexture();
-                    const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
-
-                    const ballMat = new THREE.MeshStandardMaterial({{
-                        map: soccerTex,
-                        bumpMap: soccerTex,
-                        bumpScale: 0.04,
-                        roughness: 0.28,
-                        metalness: 0.06
-                    }});
-
-                    ball = new THREE.Mesh(ballGeo, ballMat);
-                    ball.position.copy(oPos);
-
-                    // Aesthetic alignment: displays a prominent central pentagon and surrounding hexagons
-                    ball.rotation.x = 0.42;
-                    ball.rotation.y = 0.65;
-                    ball.rotation.z = -0.28;
-
-                    ball.castShadow = true;
-                    ball.receiveShadow = false;
-                    scene.add(ball);
+                    scene.add(ballGroup);
                 }}
 
                 // Render Loop (Stationary)
