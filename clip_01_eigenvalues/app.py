@@ -5,7 +5,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="Essence of Eigenvalues & Eigenvectors",
+    page_title="The Essence of Eigenvalues & Eigenvectors",
     page_icon="📐",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -267,7 +267,10 @@ elif st.session_state.presentation_state == 1:
         <div class="slide">
             <div class="slide1-content">
                 <div class="slide-title">
-                    Welcome to The Essence of Eigenvalues and Eigenvectors
+                    Welcome to
+                </div>
+                <div>
+                    The Essence of Eigenvalues and Eigenvectors
                 </div>
                 <div class="by">
                     By
