@@ -653,10 +653,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 function animate() {{
                     requestAnimationFrame(animate);
 
-                    if (ball && currentState === 10) {{
-                        ball.rotation.y += 0.003;
-                    }}
-
                     renderer.render(scene, camera);
                 }}
                 animate();
