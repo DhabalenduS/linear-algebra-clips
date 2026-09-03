@@ -583,7 +583,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 3 (State >= 10): Realistic 3D Bump-Mapped Soccer Ball
+                // CLICK 3 (State >= 10): Authentic 3D Classic Soccer Ball
                 // ============================================================
                 let ball = null;
                 const ballRadius = 2.0;
@@ -595,51 +595,50 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     bCanvas.height = 1024;
                     const ctx = bCanvas.getContext('2d');
 
-                    // Base White Leather
-                    ctx.fillStyle = '#f9fafb';
+                    // Base White Panels
+                    ctx.fillStyle = '#f8fafc';
                     ctx.fillRect(0, 0, 2048, 1024);
 
-                    // Pentagon Drawing Helper
-                    function drawPentagon(cx, cy, r) {{
+                    // Pentagon Drawer
+                    function drawPentagon(cx, cy, r, angleOffset = 0) {{
                         ctx.beginPath();
                         for (let i = 0; i < 5; i++) {{
-                            const a = (i * 2 * Math.PI / 5) - Math.PI / 2;
+                            const a = (i * 2 * Math.PI / 5) - Math.PI / 2 + angleOffset;
                             const x = cx + r * Math.cos(a);
                             const y = cy + r * Math.sin(a);
                             if (i === 0) ctx.moveTo(x, y);
                             else ctx.lineTo(x, y);
                         }}
                         ctx.closePath();
-                        ctx.fillStyle = '#111827';
+                        ctx.fillStyle = '#0f172a';
                         ctx.fill();
 
-                        // Indented 3D Seam Stitching
-                        ctx.strokeStyle = '#374151';
-                        ctx.lineWidth = 10;
+                        // Seam stitching
+                        ctx.strokeStyle = '#334155';
+                        ctx.lineWidth = 8;
                         ctx.stroke();
                     }}
 
-                    // Structured 32-Panel Layout (Telstar Distribution)
-                    const rows = 5;
-                    const cols = 10;
-                    for (let r = 0; r < rows; r++) {{
-                        for (let c = 0; c < cols; c++) {{
-                            if ((r + c) % 2 === 0) {{
-                                const cx = (c + 0.5) * (2048 / cols);
-                                const cy = (r + 0.5) * (1024 / rows);
-                                drawPentagon(cx, cy, 62);
-                            }}
-                        }}
+                    // Equator-centered geometric panel grid
+                    const cx = 1024;
+                    const cy = 512;
+                    const r = 90;
+
+                    // Central Top Pentagon
+                    drawPentagon(cx, cy, r);
+
+                    // Surrounding Pentagons
+                    const ringDist = 280;
+                    for (let i = 0; i < 5; i++) {{
+                        const a = (i * 2 * Math.PI / 5) - Math.PI / 2;
+                        drawPentagon(cx + ringDist * Math.cos(a), cy + ringDist * Math.sin(a), r, Math.PI);
                     }}
 
-                    // Connective Hexagonal Leather Seam Lines
-                    ctx.strokeStyle = '#d1d5db';
-                    ctx.lineWidth = 6;
+                    // Outer Repeating Pentagons
+                    const cols = 6;
                     for (let c = 0; c < cols; c++) {{
-                        ctx.beginPath();
-                        ctx.moveTo(c * (2048 / cols), 0);
-                        ctx.lineTo(c * (2048 / cols), 1024);
-                        ctx.stroke();
+                        drawPentagon(c * (2048 / cols), 120, r * 0.85);
+                        drawPentagon(c * (2048 / cols), 904, r * 0.85);
                     }}
 
                     const tex = new THREE.CanvasTexture(bCanvas);
@@ -652,24 +651,26 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const soccerTex = createSoccerBallTexture();
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
 
-                    // Physical 3D Material with Bump-Mapped Seams
                     const ballMat = new THREE.MeshStandardMaterial({{
                         map: soccerTex,
-                        bumpMap: soccerTex,
-                        bumpScale: 0.06,
-                        roughness: 0.38,
+                        roughness: 0.30,
                         metalness: 0.08
                     }});
 
                     ball = new THREE.Mesh(ballGeo, ballMat);
                     ball.position.copy(oPos);
+
+                    // Rotate ball by 90 deg so the camera looks directly at the equator (No Pinch)
+                    ball.rotation.x = Math.PI / 2;
+                    ball.rotation.z = -0.25;
+
                     ball.castShadow = true;
                     ball.receiveShadow = false;
                     scene.add(ball);
                 }}
 
                 // ============================================================
-                // Helper: Ultra-Crisp High-DPI Typography Labels
+                // Helper: Sharp High-DPI Labels (No WebGL Mipmap Blurring)
                 // ============================================================
                 function createPureTextLabel(text, textColor) {{
                     const tCanvas = document.createElement('canvas');
@@ -677,27 +678,33 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     tCanvas.height = 256;
                     const ctx = tCanvas.getContext('2d');
 
-                    ctx.font = 'bold 84px Georgia, "Times New Roman", serif';
+                    ctx.font = 'bold 92px Georgia, "Times New Roman", serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
 
-                    // Heavy white contour for maximum readability over the pitch
+                    // Heavy solid white contour for crisp readability
                     ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 20;
+                    ctx.lineWidth = 24;
+                    ctx.lineJoin = 'round';
                     ctx.strokeText(text, 512, 128);
 
-                    // Solid Sharp Text
+                    // Solid Main Text
                     ctx.fillStyle = textColor;
                     ctx.fillText(text, 512, 128);
 
                     const tex = new THREE.CanvasTexture(tCanvas);
+                    // Prevent WebGL from blurring the sprite text
+                    tex.generateMipmaps = false;
+                    tex.minFilter = THREE.LinearFilter;
+                    tex.magFilter = THREE.LinearFilter;
+
                     const mat = new THREE.SpriteMaterial({{
                         map: tex,
                         depthTest: false,
                         depthWrite: false
                     }});
                     const sprite = new THREE.Sprite(mat);
-                    sprite.scale.set(4.4, 1.2, 1.0);
+                    sprite.scale.set(4.8, 1.2, 1.0);
                     sprite.renderOrder = 1000;
                     return sprite;
                 }}
@@ -706,7 +713,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 (State >= 11): Center O(0,0,0) & Surface Point P(x,y,z)
                 // ============================================================
                 if (currentState >= 11) {{
-                    // 1. Center Point O(0,0,0) Marker at core
+                    // 1. Center Point O(0,0,0) Core Marker
                     const oGeo = new THREE.SphereGeometry(0.18, 32, 32);
                     const oMat = new THREE.MeshBasicMaterial({{
                         color: 0xdc2626, // Crimson Red
@@ -718,9 +725,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oMarker.renderOrder = 999;
                     scene.add(oMarker);
 
-                    // Crisp Label O(0, 0, 0) positioned clearly on the Left
+                    // Sharp Label O(0, 0, 0) on the Left
                     const oLabel = createPureTextLabel('O(0, 0, 0)', '#dc2626');
-                    oLabel.position.set(oPos.x - 3.2, oPos.y + 0.4, oPos.z - 0.2);
+                    oLabel.position.set(oPos.x - 3.4, oPos.y + 0.3, oPos.z - 0.2);
                     scene.add(oLabel);
 
                     // 2. Point P(x,y,z) in 1st Octant on Upper-Right Surface
@@ -738,9 +745,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pMarker.renderOrder = 999;
                     scene.add(pMarker);
 
-                    // Crisp Label P(x, y, z) positioned clearly on the Right
+                    // Sharp Label P(x, y, z) on the Right
                     const pLabel = createPureTextLabel('P(x, y, z)', '#1d4ed8');
-                    pLabel.position.set(pWorld.x + 3.0, pWorld.y + 0.4, pWorld.z + 0.2);
+                    pLabel.position.set(pWorld.x + 3.2, pWorld.y + 0.3, pWorld.z + 0.2);
                     scene.add(pLabel);
                 }}
 
