@@ -583,7 +583,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 3 (State >= 10): True 3D Solid Classic Soccer Ball
+                // CLICK 3 (State >= 10): Realistic 3D Bump-Mapped Soccer Ball
                 // ============================================================
                 let ball = null;
                 const ballRadius = 2.0;
@@ -595,10 +595,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     bCanvas.height = 1024;
                     const ctx = bCanvas.getContext('2d');
 
-                    ctx.fillStyle = '#f8fafc';
+                    // Base White Leather
+                    ctx.fillStyle = '#f9fafb';
                     ctx.fillRect(0, 0, 2048, 1024);
 
-                    ctx.fillStyle = '#111827';
+                    // Pentagon Drawing Helper
                     function drawPentagon(cx, cy, r) {{
                         ctx.beginPath();
                         for (let i = 0; i < 5; i++) {{
@@ -609,20 +610,36 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             else ctx.lineTo(x, y);
                         }}
                         ctx.closePath();
+                        ctx.fillStyle = '#111827';
                         ctx.fill();
+
+                        // Indented 3D Seam Stitching
                         ctx.strokeStyle = '#374151';
-                        ctx.lineWidth = 6;
+                        ctx.lineWidth = 10;
                         ctx.stroke();
                     }}
 
-                    const rows = 4;
-                    const cols = 8;
+                    // Structured 32-Panel Layout (Telstar Distribution)
+                    const rows = 5;
+                    const cols = 10;
                     for (let r = 0; r < rows; r++) {{
                         for (let c = 0; c < cols; c++) {{
                             if ((r + c) % 2 === 0) {{
-                                drawPentagon((c + 0.5) * (2048 / cols), (r + 0.5) * (1024 / rows), 75);
+                                const cx = (c + 0.5) * (2048 / cols);
+                                const cy = (r + 0.5) * (1024 / rows);
+                                drawPentagon(cx, cy, 62);
                             }}
                         }}
+                    }}
+
+                    // Connective Hexagonal Leather Seam Lines
+                    ctx.strokeStyle = '#d1d5db';
+                    ctx.lineWidth = 6;
+                    for (let c = 0; c < cols; c++) {{
+                        ctx.beginPath();
+                        ctx.moveTo(c * (2048 / cols), 0);
+                        ctx.lineTo(c * (2048 / cols), 1024);
+                        ctx.stroke();
                     }}
 
                     const tex = new THREE.CanvasTexture(bCanvas);
@@ -632,11 +649,16 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 if (currentState >= 10) {{
+                    const soccerTex = createSoccerBallTexture();
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
+
+                    // Physical 3D Material with Bump-Mapped Seams
                     const ballMat = new THREE.MeshStandardMaterial({{
-                        map: createSoccerBallTexture(),
-                        roughness: 0.35,
-                        metalness: 0.10
+                        map: soccerTex,
+                        bumpMap: soccerTex,
+                        bumpScale: 0.06,
+                        roughness: 0.38,
+                        metalness: 0.08
                     }});
 
                     ball = new THREE.Mesh(ballGeo, ballMat);
@@ -647,26 +669,26 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // Helper: Crisp High-Resolution Typography Labels
+                // Helper: Ultra-Crisp High-DPI Typography Labels
                 // ============================================================
                 function createPureTextLabel(text, textColor) {{
                     const tCanvas = document.createElement('canvas');
-                    tCanvas.width = 512;
-                    tCanvas.height = 160;
+                    tCanvas.width = 1024;
+                    tCanvas.height = 256;
                     const ctx = tCanvas.getContext('2d');
 
-                    ctx.font = 'bold 60px Georgia, "Times New Roman", serif';
+                    ctx.font = 'bold 84px Georgia, "Times New Roman", serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
 
-                    // Heavy white contour for sharp contrast
+                    // Heavy white contour for maximum readability over the pitch
                     ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 14;
-                    ctx.strokeText(text, 256, 80);
+                    ctx.lineWidth = 20;
+                    ctx.strokeText(text, 512, 128);
 
-                    // Solid Text
+                    // Solid Sharp Text
                     ctx.fillStyle = textColor;
-                    ctx.fillText(text, 256, 80);
+                    ctx.fillText(text, 512, 128);
 
                     const tex = new THREE.CanvasTexture(tCanvas);
                     const mat = new THREE.SpriteMaterial({{
@@ -675,7 +697,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         depthWrite: false
                     }});
                     const sprite = new THREE.Sprite(mat);
-                    sprite.scale.set(3.4, 1.1, 1.0);
+                    sprite.scale.set(4.4, 1.2, 1.0);
                     sprite.renderOrder = 1000;
                     return sprite;
                 }}
@@ -684,10 +706,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 (State >= 11): Center O(0,0,0) & Surface Point P(x,y,z)
                 // ============================================================
                 if (currentState >= 11) {{
-                    // 1. Center Point O(0,0,0) at geometric core of the football
-                    const oGeo = new THREE.SphereGeometry(0.16, 32, 32);
+                    // 1. Center Point O(0,0,0) Marker at core
+                    const oGeo = new THREE.SphereGeometry(0.18, 32, 32);
                     const oMat = new THREE.MeshBasicMaterial({{
-                        color: 0xdc2626, // Crimson Red Dot
+                        color: 0xdc2626, // Crimson Red
                         depthTest: false,
                         depthWrite: false
                     }});
@@ -696,18 +718,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oMarker.renderOrder = 999;
                     scene.add(oMarker);
 
-                    // Label O(0, 0, 0) clearly to the left of the ball
+                    // Crisp Label O(0, 0, 0) positioned clearly on the Left
                     const oLabel = createPureTextLabel('O(0, 0, 0)', '#dc2626');
-                    oLabel.position.set(oPos.x - 2.8, oPos.y + 0.3, oPos.z - 0.2);
+                    oLabel.position.set(oPos.x - 3.2, oPos.y + 0.4, oPos.z - 0.2);
                     scene.add(oLabel);
 
-                    // 2. Point P(x,y,z) on the Surface in 1st Octant (Upper-Right)
+                    // 2. Point P(x,y,z) in 1st Octant on Upper-Right Surface
                     const pDir = new THREE.Vector3(1.15, 1.25, 0.95).normalize();
                     const pWorld = oPos.clone().add(pDir.clone().multiplyScalar(ballRadius));
 
-                    const pGeo = new THREE.SphereGeometry(0.18, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.20, 32, 32);
                     const pMat = new THREE.MeshBasicMaterial({{
-                        color: 0x1d4ed8, // Royal Blue Dot
+                        color: 0x1d4ed8, // Royal Blue
                         depthTest: false,
                         depthWrite: false
                     }});
@@ -716,9 +738,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pMarker.renderOrder = 999;
                     scene.add(pMarker);
 
-                    // Label P(x, y, z) clearly to the right of the ball
+                    // Crisp Label P(x, y, z) positioned clearly on the Right
                     const pLabel = createPureTextLabel('P(x, y, z)', '#1d4ed8');
-                    pLabel.position.set(pWorld.x + 2.5, pWorld.y + 0.3, pWorld.z + 0.2);
+                    pLabel.position.set(pWorld.x + 3.0, pWorld.y + 0.4, pWorld.z + 0.2);
                     scene.add(pLabel);
                 }}
 
