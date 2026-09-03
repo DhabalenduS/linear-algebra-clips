@@ -1,5 +1,8 @@
 # Clip 01 - Eigenvalues and Eigenvectors
 # Slides 1-3 Complete Implementation (True TV-Grade WebGL 3D Visualization)
+# Immediately before version slide 3 upto Clic 3 is locked
+# In this commit we are trying to achieve Click 4 with OP
+#But this will change the Click 3 also, as 3D Football  will be slightly transparanet 
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -639,7 +642,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const ballMat = new THREE.MeshStandardMaterial({{
                         map: createSoccerBallTexture(),
                         roughness: 0.32,
-                        metalness: 0.12
+                        metalness: 0.12,
+                        transparent: currentState >= 11,
+                        opacity: currentState >= 11 ? 0.88 : 1.0
                     }});
 
                     ball = new THREE.Mesh(ballGeo, ballMat);
@@ -649,14 +654,96 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ball);
                 }}
 
+                // ============================================================
+                // Helper: Crisp 2D Billboard Label Badges
+                // ============================================================
+                function createLabelSprite(text, bgCol, textCol) {{
+                    const lCanvas = document.createElement('canvas');
+                    lCanvas.width = 320;
+                    lCanvas.height = 120;
+                    const ctx = lCanvas.getContext('2d');
+
+                    // Rounded Pill Badge
+                    ctx.fillStyle = bgCol;
+                    ctx.beginPath();
+                    if (ctx.roundRect) {{
+                        ctx.roundRect(10, 15, 300, 90, 20);
+                    }} else {{
+                        ctx.rect(10, 15, 300, 90);
+                    }}
+                    ctx.fill();
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 4;
+                    ctx.stroke();
+
+                    // Label Text
+                    ctx.font = 'bold 40px Georgia, "Times New Roman", serif';
+                    ctx.fillStyle = textCol;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(text, 160, 60);
+
+                    const tex = new THREE.CanvasTexture(lCanvas);
+                    const mat = new THREE.SpriteMaterial({{
+                        map: tex,
+                        depthTest: false,
+                        depthWrite: false
+                    }});
+                    const sprite = new THREE.Sprite(mat);
+                    sprite.scale.set(2.4, 0.9, 1.0);
+                    sprite.renderOrder = 1000;
+                    return sprite;
+                }}
+
+                // ============================================================
+                // CLICK 4 (State >= 11): Center O(0,0,0) and Surface Point P(x,y,z) in 1st Octant
+                // ============================================================
+                if (currentState >= 11) {{
+                    // 1. Center O(0,0,0) Marker (Glowing Core)
+                    const oGeo = new THREE.SphereGeometry(0.18, 32, 32);
+                    const oMat = new THREE.MeshBasicMaterial({{
+                        color: 0xdc2626, // Crimson Red
+                        depthTest: false,
+                        depthWrite: false
+                    }});
+                    const oMarker = new THREE.Mesh(oGeo, oMat);
+                    oMarker.position.copy(oPos);
+                    oMarker.renderOrder = 999;
+                    scene.add(oMarker);
+
+                    // Center Label O(0,0,0)
+                    const oLabel = createLabelSprite('O(0, 0, 0)', '#dc2626', '#ffffff');
+                    oLabel.position.set(oPos.x - 1.3, oPos.y - 0.4, oPos.z + 0.3);
+                    scene.add(oLabel);
+
+                    // 2. Surface Point P(x,y,z) in 1st Octant (x > 0, y > 0, z > 0)
+                    // Unit direction vector normalized in 1st octant:
+                    const pDir = new THREE.Vector3(1.1, 1.25, 1.0).normalize();
+                    const pWorld = oPos.clone().add(pDir.clone().multiplyScalar(ballRadius));
+
+                    const pGeo = new THREE.SphereGeometry(0.18, 32, 32);
+                    const pMat = new THREE.MeshBasicMaterial({{
+                        color: 0x2563eb, // Royal Blue
+                        depthTest: false,
+                        depthWrite: false
+                    }});
+                    const pMarker = new THREE.Mesh(pGeo, pMat);
+                    pMarker.position.copy(pWorld);
+                    pMarker.renderOrder = 999;
+                    scene.add(pMarker);
+
+                    // Point Label P(x,y,z)
+                    const pLabel = createLabelSprite('P(x, y, z)', '#1e40af', '#ffffff');
+                    pLabel.position.set(pWorld.x + 0.6, pWorld.y + 0.65, pWorld.z + 0.4);
+                    scene.add(pLabel);
+                }}
+
                 // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
-
                     renderer.render(scene, camera);
                 }}
                 animate();
-
                 window.addEventListener('resize', () => {{
                     camera.aspect = window.innerWidth / window.innerHeight;
                     camera.updateProjectionMatrix();
