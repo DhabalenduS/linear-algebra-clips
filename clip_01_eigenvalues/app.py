@@ -499,9 +499,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(floodLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Football Pitch with Balanced Green Border
+                // CLICK 2 (State >= 9): Football Pitch with Uniform Green Border
                 // ============================================================
-                function createPitchTexture() {{
+                function createPitchTexture() {
                     const pCanvas = document.createElement('canvas');
                     pCanvas.width = 2048;
                     pCanvas.height = 1440;
@@ -510,16 +510,16 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // 1. Edge-to-Edge Lawn Stripes
                     const stripes = 12;
                     const sh = 1440 / stripes;
-                    for (let i = 0; i < stripes; i++) {{
+                    for (let i = 0; i < stripes; i++) {
                         ctx.fillStyle = (i % 2 === 0) ? '#28792c' : '#308e36';
                         ctx.fillRect(0, i * sh, 2048, sh);
-                    }}
+                    }
 
-                    // 2. Inset Margins (Ensures clear green border around all 4 white lines)
-                    const mx = 340;
-                    const my = 240;
-                    const pw = 2048 - (2 * mx); // 1368
-                    const ph = 1440 - (2 * my); // 960
+                    // 2. Uniform Margins (Calibrated to 38 x 26.5 plane aspect ratio)
+                    const mx = 240;
+                    const my = 242;
+                    const pw = 2048 - (2 * mx); // 1568
+                    const ph = 1440 - (2 * my); // 956
                     const cx = 2048 / 2;
                     const cy = 1440 / 2;
 
@@ -527,7 +527,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.lineWidth = 14;
                     ctx.lineCap = 'round';
 
-                    // 1. Full Outer Boundary (Top, Bottom, Left, Right)
+                    // 1. Full Outer Boundary
                     ctx.strokeRect(mx, my, pw, ph);
 
                     // 2. Halfway Line
@@ -568,7 +568,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.beginPath(); ctx.arc(mx + pw, my + ph, r, Math.PI, -Math.PI * 0.5); ctx.stroke();
 
                     return new THREE.CanvasTexture(pCanvas);
-                }}
+                }
 
                 if (currentState >= 9) {{
                     const pitchGeo = new THREE.PlaneGeometry(38, 26.5);
