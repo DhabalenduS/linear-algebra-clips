@@ -583,7 +583,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 3 (State >= 10): Authentic 3D Classic Soccer Ball
+                // CLICK 3 (State >= 10): True TV-Grade 3D FIFA Classic Soccer Ball
                 // ============================================================
                 let ball = null;
                 const ballRadius = 2.0;
@@ -595,51 +595,85 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     bCanvas.height = 1024;
                     const ctx = bCanvas.getContext('2d');
 
-                    // Base White Panels
+                    // 1. Base White Leather Panel Background
                     ctx.fillStyle = '#f8fafc';
                     ctx.fillRect(0, 0, 2048, 1024);
 
-                    // Pentagon Drawer
-                    function drawPentagon(cx, cy, r, angleOffset = 0) {{
-                        ctx.beginPath();
-                        for (let i = 0; i < 5; i++) {{
-                            const a = (i * 2 * Math.PI / 5) - Math.PI / 2 + angleOffset;
-                            const x = cx + r * Math.cos(a);
-                            const y = cy + r * Math.sin(a);
-                            if (i === 0) ctx.moveTo(x, y);
-                            else ctx.lineTo(x, y);
+                    // 2. Exact 3D Icosahedron Vertices for 12 Symmetric Pentagons
+                    const phi = (1 + Math.sqrt(5)) / 2; // Golden Ratio
+                    const rawVerts = [
+                        [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
+                        [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
+                        [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
+                    ];
+
+                    // Normalize vertices to 3D Unit Sphere
+                    const icoVerts = rawVerts.map(v => {{
+                        const len = Math.hypot(v[0], v[1], v[2]);
+                        return [v[0] / len, v[1] / len, v[2] / len];
+                    }});
+
+                    // 3. Draw Connecting Hexagonal Stitch Seams
+                    ctx.strokeStyle = '#94a3b8';
+                    ctx.lineWidth = 6;
+                    for (let i = 0; i < icoVerts.length; i++) {{
+                        for (let j = i + 1; j < icoVerts.length; j++) {{
+                            const d = Math.hypot(
+                                icoVerts[i][0] - icoVerts[j][0],
+                                icoVerts[i][1] - icoVerts[j][1],
+                                icoVerts[i][2] - icoVerts[j][2]
+                            );
+                            // Neighboring vertices on icosahedron
+                            if (d < 1.1) {{
+                                const u1 = 0.5 + Math.atan2(icoVerts[i][2], icoVerts[i][0]) / (2 * Math.PI);
+                                const v1 = 0.5 - Math.asin(icoVerts[i][1]) / Math.PI;
+                                const u2 = 0.5 + Math.atan2(icoVerts[j][2], icoVerts[j][0]) / (2 * Math.PI);
+                                const v2 = 0.5 - Math.asin(icoVerts[j][1]) / Math.PI;
+
+                                if (Math.abs(u1 - u2) < 0.5) {{
+                                    ctx.beginPath();
+                                    ctx.moveTo(u1 * 2048, v1 * 1024);
+                                    ctx.lineTo(u2 * 2048, v2 * 1024);
+                                    ctx.stroke();
+                                }}
+                            }}
                         }}
-                        ctx.closePath();
-                        ctx.fillStyle = '#0f172a';
-                        ctx.fill();
-
-                        // Seam stitching
-                        ctx.strokeStyle = '#334155';
-                        ctx.lineWidth = 8;
-                        ctx.stroke();
                     }}
 
-                    // Equator-centered geometric panel grid
-                    const cx = 1024;
-                    const cy = 512;
-                    const r = 90;
+                    // 4. Draw 12 Black Pentagons with Dark Leather Stitching
+                    function drawProjectedPentagon(u, v, size) {{
+                        const px = u * 2048;
+                        const py = v * 1024;
 
-                    // Central Top Pentagon
-                    drawPentagon(cx, cy, r);
+                        // Wrap seamless edges
+                        const xOffsets = [0, -2048, 2048];
+                        xOffsets.forEach(ox => {{
+                            ctx.beginPath();
+                            for (let k = 0; k < 5; k++) {{
+                                const a = (k * 2 * Math.PI / 5) - Math.PI / 2;
+                                const x = px + ox + size * Math.cos(a);
+                                const y = py + size * Math.sin(a);
+                                if (k === 0) ctx.moveTo(x, y);
+                                else ctx.lineTo(x, y);
+                            }}
+                            ctx.closePath();
+                            ctx.fillStyle = '#0f172a'; // Deep Black Panel
+                            ctx.fill();
 
-                    // Surrounding Pentagons
-                    const ringDist = 280;
-                    for (let i = 0; i < 5; i++) {{
-                        const a = (i * 2 * Math.PI / 5) - Math.PI / 2;
-                        drawPentagon(cx + ringDist * Math.cos(a), cy + ringDist * Math.sin(a), r, Math.PI);
+                            ctx.strokeStyle = '#334155'; // Dark Seam Outline
+                            ctx.lineWidth = 8;
+                            ctx.stroke();
+                        }});
                     }}
 
-                    // Outer Repeating Pentagons
-                    const cols = 6;
-                    for (let c = 0; c < cols; c++) {{
-                        drawPentagon(c * (2048 / cols), 120, r * 0.85);
-                        drawPentagon(c * (2048 / cols), 904, r * 0.85);
-                    }}
+                    icoVerts.forEach(v => {{
+                        const u = 0.5 + Math.atan2(v[2], v[0]) / (2 * Math.PI);
+                        const lat = Math.asin(v[1]);
+                        const v_coord = 0.5 - lat / Math.PI;
+                        // Correct size for spherical latitude projection
+                        const size = 68 * Math.cos(lat * 0.4);
+                        drawProjectedPentagon(u, v_coord, size);
+                    }});
 
                     const tex = new THREE.CanvasTexture(bCanvas);
                     tex.wrapS = THREE.RepeatWrapping;
@@ -653,102 +687,23 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const ballMat = new THREE.MeshStandardMaterial({{
                         map: soccerTex,
-                        roughness: 0.30,
-                        metalness: 0.08
+                        bumpMap: soccerTex,
+                        bumpScale: 0.04,
+                        roughness: 0.28,
+                        metalness: 0.06
                     }});
 
                     ball = new THREE.Mesh(ballGeo, ballMat);
                     ball.position.copy(oPos);
 
-                    // Rotate ball by 90 deg so the camera looks directly at the equator (No Pinch)
-                    ball.rotation.x = Math.PI / 2;
-                    ball.rotation.z = -0.25;
+                    // Aesthetic alignment: displays a prominent central pentagon and surrounding hexagons
+                    ball.rotation.x = 0.42;
+                    ball.rotation.y = 0.65;
+                    ball.rotation.z = -0.28;
 
                     ball.castShadow = true;
                     ball.receiveShadow = false;
                     scene.add(ball);
-                }}
-
-                // ============================================================
-                // Helper: Sharp High-DPI Labels (No WebGL Mipmap Blurring)
-                // ============================================================
-                function createPureTextLabel(text, textColor) {{
-                    const tCanvas = document.createElement('canvas');
-                    tCanvas.width = 1024;
-                    tCanvas.height = 256;
-                    const ctx = tCanvas.getContext('2d');
-
-                    ctx.font = 'bold 92px Georgia, "Times New Roman", serif';
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-
-                    // Heavy solid white contour for crisp readability
-                    ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 24;
-                    ctx.lineJoin = 'round';
-                    ctx.strokeText(text, 512, 128);
-
-                    // Solid Main Text
-                    ctx.fillStyle = textColor;
-                    ctx.fillText(text, 512, 128);
-
-                    const tex = new THREE.CanvasTexture(tCanvas);
-                    // Prevent WebGL from blurring the sprite text
-                    tex.generateMipmaps = false;
-                    tex.minFilter = THREE.LinearFilter;
-                    tex.magFilter = THREE.LinearFilter;
-
-                    const mat = new THREE.SpriteMaterial({{
-                        map: tex,
-                        depthTest: false,
-                        depthWrite: false
-                    }});
-                    const sprite = new THREE.Sprite(mat);
-                    sprite.scale.set(4.8, 1.2, 1.0);
-                    sprite.renderOrder = 1000;
-                    return sprite;
-                }}
-
-                // ============================================================
-                // CLICK 4 (State >= 11): Center O(0,0,0) & Surface Point P(x,y,z)
-                // ============================================================
-                if (currentState >= 11) {{
-                    // 1. Center Point O(0,0,0) Core Marker
-                    const oGeo = new THREE.SphereGeometry(0.18, 32, 32);
-                    const oMat = new THREE.MeshBasicMaterial({{
-                        color: 0xdc2626, // Crimson Red
-                        depthTest: false,
-                        depthWrite: false
-                    }});
-                    const oMarker = new THREE.Mesh(oGeo, oMat);
-                    oMarker.position.copy(oPos);
-                    oMarker.renderOrder = 999;
-                    scene.add(oMarker);
-
-                    // Sharp Label O(0, 0, 0) on the Left
-                    const oLabel = createPureTextLabel('O(0, 0, 0)', '#dc2626');
-                    oLabel.position.set(oPos.x - 3.4, oPos.y + 0.3, oPos.z - 0.2);
-                    scene.add(oLabel);
-
-                    // 2. Point P(x,y,z) in 1st Octant on Upper-Right Surface
-                    const pDir = new THREE.Vector3(1.15, 1.25, 0.95).normalize();
-                    const pWorld = oPos.clone().add(pDir.clone().multiplyScalar(ballRadius));
-
-                    const pGeo = new THREE.SphereGeometry(0.20, 32, 32);
-                    const pMat = new THREE.MeshBasicMaterial({{
-                        color: 0x1d4ed8, // Royal Blue
-                        depthTest: false,
-                        depthWrite: false
-                    }});
-                    const pMarker = new THREE.Mesh(pGeo, pMat);
-                    pMarker.position.copy(pWorld);
-                    pMarker.renderOrder = 999;
-                    scene.add(pMarker);
-
-                    // Sharp Label P(x, y, z) on the Right
-                    const pLabel = createPureTextLabel('P(x, y, z)', '#1d4ed8');
-                    pLabel.position.set(pWorld.x + 3.2, pWorld.y + 0.3, pWorld.z + 0.2);
-                    scene.add(pLabel);
                 }}
 
                 // Render Loop (Stationary)
