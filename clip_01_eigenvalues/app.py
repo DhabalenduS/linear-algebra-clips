@@ -467,7 +467,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                 // Overhead TV Camera calibrated to stage dimensions
                 const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
-                camera.position.set(0, 36, 0.01);
+                camera.position.set(0, 30, 0.01);
                 camera.lookAt(0, 0, 0);
 
                 const renderer = new THREE.WebGLRenderer({{
