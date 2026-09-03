@@ -549,7 +549,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 draw2DPitch();
 
                 // ============================================================
-                // LAYER 2 (State >= 10): Transparent 3D Football Broadcast Stage
+                // LAYER 2 (State >= 10): 3D Football Broadcast Stage
                 // ============================================================
                 const canvas3d = document.getElementById('canvas3d');
                 const scene = new THREE.Scene();
@@ -557,15 +557,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Elevated 3D TV Broadcast Camera focusing purely on the 3D Ball
-                const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 1000);
-                camera.position.set(0, 14, 18);
-                camera.lookAt(0, 2.0, 0);
+                // Stadium-level 3D Perspective Camera (True depth & spherical roundness)
+                const camera = new THREE.PerspectiveCamera(36, w / h, 0.1, 1000);
+                camera.position.set(0, 7.5, 18);
+                camera.lookAt(0, 0.6, 0);
 
                 const renderer = new THREE.WebGLRenderer({{
                     canvas: canvas3d,
                     antialias: true,
-                    alpha: true, // 100% Transparent background to reveal the 2D Pitch below
+                    alpha: true, // Transparent to seamlessly overlay on the 2D Pitch
                     powerPreference: "high-performance"
                 }});
                 renderer.setSize(w, h);
@@ -582,20 +582,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.40);
                 scene.add(hemiLight);
 
-                // Angled Stadium Floodlight (Casts 3D curved highlights and soft shadow)
+                // Angled Key Light for rich 3D specular shine on the sphere
                 const keyLight = new THREE.DirectionalLight(0xffffff, 1.65);
-                keyLight.position.set(-12, 25, 16);
+                keyLight.position.set(-10, 20, 16);
                 scene.add(keyLight);
 
                 const rimLight = new THREE.DirectionalLight(0xdbeafe, 0.70);
-                rimLight.position.set(12, 15, -8);
+                rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
 
                 // ============================================================
-                // CLICK 3 (State >= 10): True 3D Geometric Soccer Ball
+                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
                 // ============================================================
                 let ballGroup = null;
-                const ballRadius = 2.0;
+                const ballRadius = 1.35; // Proportioned to sit cleanly inside center circle
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
                 // Helper: Soft Ground Contact Shadow Texture
@@ -615,7 +615,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                 if (currentState >= 10) {{
                     // 1. Soft Ground Contact Shadow at turf level
-                    const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.4, ballRadius * 2.4);
+                    const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
                     const shadowMat = new THREE.MeshBasicMaterial({{
                         map: createContactShadowTexture(),
                         transparent: true,
@@ -626,14 +626,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. White Leather Sphere with Glossy Specular Highlights
+                    // 2. White Leather Sphere with Glossy 3D Highlights
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
-                        roughness: 0.18, // Glossy 3D leather sheen
+                        roughness: 0.18,
                         metalness: 0.10
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
@@ -659,7 +659,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
 
-                    const pentagonRadius = 0.58;
+                    const pentagonRadius = 0.39; // Proportioned to 1.35 radius
 
                     // Place 12 Real 3D Pentagons on the Sphere Surface
                     icoVerts.forEach(v => {{
@@ -685,8 +685,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }}
 
                     // Angle the ball naturally toward the 3D TV camera
-                    ballGroup.rotation.x = 0.30;
-                    ballGroup.rotation.y = 0.50;
+                    ballGroup.rotation.x = 0.28;
+                    ballGroup.rotation.y = 0.48;
                     ballGroup.rotation.z = -0.15;
 
                     scene.add(ballGroup);
