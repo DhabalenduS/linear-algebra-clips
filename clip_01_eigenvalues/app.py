@@ -468,7 +468,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // 1. Locked 10/10 Overhead TV Camera
+                // Locked 10/10 Overhead TV Camera
                 const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
                 camera.position.set(0, 30, 0.01);
                 camera.lookAt(0, 0, 0);
@@ -486,19 +486,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.12;
 
-                // 2. Calibrated 3D Stadium Lighting (Creates clear 3D curved highlights & shading)
+                // 2. Calibrated 3D Stadium Lighting
                 const ambient = new THREE.AmbientLight(0xffffff, 0.48);
                 scene.add(ambient);
 
                 const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.32);
                 scene.add(hemiLight);
 
-                // Angled Key Light (Creates light-to-shadow gradient across the sphere)
+                // Angled Key Light (Creates light-to-shadow gradient across sphere)
                 const keyLight = new THREE.DirectionalLight(0xffffff, 1.55);
                 keyLight.position.set(-14, 26, 12);
                 scene.add(keyLight);
 
-                // Opposite Rim Light (Separates the 3D ball from the green turf)
+                // Opposite Rim Light (Separates the 3D ball from green turf)
                 const rimLight = new THREE.DirectionalLight(0xdbeafe, 0.75);
                 rimLight.position.set(14, 18, -12);
                 scene.add(rimLight);
@@ -589,7 +589,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const ballRadius = 2.0;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
-                // Helper: Soft Radial Ambient Ground Shadow directly under the ball
+                // Helper: Soft Radial Ground Shadow directly under the ball
                 function createContactShadowTexture() {{
                     const sCanvas = document.createElement('canvas');
                     sCanvas.width = 256;
@@ -617,14 +617,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. Base 3D Sphere with Glossy Leather Specular Highlights
+                    // 2. Base 3D Sphere with Glossy Leather Highlights
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
-                        roughness: 0.18, // Glossy specular highlight
+                        roughness: 0.18,
                         metalness: 0.12
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
@@ -688,6 +688,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     renderer.render(scene, camera);
                 }}
                 animate();
+
                 window.addEventListener('resize', () => {{
                     camera.aspect = window.innerWidth / window.innerHeight;
                     camera.updateProjectionMatrix();
