@@ -486,20 +486,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.12;
 
-                // 2. Broadcast 3D Key-Lighting Rig (Low-angle for true sphere volume)
-                const ambient = new THREE.AmbientLight(0xffffff, 0.65);
+                // 2. Stadium Flood Lighting (Tight contact shadow directly under the ball)
+                const ambient = new THREE.AmbientLight(0xffffff, 0.82);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.35);
+                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.45);
                 scene.add(hemiLight);
 
-                const keyLight = new THREE.DirectionalLight(0xffffff, 1.45);
-                keyLight.position.set(-16, 24, 14);
-                keyLight.castShadow = true;
-                keyLight.shadow.mapSize.width = 2048;
-                keyLight.shadow.mapSize.height = 2048;
-                keyLight.shadow.bias = -0.0003;
-                scene.add(keyLight);
+                const floodLight = new THREE.DirectionalLight(0xffffff, 1.25);
+                floodLight.position.set(4, 32, 4);
+                floodLight.castShadow = true;
+                floodLight.shadow.mapSize.width = 2048;
+                floodLight.shadow.mapSize.height = 2048;
+                floodLight.shadow.bias = -0.0003;
+                floodLight.shadow.radius = 2.5;
+                scene.add(floodLight);
 
                 // ============================================================
                 // CLICK 2 (State >= 9): Locked 10/10 Football Pitch
@@ -582,7 +583,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 3 (State >= 10): 3D Classic Soccer Ball
+                // CLICK 3 (State >= 10): True 3D Solid Classic Soccer Ball
                 // ============================================================
                 let ball = null;
                 const ballRadius = 2.0;
@@ -610,7 +611,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.closePath();
                         ctx.fill();
                         ctx.strokeStyle = '#374151';
-                        ctx.lineWidth = 5;
+                        ctx.lineWidth = 6;
                         ctx.stroke();
                     }}
 
@@ -619,7 +620,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     for (let r = 0; r < rows; r++) {{
                         for (let c = 0; c < cols; c++) {{
                             if ((r + c) % 2 === 0) {{
-                                drawPentagon((c + 0.5) * (2048 / cols), (r + 0.5) * (1024 / rows), 68);
+                                drawPentagon((c + 0.5) * (2048 / cols), (r + 0.5) * (1024 / rows), 75);
                             }}
                         }}
                     }}
@@ -634,17 +635,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
                     const ballMat = new THREE.MeshStandardMaterial({{
                         map: createSoccerBallTexture(),
-                        roughness: 0.32,
-                        metalness: 0.12,
-                        transparent: currentState >= 11,
-                        opacity: currentState >= 11 ? 0.72 : 1.0,
-                        depthWrite: currentState < 11
+                        roughness: 0.35,
+                        metalness: 0.10
                     }});
 
                     ball = new THREE.Mesh(ballGeo, ballMat);
                     ball.position.copy(oPos);
                     ball.castShadow = true;
-                    ball.receiveShadow = true;
+                    ball.receiveShadow = false;
                     scene.add(ball);
                 }}
 
@@ -657,11 +655,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     tCanvas.height = 160;
                     const ctx = tCanvas.getContext('2d');
 
-                    ctx.font = 'bold 64px Georgia, "Times New Roman", serif';
+                    ctx.font = 'bold 60px Georgia, "Times New Roman", serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
 
-                    // Heavy white contour for crisp contrast over 3D turf
+                    // Heavy white contour for sharp contrast
                     ctx.strokeStyle = '#ffffff';
                     ctx.lineWidth = 14;
                     ctx.strokeText(text, 256, 80);
@@ -683,13 +681,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 4 (State >= 11): 3D Center O(0,0,0) & Surface Point P(x,y,z)
+                // CLICK 4 (State >= 11): Center O(0,0,0) & Surface Point P(x,y,z)
                 // ============================================================
                 if (currentState >= 11) {{
-                    // 1. Center Point O(0,0,0) at exact sphere core
-                    const oGeo = new THREE.SphereGeometry(0.18, 32, 32);
+                    // 1. Center Point O(0,0,0) at geometric core of the football
+                    const oGeo = new THREE.SphereGeometry(0.16, 32, 32);
                     const oMat = new THREE.MeshBasicMaterial({{
-                        color: 0x991b1b, // Deep Red Core
+                        color: 0xdc2626, // Crimson Red Dot
                         depthTest: false,
                         depthWrite: false
                     }});
@@ -698,18 +696,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oMarker.renderOrder = 999;
                     scene.add(oMarker);
 
-                    // Label O(0, 0, 0) positioned to the LEFT outside the ball
-                    const oLabel = createPureTextLabel('O(0, 0, 0)', '#991b1b');
-                    oLabel.position.set(oPos.x - 2.8, oPos.y + 0.3, oPos.z - 0.4);
+                    // Label O(0, 0, 0) clearly to the left of the ball
+                    const oLabel = createPureTextLabel('O(0, 0, 0)', '#dc2626');
+                    oLabel.position.set(oPos.x - 2.8, oPos.y + 0.3, oPos.z - 0.2);
                     scene.add(oLabel);
 
-                    // 2. Point P(x,y,z) in 1st Octant on Upper-Right Surface
-                    const pDir = new THREE.Vector3(1.3, 1.2, 0.7).normalize();
+                    // 2. Point P(x,y,z) on the Surface in 1st Octant (Upper-Right)
+                    const pDir = new THREE.Vector3(1.15, 1.25, 0.95).normalize();
                     const pWorld = oPos.clone().add(pDir.clone().multiplyScalar(ballRadius));
 
-                    const pGeo = new THREE.SphereGeometry(0.20, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.18, 32, 32);
                     const pMat = new THREE.MeshBasicMaterial({{
-                        color: 0x1d4ed8, // Royal Blue Marker
+                        color: 0x1d4ed8, // Royal Blue Dot
                         depthTest: false,
                         depthWrite: false
                     }});
@@ -718,9 +716,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pMarker.renderOrder = 999;
                     scene.add(pMarker);
 
-                    // Label P(x, y, z) positioned to the RIGHT outside the ball
+                    // Label P(x, y, z) clearly to the right of the ball
                     const pLabel = createPureTextLabel('P(x, y, z)', '#1d4ed8');
-                    pLabel.position.set(pWorld.x + 2.2, pWorld.y + 0.3, pWorld.z + 0.4);
+                    pLabel.position.set(pWorld.x + 2.5, pWorld.y + 0.3, pWorld.z + 0.2);
                     scene.add(pLabel);
                 }}
 
