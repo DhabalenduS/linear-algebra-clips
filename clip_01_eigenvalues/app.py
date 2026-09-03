@@ -269,7 +269,7 @@ elif st.session_state.presentation_state == 1:
                 <div class="slide-title">
                     Welcome to
                 </div>
-                <div>
+                <div class="slide-title">
                     The Essence of Eigenvalues and Eigenvectors
                 </div>
                 <div class="by">
