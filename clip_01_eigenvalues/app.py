@@ -516,7 +516,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }}
 
                     // 2. Perfectly Uniform Outer Green Border (140px on all sides)
-                    const mx = 165;
+                    const mx = 140;
                     const my = 140;
                     const pw = 2048 - (2 * mx); // 1768
                     const ph = 1536 - (2 * my); // 1256
