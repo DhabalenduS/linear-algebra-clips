@@ -515,11 +515,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // 2. Uniform Margins (Calibrated to 38 x 26.5 plane aspect ratio)
-                    const mx = 240;
-                    const my = 242;
-                    const pw = 2048 - (2 * mx); // 1568
-                    const ph = 1440 - (2 * my); // 956
+                    // 2. Calibrated Uniform Margins (Equal green apron on all 4 sides)
+                    const mx = 200;
+                    const my = 140;
+                    const pw = 2048 - (2 * mx); // 1648
+                    const ph = 1440 - (2 * my); // 1160
                     const cx = 2048 / 2;
                     const cy = 1440 / 2;
 
@@ -527,7 +527,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.lineWidth = 14;
                     ctx.lineCap = 'round';
 
-                    // 1. Full Outer Boundary
+                    // 1. Full Outer Boundary Line
                     ctx.strokeRect(mx, my, pw, ph);
 
                     // 2. Halfway Line
@@ -538,7 +538,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // 3. Center Circle & Center Spot
                     ctx.beginPath();
-                    ctx.arc(cx, cy, 160, 0, Math.PI * 2);
+                    ctx.arc(cx, cy, 175, 0, Math.PI * 2);
                     ctx.stroke();
 
                     ctx.fillStyle = '#ffffff';
@@ -547,21 +547,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.fill();
 
                     // 4. Left Penalty Box & Goal Box
-                    ctx.strokeRect(mx, cy - 230, 220, 460);
-                    ctx.strokeRect(mx, cy - 90, 80, 180);
+                    ctx.strokeRect(mx, cy - 260, 250, 520);
+                    ctx.strokeRect(mx, cy - 105, 90, 210);
                     ctx.beginPath();
-                    ctx.arc(mx + 160, cy, 90, -Math.PI * 0.32, Math.PI * 0.32);
+                    ctx.arc(mx + 185, cy, 100, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
                     // 5. Right Penalty Box & Goal Box
-                    ctx.strokeRect(mx + pw - 220, cy - 230, 220, 460);
-                    ctx.strokeRect(mx + pw - 80, cy - 90, 80, 180);
+                    ctx.strokeRect(mx + pw - 250, cy - 260, 250, 520);
+                    ctx.strokeRect(mx + pw - 90, cy - 105, 90, 210);
                     ctx.beginPath();
-                    ctx.arc(mx + pw - 160, cy, 90, Math.PI * 0.68, Math.PI * 1.32);
+                    ctx.arc(mx + pw - 185, cy, 100, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
                     // 6. All 4 Corner Arcs
-                    const r = 30;
+                    const r = 32;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
