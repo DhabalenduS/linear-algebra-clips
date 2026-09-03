@@ -486,20 +486,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.12;
 
-                // 2. Broadcast Lighting Rig
-                const ambient = new THREE.AmbientLight(0xffffff, 0.85);
+                // 2. Broadcast 3D Key-Lighting Rig (Low-angle for true sphere volume)
+                const ambient = new THREE.AmbientLight(0xffffff, 0.65);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.45);
+                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.35);
                 scene.add(hemiLight);
 
-                const floodLight = new THREE.DirectionalLight(0xffffff, 1.25);
-                floodLight.position.set(10, 35, 10);
-                floodLight.castShadow = true;
-                floodLight.shadow.mapSize.width = 2048;
-                floodLight.shadow.mapSize.height = 2048;
-                floodLight.shadow.bias = -0.0003;
-                scene.add(floodLight);
+                const keyLight = new THREE.DirectionalLight(0xffffff, 1.45);
+                keyLight.position.set(-16, 24, 14);
+                keyLight.castShadow = true;
+                keyLight.shadow.mapSize.width = 2048;
+                keyLight.shadow.mapSize.height = 2048;
+                keyLight.shadow.bias = -0.0003;
+                scene.add(keyLight);
 
                 // ============================================================
                 // CLICK 2 (State >= 9): Locked 10/10 Football Pitch
@@ -637,7 +637,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         roughness: 0.32,
                         metalness: 0.12,
                         transparent: currentState >= 11,
-                        opacity: currentState >= 11 ? 0.88 : 1.0
+                        opacity: currentState >= 11 ? 0.72 : 1.0,
+                        depthWrite: currentState < 11
                     }});
 
                     ball = new THREE.Mesh(ballGeo, ballMat);
@@ -656,13 +657,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     tCanvas.height = 160;
                     const ctx = tCanvas.getContext('2d');
 
-                    ctx.font = 'bold 56px Georgia, "Times New Roman", serif';
+                    ctx.font = 'bold 64px Georgia, "Times New Roman", serif';
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
 
-                    // Clean white contour
+                    // Heavy white contour for crisp contrast over 3D turf
                     ctx.strokeStyle = '#ffffff';
-                    ctx.lineWidth = 10;
+                    ctx.lineWidth = 14;
                     ctx.strokeText(text, 256, 80);
 
                     // Solid Text
@@ -676,19 +677,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         depthWrite: false
                     }});
                     const sprite = new THREE.Sprite(mat);
-                    sprite.scale.set(3.6, 1.1, 1.0);
+                    sprite.scale.set(3.4, 1.1, 1.0);
                     sprite.renderOrder = 1000;
                     return sprite;
                 }}
 
                 // ============================================================
-                // CLICK 4 (State >= 11): Center O(0,0,0) & Surface Point P(x,y,z)
+                // CLICK 4 (State >= 11): 3D Center O(0,0,0) & Surface Point P(x,y,z)
                 // ============================================================
                 if (currentState >= 11) {{
-                    // 1. Center O(0,0,0) Marker
-                    const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
+                    // 1. Center Point O(0,0,0) at exact sphere core
+                    const oGeo = new THREE.SphereGeometry(0.18, 32, 32);
                     const oMat = new THREE.MeshBasicMaterial({{
-                        color: 0x0f172a, // Dark Navy/Black
+                        color: 0x991b1b, // Deep Red Core
                         depthTest: false,
                         depthWrite: false
                     }});
@@ -697,18 +698,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oMarker.renderOrder = 999;
                     scene.add(oMarker);
 
-                    // Pure Text Label for O(0, 0, 0)
-                    const oLabel = createPureTextLabel('O(0, 0, 0)', '#0f172a');
-                    oLabel.position.set(oPos.x - 1.4, oPos.y + 0.2, oPos.z + 0.2);
+                    // Label O(0, 0, 0) positioned to the LEFT outside the ball
+                    const oLabel = createPureTextLabel('O(0, 0, 0)', '#991b1b');
+                    oLabel.position.set(oPos.x - 2.8, oPos.y + 0.3, oPos.z - 0.4);
                     scene.add(oLabel);
 
-                    // 2. Point P(x,y,z) in 1st Octant on Surface
-                    // (+X right, +Y upward toward camera, +Z forward)
-                    const pWorld = new THREE.Vector3(1.2, oPos.y + 1.2, 0.8);
+                    // 2. Point P(x,y,z) in 1st Octant on Upper-Right Surface
+                    const pDir = new THREE.Vector3(1.3, 1.2, 0.7).normalize();
+                    const pWorld = oPos.clone().add(pDir.clone().multiplyScalar(ballRadius));
 
-                    const pGeo = new THREE.SphereGeometry(0.16, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.20, 32, 32);
                     const pMat = new THREE.MeshBasicMaterial({{
-                        color: 0x1d4ed8, // Royal Blue
+                        color: 0x1d4ed8, // Royal Blue Marker
                         depthTest: false,
                         depthWrite: false
                     }});
@@ -717,9 +718,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pMarker.renderOrder = 999;
                     scene.add(pMarker);
 
-                    // Pure Text Label for P(x, y, z)
-                    const pLabel = createPureTextLabel('P(x, y, z)', '#1e3a8a');
-                    pLabel.position.set(pWorld.x + 1.4, pWorld.y + 0.3, pWorld.z);
+                    // Label P(x, y, z) positioned to the RIGHT outside the ball
+                    const pLabel = createPureTextLabel('P(x, y, z)', '#1d4ed8');
+                    pLabel.position.set(pWorld.x + 2.2, pWorld.y + 0.3, pWorld.z + 0.4);
                     scene.add(pLabel);
                 }}
 
