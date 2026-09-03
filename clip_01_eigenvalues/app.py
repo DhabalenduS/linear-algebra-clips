@@ -468,10 +468,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
-                // Locked 10/10 Overhead TV Camera
-                const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 1000);
-                camera.position.set(0, 30, 0.01);
-                camera.lookAt(0, 0, 0);
+                // Calibrated TV Stadium Broadcast Camera (45-degree elevated 3D depth)
+                const camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 1000);
+                camera.position.set(0, 18, 14);
+                camera.lookAt(0, 0.8, -0.5);
 
                 const renderer = new THREE.WebGLRenderer({{
                     canvas: canvas,
@@ -484,27 +484,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.shadowMap.enabled = true;
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-                renderer.toneMappingExposure = 1.12;
+                renderer.toneMappingExposure = 1.15;
 
-                // 2. Calibrated 3D Stadium Lighting
-                const ambient = new THREE.AmbientLight(0xffffff, 0.48);
+                // 2. Broadcast Stadium Lighting Rig
+                const ambient = new THREE.AmbientLight(0xffffff, 0.55);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.32);
+                const hemiLight = new THREE.HemisphereLight(0xebfbee, 0x1b431e, 0.35);
                 scene.add(hemiLight);
 
-                // Angled Key Light (Creates light-to-shadow gradient across sphere)
+                // Main Stadium Floodlight (Casts 3D highlight on sphere & shadow on grass)
                 const keyLight = new THREE.DirectionalLight(0xffffff, 1.55);
-                keyLight.position.set(-14, 26, 12);
+                keyLight.position.set(-10, 24, 15);
+                keyLight.castShadow = true;
+                keyLight.shadow.mapSize.width = 2048;
+                keyLight.shadow.mapSize.height = 2048;
+                keyLight.shadow.bias = -0.0003;
                 scene.add(keyLight);
 
-                // Opposite Rim Light (Separates the 3D ball from green turf)
-                const rimLight = new THREE.DirectionalLight(0xdbeafe, 0.75);
-                rimLight.position.set(14, 18, -12);
-                scene.add(rimLight);
+                const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.65);
+                fillLight.position.set(12, 16, -8);
+                scene.add(fillLight);
 
                 // ============================================================
-                // CLICK 2 (State >= 9): Locked 10/10 Football Pitch
+                // CLICK 2 (State >= 9): Calibrated 3D Perspective Pitch
                 // ============================================================
                 function createPitchTexture() {{
                     const pCanvas = document.createElement('canvas');
@@ -512,7 +515,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pCanvas.height = 1536;
                     const ctx = pCanvas.getContext('2d');
 
-                    // Rich High-Contrast Turf Stripes
+                    // Rich Stadium Grass Stripes
                     const stripes = 10;
                     const sh = 1536 / stripes;
                     for (let i = 0; i < stripes; i++) {{
@@ -520,9 +523,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // Locked Uniform Margins (10/10)
-                    const mx = 110;
-                    const my = 140;
+                    // Calibrated Margins for Perspective TV View
+                    const mx = 130;
+                    const my = 120;
                     const pw = 2048 - (2 * mx);
                     const ph = 1536 - (2 * my);
                     const cx = 2048 / 2;
@@ -532,13 +535,16 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.lineWidth = 15;
                     ctx.lineCap = 'round';
 
+                    // Outer Boundary Line
                     ctx.strokeRect(mx, my, pw, ph);
 
+                    // Halfway Line
                     ctx.beginPath();
                     ctx.moveTo(cx, my);
                     ctx.lineTo(cx, my + ph);
                     ctx.stroke();
 
+                    // Center Circle & Center Spot
                     ctx.beginPath();
                     ctx.arc(cx, cy, 185, 0, Math.PI * 2);
                     ctx.stroke();
@@ -548,6 +554,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.arc(cx, cy, 15, 0, Math.PI * 2);
                     ctx.fill();
 
+                    // Penalty Boxes
                     ctx.strokeRect(mx, cy - 275, 270, 550);
                     ctx.strokeRect(mx, cy - 110, 100, 220);
                     ctx.beginPath();
@@ -560,6 +567,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.arc(mx + pw - 200, cy, 105, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
+                    // Corner Arcs
                     const r = 35;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
@@ -570,7 +578,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 if (currentState >= 9) {{
-                    const pitchGeo = new THREE.PlaneGeometry(32, 24);
+                    const pitchGeo = new THREE.PlaneGeometry(28, 21);
                     const pitchMat = new THREE.MeshStandardMaterial({{
                         map: createPitchTexture(),
                         roughness: 0.85,
@@ -578,59 +586,35 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
                     const pitch = new THREE.Mesh(pitchGeo, pitchMat);
                     pitch.rotation.x = -Math.PI / 2;
-                    pitch.position.set(0, 0, 0);
+                    pitch.position.set(0, 0, -0.6);
+                    pitch.receiveShadow = true;
                     scene.add(pitch);
                 }}
 
                 // ============================================================
-                // CLICK 3 (State >= 10): True 3D Geometric Soccer Ball with Shading
+                // CLICK 3 (State >= 10): True 3D Football Resting on Turf
                 // ============================================================
                 let ballGroup = null;
-                const ballRadius = 2.0;
-                const oPos = new THREE.Vector3(0, ballRadius, 0);
-
-                // Helper: Soft Radial Ground Shadow directly under the ball
-                function createContactShadowTexture() {{
-                    const sCanvas = document.createElement('canvas');
-                    sCanvas.width = 256;
-                    sCanvas.height = 256;
-                    const sCtx = sCanvas.getContext('2d');
-                    const grad = sCtx.createRadialGradient(128, 128, 15, 128, 128, 120);
-                    grad.addColorStop(0, 'rgba(15, 30, 15, 0.72)');
-                    grad.addColorStop(0.5, 'rgba(20, 45, 20, 0.35)');
-                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                    sCtx.fillStyle = grad;
-                    sCtx.fillRect(0, 0, 256, 256);
-                    return new THREE.CanvasTexture(sCanvas);
-                }}
+                const ballRadius = 1.9;
+                const oPos = new THREE.Vector3(0, ballRadius, -0.6);
 
                 if (currentState >= 10) {{
-                    // 1. Soft Ground Contact Shadow
-                    const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.3, ballRadius * 2.3);
-                    const shadowMat = new THREE.MeshBasicMaterial({{
-                        map: createContactShadowTexture(),
-                        transparent: true,
-                        depthWrite: false
-                    }});
-                    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
-                    shadowMesh.rotation.x = -Math.PI / 2;
-                    shadowMesh.position.set(0, 0.02, 0);
-                    scene.add(shadowMesh);
-
-                    // 2. Base 3D Sphere with Glossy Leather Highlights
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
+                    // 1. White Leather Sphere with Curved Specular Sheen
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
-                        roughness: 0.18,
-                        metalness: 0.12
+                        roughness: 0.22,
+                        metalness: 0.08
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                    whiteBall.castShadow = true;
+                    whiteBall.receiveShadow = true;
                     ballGroup.add(whiteBall);
 
-                    // 3. Exact 12 Icosahedral 3D Pentagon Coordinates
+                    // 2. Exact 3D Pentagon Coordinates
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -645,12 +629,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pentagonMat = new THREE.MeshStandardMaterial({{
                         color: 0x0f172a,
-                        roughness: 0.22,
-                        metalness: 0.10,
+                        roughness: 0.28,
+                        metalness: 0.08,
                         side: THREE.DoubleSide
                     }});
 
-                    const pentagonRadius = 0.58;
+                    const pentagonRadius = 0.55;
 
                     icoVerts.forEach(v => {{
                         const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
@@ -660,7 +644,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(pentMesh);
                     }});
 
-                    // 4. Seam Stitch Lines
+                    // 3. 3D Seams (Forms 20 Hexagons)
                     const lineMat = new THREE.LineBasicMaterial({{ color: 0x64748b, linewidth: 2 }});
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
@@ -674,10 +658,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                     }}
 
-                    // Orient ball so light catches the top-left curvature
-                    ballGroup.rotation.x = 0.35;
-                    ballGroup.rotation.y = 0.55;
-                    ballGroup.rotation.z = -0.20;
+                    // Angle the ball naturally toward the broadcast camera
+                    ballGroup.rotation.x = 0.28;
+                    ballGroup.rotation.y = 0.45;
+                    ballGroup.rotation.z = -0.15;
 
                     scene.add(ballGroup);
                 }}
