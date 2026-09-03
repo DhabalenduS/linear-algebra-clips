@@ -236,21 +236,21 @@ div[data-testid="stButton"] button {
 """,
 unsafe_allow_html=True,
 )
-============================================================
-ADVANCE PRESENTATION (Clicks state 0 through 18)
-============================================================
+#============================================================
+#ADVANCE PRESENTATION (Clicks state 0 through 18)
+#============================================================
 if st.session_state.presentation_state < 18:
 if st.button("advance", key="advance_button"):
 st.session_state.presentation_state += 1
 st.rerun()
-============================================================
-STATE 0 — BLANK
-============================================================
+#============================================================
+#STATE 0 — BLANK
+#============================================================
 if st.session_state.presentation_state == 0:
 pass
-============================================================
-STATE 1 — SLIDE 1
-============================================================
+#============================================================
+#STATE 1 — SLIDE 1
+#============================================================
 elif st.session_state.presentation_state == 1:
 st.html(
 """
@@ -272,9 +272,9 @@ Dr. Dhabalendu Samanta
 </div>
 """
 )
-============================================================
-STATES 2–7 — SLIDE 2
-============================================================
+#============================================================
+#STATES 2–7 — SLIDE 2
+#============================================================
 elif 2 <= st.session_state.presentation_state <= 7:
 state = st.session_state.presentation_state
 code
@@ -345,9 +345,9 @@ content += """
 </div>
 """
 st.html(content)
-============================================================
-STATES 8–18 — SLIDE 3 (VISUALIZATION, OBSERVATION & CONCLUSION)
-============================================================
+#============================================================
+#STATES 8–18 — SLIDE 3 (VISUALIZATION, OBSERVATION & CONCLUSION)
+#============================================================
 elif 8 <= st.session_state.presentation_state <= 18:
 state = st.session_state.presentation_state
 code
