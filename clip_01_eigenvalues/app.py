@@ -590,53 +590,41 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
 
-                // Helper: Crisp Text Sprite Maker
-                function makeTextSprite(text, color, bgColor, borderColor) {{
+                // Helper: Crisp Academic Math Text (No background badge)
+                function makeMathTextSprite(text, color) {
                     const fontface = "Georgia, serif";
-                    const fontsize = 52;
+                    const fontsize = 54;
                     const canvas = document.createElement('canvas');
                     canvas.width = 512;
-                    canvas.height = 256;
+                    canvas.height = 160;
                     const ctx = canvas.getContext('2d');
 
-                    ctx.font = "Bold " + fontsize + "px " + fontface;
-                    const metrics = ctx.measureText(text);
-                    const textWidth = metrics.width;
-
-                    const padX = 30;
-                    const padY = 20;
-                    const bx = (512 - textWidth - padX * 2) / 2;
-                    const by = (256 - fontsize - padY * 2) / 2;
-                    const bw = textWidth + padX * 2;
-                    const bh = fontsize + padY * 2;
-
-                    // Rounded Pill Box
-                    ctx.fillStyle = bgColor || "rgba(15, 23, 42, 0.88)";
-                    ctx.strokeStyle = borderColor || "rgba(255, 255, 255, 0.9)";
-                    ctx.lineWidth = 5;
-                    ctx.beginPath();
-                    ctx.roundRect(bx, by, bw, bh, 20);
-                    ctx.fill();
-                    ctx.stroke();
-
-                    // Text
-                    ctx.fillStyle = color || "#ffffff";
+                    ctx.font = "Bold italic " + fontsize + "px " + fontface;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    ctx.fillText(text, 256, 128);
+
+                    // Crisp white outline stroke for contrast on green/black/white areas
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.lineWidth = 7;
+                    ctx.lineJoin = "round";
+                    ctx.miterLimit = 2;
+                    ctx.strokeText(text, 256, 80);
+
+                    // Solid text fill
+                    ctx.fillStyle = color || "#1d4ed8";
+                    ctx.fillText(text, 256, 80);
 
                     const texture = new THREE.CanvasTexture(canvas);
-                    const spriteMat = new THREE.SpriteMaterial({{
+                    const spriteMat = new THREE.SpriteMaterial({
                         map: texture,
                         depthTest: false,
                         depthWrite: false
-                    }});
+                    });
                     const sprite = new THREE.Sprite(spriteMat);
                     sprite.renderOrder = 999;
-                    sprite.scale.set(1.5, 0.75, 1);
+                    sprite.scale.set(1.35, 0.42, 1);
                     return sprite;
-                }}
-
+                }
                 // ============================================================
                 // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
                 // ============================================================
