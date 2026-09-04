@@ -591,12 +591,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(rimLight);
 
                 
-renderer.localClippingEnabled = true;
-
-                // Helper: Crisp Academic Math Text (Zero blur, clear white halo)
+// Helper: Crisp Academic Math Text (Zero blur, clear white halo)
                 function makeMathTextSprite(text, color) {{
                     const fontface = "Georgia, serif";
-                    const fontsize = 56;
+                    const fontsize = 54;
                     const canvas = document.createElement('canvas');
                     canvas.width = 512;
                     canvas.height = 180;
@@ -624,14 +622,15 @@ renderer.localClippingEnabled = true;
                     }});
                     const sprite = new THREE.Sprite(spriteMat);
                     sprite.renderOrder = 999;
-                    sprite.scale.set(1.5, 0.52, 1);
+                    sprite.scale.set(1.4, 0.48, 1);
                     return sprite;
                 }}
                 // ============================================================
-                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
+                // CLICK 3 (State 10): Full Intact 3D Football
+                // CLICK 4 (State >= 11): Dedicated Solid 3D Cutaway Football
                 // ============================================================
                 let ballGroup = null;
-                const ballRadius = 1.35; // Proportioned to sit cleanly inside center circle
+                const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
                 // Helper: Soft Ground Contact Shadow Texture
@@ -650,7 +649,7 @@ renderer.localClippingEnabled = true;
                 }}
 
                 if (currentState >= 10) {{
-                    // 1. Soft Ground Contact Shadow at turf level
+                    // 1. Soft Ground Contact Shadow
                     const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
                     const shadowMat = new THREE.MeshBasicMaterial({{
                         map: createContactShadowTexture(),
@@ -662,20 +661,46 @@ renderer.localClippingEnabled = true;
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. White Leather Sphere with Glossy 3D Highlights
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
-                    const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
+                    // 2. Leather Sphere Geometry (Full 360° at Click 3, Sliced 270° at Click 4)
+                    const isCutaway = (currentState >= 11);
+                    const phiLength = isCutaway ? (Math.PI * 1.5) : (Math.PI * 2);
+
+                    const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64, 0, phiLength, 0, Math.PI);
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
-                        metalness: 0.10
+                        metalness: 0.10,
+                        side: THREE.DoubleSide
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                     ballGroup.add(whiteBall);
 
-                    // 3. Exact 12 Icosahedral 3D Pentagon Coordinates
+                    // 3. Solid Interior Cut Faces (Only for Click 4, meeting at O(0,0,0))
+                    if (isCutaway) {{
+                        const cutMat = new THREE.MeshStandardMaterial({{
+                            color: 0xe2e8f0, // Clean solid matte slate cross-section
+                            roughness: 0.30,
+                            metalness: 0.05,
+                            side: THREE.DoubleSide
+                        }});
+
+                        // Vertical Wall 1 (at angle 0)
+                        const w1Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
+                        const w1 = new THREE.Mesh(w1Geo, cutMat);
+                        w1.rotation.y = 0;
+                        ballGroup.add(w1);
+
+                        // Vertical Wall 2 (at angle 270°)
+                        const w2Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
+                        const w2 = new THREE.Mesh(w2Geo, cutMat);
+                        w2.rotation.y = -Math.PI * 0.5;
+                        ballGroup.add(w2);
+                    }}
+
+                    // 4. Black Pentagons (Only on the intact surface)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -683,100 +708,52 @@ renderer.localClippingEnabled = true;
                         [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
                     ];
 
-                    const icoVerts = rawVerts.map(v => {{
-                        const len = Math.hypot(v[0], v[1], v[2]);
-                        return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
-                    }});
-
                     const pentagonMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a, // Deep Classic Black
+                        color: 0x0f172a,
                         roughness: 0.25,
                         metalness: 0.08,
                         side: THREE.DoubleSide
                     }});
 
-                    const pentagonRadius = 0.39; // Proportioned to 1.35 radius
+                    rawVerts.forEach(rv => {{
+                        const len = Math.hypot(rv[0], rv[1], rv[2]);
+                        const v = new THREE.Vector3(rv[0] / len, rv[1] / len, rv[2] / len);
 
-                    // Place 12 Real 3D Pentagons on the Sphere Surface
-                    icoVerts.forEach(v => {{
-                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
-                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                        pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
-                        pentMesh.lookAt(v.clone().multiplyScalar(ballRadius * 2));
-                        ballGroup.add(pentMesh);
-                    }});
-
-                    // 4. 3D Seam Lines Connecting Neighbors (20 Hexagons)
-                    const lineMat = new THREE.LineBasicMaterial({{ color: 0x64748b, linewidth: 2 }});
-                    for (let i = 0; i < icoVerts.length; i++) {{
-                        for (let j = i + 1; j < icoVerts.length; j++) {{
-                            if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
-                                const p1 = icoVerts[i].clone().multiplyScalar(ballRadius * 1.001);
-                                const p2 = icoVerts[j].clone().multiplyScalar(ballRadius * 1.001);
-                                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-                                const seam = new THREE.Line(lineGeo, lineMat);
-                                ballGroup.add(seam);
+                        // If cutaway, do not render pentagons inside the 90° opening
+                        let skip = false;
+                        if (isCutaway) {{
+                            const az = Math.atan2(v.z, v.x);
+                            const normAz = (az < 0) ? az + Math.PI * 2 : az;
+                            if (normAz > Math.PI * 1.5 && normAz < Math.PI * 2) {{
+                                skip = true;
                             }}
                         }}
-                    }}
 
-                    // Angle the ball naturally toward the 3D TV camera
+                        if (!skip) {{
+                            const pentGeo = new THREE.CircleGeometry(0.38, 5);
+                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                            pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
+                            pentMesh.lookAt(v.clone().multiplyScalar(ballRadius * 2));
+                            ballGroup.add(pentMesh);
+                        }}
+                    }});
+
+                    // Tilt ball naturally toward camera
                     ballGroup.rotation.x = 0.28;
                     ballGroup.rotation.y = 0.48;
                     ballGroup.rotation.z = -0.15;
 
                     scene.add(ballGroup);
 
-                     // ========================================================
-                    // CLICK 4 (State >= 11): Native GPU Sliced 1st Octant Cutaway
+                    // ========================================================
+                    // CLICK 4 (State >= 11): Physical Center O, Surface P, Ray OP
                     // ========================================================
                     if (currentState >= 11) {{
-                        // 1. Two Native GPU Cutting Planes through O(0,0,0) defining the 1st Octant
-                        const clipPlane1 = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0); // Slices X > 0
-                        const clipPlane2 = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0); // Slices Y > 0
-                        const clipPlane3 = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0); // Slices Z > 0
-
-                        // Apply clipping to the ball leather and all pentagons
-                        whiteBall.material.clippingPlanes = [clipPlane1, clipPlane2, clipPlane3];
-                        whiteBall.material.clipIntersection = true;
-
-                        ballGroup.traverse((child) => {{
-                            if (child.isMesh && child !== whiteBall) {{
-                                child.material.clippingPlanes = [clipPlane1, clipPlane2, clipPlane3];
-                                child.material.clipIntersection = true;
-                            }}
-                        }});
-
-                        // 2. Solid Cross-Section Interior Cap Faces meeting at O(0,0,0)
-                        const capMat = new THREE.MeshStandardMaterial({{
-                            color: 0xe2e8f0, // Clean light slate cross-section
-                            roughness: 0.30,
-                            metalness: 0.05,
-                            side: THREE.DoubleSide
-                        }});
-
-                        // Horizontal cross-section plane (X-Z plane)
-                        const hCapGeo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI * 0.5);
-                        const hCap = new THREE.Mesh(hCapGeo, capMat);
-                        hCap.rotation.x = Math.PI * 0.5;
-                        ballGroup.add(hCap);
-
-                        // Vertical cross-section plane (X-Y plane)
-                        const vCapGeo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI * 0.5);
-                        const vCap = new THREE.Mesh(vCapGeo, capMat);
-                        ballGroup.add(vCap);
-
-                        // Vertical cross-section plane (Y-Z plane)
-                        const sCapGeo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI * 0.5);
-                        const sCap = new THREE.Mesh(sCapGeo, capMat);
-                        sCap.rotation.y = -Math.PI * 0.5;
-                        ballGroup.add(sCap);
-
-                        // 3. Central Ray OP on the exposed 1st octant surface
-                        const pLocalDir = new THREE.Vector3(0.58, 0.70, 0.42).normalize();
+                        // Point P on the exposed flat interior face at the rim
+                        const pLocalDir = new THREE.Vector3(0.68, 0.73, 0).normalize();
                         const pPos = pLocalDir.clone().multiplyScalar(ballRadius);
 
-                        // Blue Vector Line from O(0,0,0) to P(x,y,z)
+                        // 1. Ray Line from Center O(0,0,0) to P(x,y,z)
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             pPos
@@ -791,7 +768,7 @@ renderer.localClippingEnabled = true;
                         rayLine.renderOrder = 997;
                         ballGroup.add(rayLine);
 
-                        // Arrowhead sitting right at P on the outer rim
+                        // 2. Arrowhead right at point P on the outer rim
                         const coneGeo = new THREE.ConeGeometry(0.08, 0.22, 16);
                         const coneMat = new THREE.MeshBasicMaterial({{
                             color: 0x2563eb,
@@ -804,7 +781,7 @@ renderer.localClippingEnabled = true;
                         cone.renderOrder = 998;
                         ballGroup.add(cone);
 
-                        // 4. Center Origin O(0,0,0) at the internal intersection corner
+                        // 3. Center Origin O(0,0,0) at the internal intersection corner
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const oMat = new THREE.MeshBasicMaterial({{
                             color: 0xdc2626,
@@ -819,7 +796,7 @@ renderer.localClippingEnabled = true;
                         oSprite.position.set(-0.68, -0.28, 0.1);
                         ballGroup.add(oSprite);
 
-                        // 5. Point P(x,y,z) on the outer curved rim
+                        // 4. Point P(x,y,z) at the outer curved rim
                         const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const pMat = new THREE.MeshBasicMaterial({{
                             color: 0x1d4ed8,
