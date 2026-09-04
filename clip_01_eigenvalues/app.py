@@ -726,79 +726,108 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                      // ========================================================
-                    // CLICK 4 (State >= 11): 25° High-Contrast Radial Strip
+                    // CLICK 4 (State >= 11): 50° 3D Carved Channel + Core Pocket
                     // ========================================================
                     if (currentState >= 11) {{
-                        // 1. Central Direction for Point P (1st Octant)
+                        // 1. Central Axis Direction for P (1st Octant)
                         const pDir = new THREE.Vector3(0.58, 0.72, 0.38).normalize();
                         const pPos = pDir.clone().multiplyScalar(ballRadius);
 
-                        // 2. Orthogonal Basis for the Strip
-                        const perpAxis = new THREE.Vector3(0, 1, 0).cross(pDir).normalize();
+                        // 3D Orthogonal Basis Vectors
+                        const perpAxis = new THREE.Vector3(0, 1, 0).cross(pDir).normalize(); // Width axis
+                        const normalAxis = new THREE.Vector3().crossVectors(pDir, perpAxis).normalize(); // Depth / Inward axis
 
-                        // 3. Construct the 25° Radial Wedge Mesh (Widens from 0 at O to outer rim at P)
-                        const halfAngle = 0.22; // ~12.5 degrees half-width (25° total)
-                        const steps = 20;
-                        const channelGeo = new THREE.BufferGeometry();
+                        // 2. Channel & Pocket Parameters
+                        const halfAngle = 0.44; // ~25° half-angle (50° total opening)
+                        const depthWall = 0.38;  // Vertical 3D wall depth
+                        const coreRadius = 0.28; // Rounded pocket radius behind O(0,0,0)
+                        const steps = 24;
+
+                        const carvedGeo = new THREE.BufferGeometry();
                         const positions = [];
-                        const borderPtsLeft = [new THREE.Vector3(0, 0, 0)];
-                        const borderPtsRight = [new THREE.Vector3(0, 0, 0)];
+                        const borderPtsLeft = [];
+                        const borderPtsRight = [];
 
+                        // 3. Build Channel Floor & 3D Side Walls
                         for (let i = 0; i <= steps; i++) {{
-                            const r = (i / steps) * ballRadius;
-                            const w = r * Math.tan(halfAngle);
-                            const c = pDir.clone().multiplyScalar(r);
+                            const t = i / steps;
+                            const r = t * ballRadius;
 
-                            const ptL = c.clone().add(perpAxis.clone().multiplyScalar(-w));
-                            const ptR = c.clone().add(perpAxis.clone().multiplyScalar(w));
-
-                            if (i > 0) {{
-                                const prevR = ((i - 1) / steps) * ballRadius;
-                                const prevW = prevR * Math.tan(halfAngle);
-                                const prevC = pDir.clone().multiplyScalar(prevR);
-                                const prevL = prevC.clone().add(perpAxis.clone().multiplyScalar(-prevW));
-                                const prevR_pt = prevC.clone().add(perpAxis.clone().multiplyScalar(prevW));
-
-                                // Add Quad (2 triangles)
-                                positions.push(prevL.x, prevL.y, prevL.z, prevR_pt.x, prevR_pt.y, prevR_pt.z, ptL.x, ptL.y, ptL.z);
-                                positions.push(prevR_pt.x, prevR_pt.y, prevR_pt.z, ptR.x, ptR.y, ptR.z, ptL.x, ptL.y, ptL.z);
+                            // Width flaring: smooth circular curve around O for r < coreRadius, flaring to 50° for r >= coreRadius
+                            let w;
+                            if (r < coreRadius) {{
+                                const angleCore = (r / coreRadius) * (Math.PI * 0.5);
+                                w = Math.sin(angleCore) * coreRadius * 0.9 + 0.08;
+                            }} else {{
+                                w = r * Math.tan(halfAngle);
                             }}
 
-                            borderPtsLeft.push(ptL);
-                            borderPtsRight.push(ptR);
+                            const c = pDir.clone().multiplyScalar(r);
+
+                            // Surface Top Edges (Outer Leather Boundary)
+                            const topL = c.clone().add(perpAxis.clone().multiplyScalar(-w));
+                            const topR = c.clone().add(perpAxis.clone().multiplyScalar(w));
+
+                            // Sunken Floor Edges (Depth into the ball)
+                            const floorL = topL.clone().add(normalAxis.clone().multiplyScalar(depthWall * (1 - t * 0.4)));
+                            const floorR = topR.clone().add(normalAxis.clone().multiplyScalar(depthWall * (1 - t * 0.4)));
+
+                            borderPtsLeft.push(topL);
+                            borderPtsRight.push(topR);
+
+                            if (i > 0) {{
+                                const prevT = (i - 1) / steps;
+                                const prevR = prevT * ballRadius;
+                                let prevW = (prevR < coreRadius) ? (Math.sin((prevR / coreRadius) * (Math.PI * 0.5)) * coreRadius * 0.9 + 0.08) : (prevR * Math.tan(halfAngle));
+
+                                const prevC = pDir.clone().multiplyScalar(prevR);
+                                const pTopL = prevC.clone().add(perpAxis.clone().multiplyScalar(-prevW));
+                                const pTopR = prevC.clone().add(perpAxis.clone().multiplyScalar(prevW));
+                                const pFloorL = pTopL.clone().add(normalAxis.clone().multiplyScalar(depthWall * (1 - prevT * 0.4)));
+                                const pFloorR = pTopR.clone().add(normalAxis.clone().multiplyScalar(depthWall * (1 - prevT * 0.4)));
+
+                                // A. Channel Floor (Sunken Interior)
+                                positions.push(pFloorL.x, pFloorL.y, pFloorL.z, pFloorR.x, pFloorR.y, pFloorR.z, floorL.x, floorL.y, floorL.z);
+                                positions.push(pFloorR.x, pFloorR.y, pFloorR.z, floorR.x, floorR.y, floorR.z, floorL.x, floorL.y, floorL.z);
+
+                                // B. Left Vertical 3D Wall (Drops from surface to floor)
+                                positions.push(pTopL.x, pTopL.y, pTopL.z, pFloorL.x, pFloorL.y, pFloorL.z, topL.x, topL.y, topL.z);
+                                positions.push(pFloorL.x, pFloorL.y, pFloorL.z, floorL.x, floorL.y, floorL.z, topL.x, topL.y, topL.z);
+
+                                // C. Right Vertical 3D Wall (Drops from surface to floor)
+                                positions.push(pTopR.x, pTopR.y, pTopR.z, topR.x, topR.y, topR.z, pFloorR.x, pFloorR.y, pFloorR.z);
+                                positions.push(pFloorR.x, pFloorR.y, pFloorR.z, topR.x, topR.y, topR.z, floorR.x, floorR.y, floorR.z);
+                            }}
                         }}
 
-                        channelGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-                        channelGeo.computeVertexNormals();
+                        carvedGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                        carvedGeo.computeVertexNormals();
 
-                        // Clean Slate-Grey Inner Wedge Material (depthTest: false ensures 100% visibility)
-                        const channelMat = new THREE.MeshBasicMaterial({{
-                            color: 0xd1d5db, // Light grey cross-section
-                            side: THREE.DoubleSide,
-                            depthTest: false,
-                            depthWrite: false
+                        // 3D Shaded Interior Material with light & shadow
+                        const carvedMat = new THREE.MeshStandardMaterial({{
+                            color: 0xcfd8dc, // Clean slate interior
+                            roughness: 0.28,
+                            metalness: 0.08,
+                            side: THREE.DoubleSide
                         }});
-                        const channelMesh = new THREE.Mesh(channelGeo, channelMat);
-                        channelMesh.renderOrder = 950;
-                        ballGroup.add(channelMesh);
+                        const carvedMesh = new THREE.Mesh(carvedGeo, carvedMat);
+                        carvedMesh.renderOrder = 950;
+                        ballGroup.add(carvedMesh);
 
-                        // 4. Crisp Dark Boundary Seam around the Wedge
-                        const borderPoints = [
-                            ...borderPtsLeft,
-                            ...borderPtsRight.reverse()
-                        ];
-                        const borderGeo = new THREE.BufferGeometry().setFromPoints(borderPoints);
-                        const borderMat = new THREE.LineBasicMaterial({{
-                            color: 0x475569, // Dark slate boundary line
+                        // 4. Boundary Rim Outline
+                        const rimPts = [...borderPtsLeft, ...borderPtsRight.reverse()];
+                        const rimGeo = new THREE.BufferGeometry().setFromPoints(rimPts);
+                        const rimMat = new THREE.LineBasicMaterial({{
+                            color: 0x334155, // Dark slate seam outline
                             linewidth: 3,
                             depthTest: false,
                             depthWrite: false
                         }});
-                        const borderLine = new THREE.Line(borderGeo, borderMat);
-                        borderLine.renderOrder = 951;
-                        ballGroup.add(borderLine);
+                        const rimLine = new THREE.Line(rimGeo, rimMat);
+                        rimLine.renderOrder = 951;
+                        ballGroup.add(rimLine);
 
-                        // 5. Central Vector Ray OP (runs straight down the spine from O to P)
+                        // 5. Central Vector Ray OP from Core O(0,0,0) to P(x,y,z)
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             pPos
@@ -813,7 +842,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         rayLine.renderOrder = 997;
                         ballGroup.add(rayLine);
 
-                        // Arrowhead sitting right at P on the surface
+                        // Arrowhead sitting right at P on the outer rim
                         const coneGeo = new THREE.ConeGeometry(0.07, 0.20, 16);
                         const coneMat = new THREE.MeshBasicMaterial({{
                             color: 0x2563eb,
@@ -826,7 +855,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         cone.renderOrder = 998;
                         ballGroup.add(cone);
 
-                        // 6. Center Origin O(0,0,0) at the sharp interior apex
+                        // 6. Origin O(0,0,0) inside the curved central pocket
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const oMat = new THREE.MeshBasicMaterial({{
                             color: 0xdc2626,
