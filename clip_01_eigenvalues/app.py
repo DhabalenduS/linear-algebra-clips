@@ -726,84 +726,56 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                      // ========================================================
-                    // CLICK 4 (State >= 11): Solid 25° Radial Octant Wedge
+                    // CLICK 4 (State >= 11): 25° Radial Strip from O to P
                     // ========================================================
                     if (currentState >= 11) {{
-                        // 1. Central Axis Direction uP (1st Octant facing camera)
-                        const uP = new THREE.Vector3(0.55, 0.72, 0.42).normalize();
-                        const pPos = uP.clone().multiplyScalar(ballRadius);
-                        const rayEnd = uP.clone().multiplyScalar(ballRadius * 1.58);
+                        const wedgeAngle = 0.44; // 25 degree radial opening
 
-                        // 2. Build the Solid 25° Radial Wedge Pocket originating at O(0,0,0)
-                        // Orthogonal basis vectors around uP
-                        const upRef = new THREE.Vector3(0, 1, 0);
-                        const tangentU = new THREE.Vector3().crossVectors(uP, upRef).normalize();
-                        const tangentV = new THREE.Vector3().crossVectors(uP, tangentU).normalize();
+                        // 1. Cut the 25-degree wedge out of the outer white sphere
+                        whiteBall.geometry.dispose();
+                        whiteBall.geometry = new THREE.SphereGeometry(
+                            ballRadius, 
+                            64, 
+                            64, 
+                            wedgeAngle, 
+                            Math.PI * 2 - wedgeAngle, 
+                            0, 
+                            Math.PI
+                        );
 
-                        const halfAngle = 0.22; // ~12.5 deg half-width (25 deg total opening)
-                        const segments = 16;
-                        const arcPtsLeft = [];
-                        const arcPtsRight = [];
-
-                        for (let i = 0; i <= segments; i++) {{
-                            const t = (i / segments) * Math.PI * 0.5 - (Math.PI * 0.25);
-                            const dirLeft = uP.clone()
-                                .add(tangentU.clone().multiplyScalar(-Math.sin(halfAngle)))
-                                .add(tangentV.clone().multiplyScalar(Math.sin(t) * 0.35))
-                                .normalize();
-                            const dirRight = uP.clone()
-                                .add(tangentU.clone().multiplyScalar(Math.sin(halfAngle)))
-                                .add(tangentV.clone().multiplyScalar(Math.sin(t) * 0.35))
-                                .normalize();
-
-                            arcPtsLeft.push(dirLeft.multiplyScalar(ballRadius));
-                            arcPtsRight.push(dirRight.multiplyScalar(ballRadius));
-                        }}
-
-                        // Solid Inner Radial Walls Geometry (Meeting at Apex O)
-                        const wallGeo = new THREE.BufferGeometry();
-                        const positions = [];
-                        const oPoint = [0, 0, 0];
-
-                        // Wall 1: Left Radial Wall from O to outer curve
-                        for (let i = 0; i < segments; i++) {{
-                            positions.push(...oPoint, arcPtsLeft[i].x, arcPtsLeft[i].y, arcPtsLeft[i].z, arcPtsLeft[i+1].x, arcPtsLeft[i+1].y, arcPtsLeft[i+1].z);
-                        }}
-                        // Wall 2: Right Radial Wall from O to outer curve
-                        for (let i = 0; i < segments; i++) {{
-                            positions.push(...oPoint, arcPtsRight[i+1].x, arcPtsRight[i+1].y, arcPtsRight[i+1].z, arcPtsRight[i].x, arcPtsRight[i].y, arcPtsRight[i].z);
-                        }}
-                        // Floor Wall: Closing the bottom of the wedge to seal against the sphere interior
-                        for (let i = 0; i < segments; i++) {{
-                            positions.push(
-                                arcPtsLeft[i].x, arcPtsLeft[i].y, arcPtsLeft[i].z,
-                                arcPtsRight[i].x, arcPtsRight[i].y, arcPtsRight[i].z,
-                                arcPtsRight[i+1].x, arcPtsRight[i+1].y, arcPtsRight[i+1].z
-                            );
-                            positions.push(
-                                arcPtsLeft[i].x, arcPtsLeft[i].y, arcPtsLeft[i].z,
-                                arcPtsRight[i+1].x, arcPtsRight[i+1].y, arcPtsRight[i+1].z,
-                                arcPtsLeft[i+1].x, arcPtsLeft[i+1].y, arcPtsLeft[i+1].z
-                            );
-                        }}
-
-                        wallGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-                        wallGeo.computeVertexNormals();
-
+                        // 2. Solid Grey Radial Walls meeting at O(0,0,0)
                         const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0xcfd8dc, // Clean solid engineering slate-grey interior
+                            color: 0xcfd8dc, // Clean engineering slate-grey interior
                             roughness: 0.35,
                             metalness: 0.05,
                             side: THREE.DoubleSide
                         }});
-                        const wedgeMesh = new THREE.Mesh(wallGeo, wallMat);
-                        wedgeMesh.renderOrder = 50;
-                        ballGroup.add(wedgeMesh);
 
-                        // 3. Central Ray OP: Starts at O(0,0,0), passes through midpoint P, shoots outward
+                        // Left interior wall from O to rim
+                        const w1Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
+                        const w1 = new THREE.Mesh(w1Geo, wallMat);
+                        w1.rotation.y = 0;
+                        ballGroup.add(w1);
+
+                        // Right interior wall from O to rim
+                        const w2Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
+                        const w2 = new THREE.Mesh(w2Geo, wallMat);
+                        w2.rotation.y = -wedgeAngle;
+                        ballGroup.add(w2);
+
+                        // 3. Central Axis Ray OP (terminates at surface point P)
+                        const pLocalDir = new THREE.Vector3(
+                            Math.cos(wedgeAngle * 0.5), 
+                            0.78, 
+                            Math.sin(wedgeAngle * 0.5)
+                        ).normalize();
+                        
+                        const pPos = pLocalDir.clone().multiplyScalar(ballRadius);
+
+                        // Ray Line from O(0,0,0) to P(x,y,z)
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
-                            rayEnd
+                            pPos
                         ]);
                         const lineMat = new THREE.LineBasicMaterial({{
                             color: 0x2563eb,
@@ -815,7 +787,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         rayLine.renderOrder = 997;
                         ballGroup.add(rayLine);
 
-                        // Arrowhead at the tip of the ray
+                        // Arrowhead sitting right at P on the surface
                         const coneGeo = new THREE.ConeGeometry(0.07, 0.20, 16);
                         const coneMat = new THREE.MeshBasicMaterial({{
                             color: 0x2563eb,
@@ -823,13 +795,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             depthWrite: false
                         }});
                         const cone = new THREE.Mesh(coneGeo, coneMat);
-                        cone.position.copy(rayEnd);
-                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), uP);
+                        cone.position.copy(pPos);
+                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pLocalDir);
                         cone.renderOrder = 998;
                         ballGroup.add(cone);
 
-                        // 4. Physical Origin O(0,0,0) at the sharp interior apex
-                        const oGeo = new THREE.SphereGeometry(0.07, 24, 24);
+                        // 4. Center Origin O(0,0,0) at the internal apex
+                        const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const oMat = new THREE.MeshBasicMaterial({{
                             color: 0xdc2626,
                             depthTest: false,
@@ -843,8 +815,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oSprite.position.set(-0.62, -0.22, 0.05);
                         ballGroup.add(oSprite);
 
-                        // 5. Point P(x,y,z) centered at the midpoint of the outer curved rim
-                        const pGeo = new THREE.SphereGeometry(0.07, 24, 24);
+                        // 5. Point P(x,y,z) at the outer curved rim
+                        const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const pMat = new THREE.MeshBasicMaterial({{
                             color: 0x1d4ed8,
                             depthTest: false,
