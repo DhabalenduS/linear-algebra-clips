@@ -726,74 +726,73 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                     // ========================================================
-                    // CLICK 4 (State >= 11): O(0,0,0) and P(x,y,z) Appearance
+                    // CLICK 4 (State >= 11): Option 1 - Vector Ray OP Depth Cue
                     // ========================================================
-                    if (currentState >= 11) {{
-                        // A. Origin O(0,0,0) at geometric center with X-ray core glow
-                        const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
-                        const oMat = new THREE.MeshBasicMaterial({{
-                            color: 0xef4444, // Vibrant Red Origin
+                    if (currentState >= 11) {
+                        // Point P Direction & Position on the surface
+                        const pDir = new THREE.Vector3(0.50, 0.70, 0.50).normalize();
+                        const pPos = pDir.clone().multiplyScalar(ballRadius * 1.005);
+                        const rayEnd = pDir.clone().multiplyScalar(ballRadius * 1.55); // Extends outward
+
+                        // 1. Ray Line from O(0,0,0) through P to the arrow tip
+                        const lineGeo = new THREE.BufferGeometry().setFromPoints([
+                            new THREE.Vector3(0, 0, 0),
+                            rayEnd
+                        ]);
+                        const lineMat = new THREE.LineBasicMaterial({
+                            color: 0x2563eb,
+                            linewidth: 3,
                             depthTest: false,
                             depthWrite: false
-                        }});
-                        const oMesh = new THREE.Mesh(oGeo, oMat);
-                        oMesh.renderOrder = 998;
-                        ballGroup.add(oMesh);
+                        });
+                        const rayLine = new THREE.Line(lineGeo, lineMat);
+                        rayLine.renderOrder = 997;
+                        ballGroup.add(rayLine);
 
-                        // Origin Halo Ring
-                        const ringGeo = new THREE.RingGeometry(0.12, 0.16, 32);
-                        const ringMat = new THREE.MeshBasicMaterial({{
-                            color: 0xfca5a5,
-                            side: THREE.DoubleSide,
+                        // 2. Arrowhead at the extending tip
+                        const coneGeo = new THREE.ConeGeometry(0.07, 0.20, 16);
+                        const coneMat = new THREE.MeshBasicMaterial({
+                            color: 0x2563eb,
                             depthTest: false,
                             depthWrite: false
-                        }});
-                        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-                        ringMesh.lookAt(camera.position);
-                        ringMesh.renderOrder = 998;
-                        ballGroup.add(ringMesh);
+                        });
+                        const cone = new THREE.Mesh(coneGeo, coneMat);
+                        cone.position.copy(rayEnd);
+                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pDir);
+                        cone.renderOrder = 998;
+                        ballGroup.add(cone);
 
-                        // Origin Label O(0,0,0)
-                        const oSprite = makeTextSprite("O (0,0,0)", "#ffffff", "rgba(220, 38, 38, 0.9)", "#ffffff");
-                        oSprite.position.set(-0.55, -0.25, 0);
-                        oSprite.scale.set(1.1, 0.55, 1);
+                        // 3. Center Origin O(0,0,0) dot & clean label
+                        const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
+                        const oMat = new THREE.MeshBasicMaterial({
+                            color: 0xdc2626, // Crimson Red Origin
+                            depthTest: false,
+                            depthWrite: false
+                        });
+                        const oDot = new THREE.Mesh(oGeo, oMat);
+                        oDot.renderOrder = 998;
+                        ballGroup.add(oDot);
+
+                        const oSprite = makeMathTextSprite("O (0,0,0)", "#dc2626");
+                        oSprite.position.set(-0.62, -0.22, 0);
                         ballGroup.add(oSprite);
 
-                        // B. Point P(x,y,z) on Front-Facing Upper Patch
-                        const pLocalDir = new THREE.Vector3(0.48, 0.72, 0.48).normalize();
-                        const pLocalPos = pLocalDir.clone().multiplyScalar(ballRadius * 1.01);
-
-                        const pGeo = new THREE.SphereGeometry(0.09, 32, 32);
-                        const pMat = new THREE.MeshBasicMaterial({{
-                            color: 0x2563eb, // High-contrast Blue Point P
+                        // 4. Surface Point P(x,y,z) dot & clean label
+                        const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
+                        const pMat = new THREE.MeshBasicMaterial({
+                            color: 0x1d4ed8, // Deep Blue Point P
                             depthTest: false,
                             depthWrite: false
-                        }});
-                        const pMesh = new THREE.Mesh(pGeo, pMat);
-                        pMesh.position.copy(pLocalPos);
-                        pMesh.renderOrder = 998;
-                        ballGroup.add(pMesh);
+                        });
+                        const pDot = new THREE.Mesh(pGeo, pMat);
+                        pDot.position.copy(pPos);
+                        pDot.renderOrder = 998;
+                        ballGroup.add(pDot);
 
-                        // Point P Halo Ring
-                        const pRingGeo = new THREE.RingGeometry(0.12, 0.16, 32);
-                        const pRingMat = new THREE.MeshBasicMaterial({{
-                            color: 0x93c5fd,
-                            side: THREE.DoubleSide,
-                            depthTest: false,
-                            depthWrite: false
-                        }});
-                        const pRingMesh = new THREE.Mesh(pRingGeo, pRingMat);
-                        pRingMesh.position.copy(pLocalPos);
-                        pRingMesh.lookAt(camera.position);
-                        pRingMesh.renderOrder = 998;
-                        ballGroup.add(pRingMesh);
-
-                        // Point P Label P(x,y,z)
-                        const pSprite = makeTextSprite("P (x, y, z)", "#ffffff", "rgba(37, 99, 235, 0.9)", "#ffffff");
-                        pSprite.position.copy(pLocalPos).add(new THREE.Vector3(0.55, 0.28, 0));
-                        pSprite.scale.set(1.2, 0.6, 1);
+                        const pSprite = makeMathTextSprite("P (x, y, z)", "#1d4ed8");
+                        pSprite.position.copy(pPos).add(new THREE.Vector3(0.55, 0.22, 0));
                         ballGroup.add(pSprite);
-                    }}
+                    }
                 }}
 
                 // Render Loop (Stationary)
