@@ -590,10 +590,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
 
-                // Helper: Crisp Academic Math Text (No background badge)
+                
+// Helper: Crisp Academic Math Text (No background badge)
                 function makeMathTextSprite(text, color) {{
                     const fontface = "Georgia, serif";
-                    const fontsize = 54;
+                    const fontsize = 52;
                     const canvas = document.createElement('canvas');
                     canvas.width = 512;
                     canvas.height = 160;
@@ -603,11 +604,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
 
-                    // Crisp white outline stroke for contrast on green/black/white areas
+                    // Crisp white outline stroke for maximum contrast
                     ctx.strokeStyle = "#ffffff";
-                    ctx.lineWidth = 7;
+                    ctx.lineWidth = 8;
                     ctx.lineJoin = "round";
-                    ctx.miterLimit = 2;
                     ctx.strokeText(text, 256, 80);
 
                     // Solid text fill
@@ -725,68 +725,55 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     scene.add(ballGroup);
 
-                    // ========================================================
-                    // CLICK 4 (State >= 11): Option 1 - Vector Ray OP Depth Cue
+                     // ========================================================
+                    // CLICK 4 (State >= 11): Physical Center O, Surface P, Ray OP
                     // ========================================================
                     if (currentState >= 11) {{
-                        // Point P Direction & Position on the surface
-                        const pDir = new THREE.Vector3(0.50, 0.70, 0.50).normalize();
-                        const pPos = pDir.clone().multiplyScalar(ballRadius * 1.005);
-                        const rayEnd = pDir.clone().multiplyScalar(ballRadius * 1.55); // Extends outward
+                        // Vector direction along the exposed inner cut wall
+                        const pLocalDir = new THREE.Vector3(
+                            Math.cos(wedgeAngle * 0.5), 
+                            0.78, 
+                            Math.sin(wedgeAngle * 0.5)
+                        ).normalize();
 
-                        // 1. Ray Line from O(0,0,0) through P to the arrow tip
+                        const pPos = pLocalDir.clone().multiplyScalar(ballRadius);
+                        const rayEnd = pLocalDir.clone().multiplyScalar(ballRadius * 1.6);
+
+                        // 1. Ray Line from Center O(0,0,0) out through P into free space
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             rayEnd
                         ]);
                         const lineMat = new THREE.LineBasicMaterial({{
                             color: 0x2563eb,
-                            linewidth: 3,
-                            depthTest: false,
-                            depthWrite: false
+                            linewidth: 4
                         }});
                         const rayLine = new THREE.Line(lineGeo, lineMat);
-                        rayLine.renderOrder = 997;
                         ballGroup.add(rayLine);
 
-                        // 2. Arrowhead at the extending tip
+                        // Arrowhead
                         const coneGeo = new THREE.ConeGeometry(0.07, 0.20, 16);
-                        const coneMat = new THREE.MeshBasicMaterial({{
-                            color: 0x2563eb,
-                            depthTest: false,
-                            depthWrite: false
-                        }});
+                        const coneMat = new THREE.MeshBasicMaterial({{ color: 0x2563eb }});
                         const cone = new THREE.Mesh(coneGeo, coneMat);
                         cone.position.copy(rayEnd);
-                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pDir);
-                        cone.renderOrder = 998;
+                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pLocalDir);
                         ballGroup.add(cone);
 
-                        // 3. Center Origin O(0,0,0) dot & clean label
+                        // 2. Physical Origin O(0,0,0) at internal intersection vertex
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
-                        const oMat = new THREE.MeshBasicMaterial({{
-                            color: 0xdc2626, // Crimson Red Origin
-                            depthTest: false,
-                            depthWrite: false
-                        }});
+                        const oMat = new THREE.MeshBasicMaterial({{ color: 0xdc2626 }});
                         const oDot = new THREE.Mesh(oGeo, oMat);
-                        oDot.renderOrder = 998;
                         ballGroup.add(oDot);
 
-                        const oSprite = makeMathTextSprite("O (0,0,0)", "#dc2626");
-                        oSprite.position.set(-0.62, -0.22, 0);
+                        const oSprite = makeMathTextSprite("O (0, 0, 0)", "#dc2626");
+                        oSprite.position.set(-0.55, -0.22, 0.1);
                         ballGroup.add(oSprite);
 
-                        // 4. Surface Point P(x,y,z) dot & clean label
+                        // 3. Point P(x,y,z) sitting on the outer curved rim
                         const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
-                        const pMat = new THREE.MeshBasicMaterial({{
-                            color: 0x1d4ed8, // Deep Blue Point P
-                            depthTest: false,
-                            depthWrite: false
-                        }});
+                        const pMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
                         const pDot = new THREE.Mesh(pGeo, pMat);
                         pDot.position.copy(pPos);
-                        pDot.renderOrder = 998;
                         ballGroup.add(pDot);
 
                         const pSprite = makeMathTextSprite("P (x, y, z)", "#1d4ed8");
@@ -794,7 +781,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(pSprite);
                     }}
                 }}
-
                 // Render Loop (Stationary)
                 function animate() {{
                     requestAnimationFrame(animate);
