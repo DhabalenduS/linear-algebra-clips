@@ -591,10 +591,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(rimLight);
 
                 
-// Helper: Broadcast-Quality Math Text (Zero blur, crisp white halo)
+renderer.localClippingEnabled = true;
+
+                // Helper: Crisp Academic Math Text (Zero blur, clear white halo)
                 function makeMathTextSprite(text, color) {{
                     const fontface = "Georgia, serif";
-                    const fontsize = 54;
+                    const fontsize = 56;
                     const canvas = document.createElement('canvas');
                     canvas.width = 512;
                     canvas.height = 180;
@@ -604,11 +606,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
 
-                    // Crisp thick white outline for contrast over green pitch & ball
+                    // Crisp white outline stroke for contrast
                     ctx.strokeStyle = "#ffffff";
                     ctx.lineWidth = 10;
                     ctx.lineJoin = "round";
-                    ctx.miterLimit = 2;
                     ctx.strokeText(text, 256, 90);
 
                     // Solid text fill
@@ -623,7 +624,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
                     const sprite = new THREE.Sprite(spriteMat);
                     sprite.renderOrder = 999;
-                    sprite.scale.set(1.4, 0.48, 1);
+                    sprite.scale.set(1.5, 0.52, 1);
                     return sprite;
                 }}
                 // ============================================================
@@ -727,116 +728,55 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                      // ========================================================
-                    // CLICK 4 (State >= 11): True Radial Pie-Wedge (0 at O -> Wide at P)
+                    // CLICK 4 (State >= 11): Native GPU Sliced 1st Octant Cutaway
                     // ========================================================
                     if (currentState >= 11) {{
-                        // 1. Central Direction Vector for P (1st Octant facing camera)
-                        const pDir = new THREE.Vector3(0.55, 0.72, 0.42).normalize();
-                        const pPos = pDir.clone().multiplyScalar(ballRadius);
+                        // 1. Two Native GPU Cutting Planes through O(0,0,0) defining the 1st Octant
+                        const clipPlane1 = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0); // Slices X > 0
+                        const clipPlane2 = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0); // Slices Y > 0
+                        const clipPlane3 = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0); // Slices Z > 0
 
-                        // 3D Orthogonal Basis (Perpendicular horizontal width and inward depth)
-                        const perpAxis = new THREE.Vector3(0.42, 0, -0.55).normalize();
-                        const depthAxis = new THREE.Vector3().crossVectors(pDir, perpAxis).normalize();
+                        // Apply clipping to the ball leather and all pentagons
+                        whiteBall.material.clippingPlanes = [clipPlane1, clipPlane2, clipPlane3];
+                        whiteBall.material.clipIntersection = true;
 
-                        // 2. Geometry Parameters: 0 width at Center O -> 55° wide at Surface P
-                        const halfAngle = 0.46; // ~26.5° half-angle (53° total flare)
-                        const wallDepth = 0.22; // Physical 3D carving depth
-                        const steps = 24;
-
-                        const floorPositions = [];
-                        const wallPositions = [];
-                        const rimPtsLeft = [];
-                        const rimPtsRight = [];
-
-                        // 3. Build the Radial Pie Wedge (Starts at sharp apex O, widens out to P)
-                        for (let i = 0; i <= steps; i++) {{
-                            const t = i / steps;
-                            const r = t * ballRadius;
-
-                            // Linear radial flaring: Width is strictly 0 at O(0,0,0) and maximum at outer rim P
-                            const w = r * Math.tan(halfAngle);
-                            const c = pDir.clone().multiplyScalar(r);
-
-                            // Top Surface Edges (Outer Leather Contour)
-                            const topL = c.clone().add(perpAxis.clone().multiplyScalar(-w));
-                            const topR = c.clone().add(perpAxis.clone().multiplyScalar(w));
-
-                            // Sunken Floor Edges (Depth into the ball's interior)
-                            const d = wallDepth * Math.sin(t * Math.PI * 0.5); // Smooth depth profile
-                            const floorL = topL.clone().add(depthAxis.clone().multiplyScalar(d));
-                            const floorR = topR.clone().add(depthAxis.clone().multiplyScalar(d));
-
-                            rimPtsLeft.push(topL);
-                            rimPtsRight.push(topR);
-
-                            if (i > 0) {{
-                                const prevT = (i - 1) / steps;
-                                const prevR = prevT * ballRadius;
-                                const prevW = prevR * Math.tan(halfAngle);
-                                const prevC = pDir.clone().multiplyScalar(prevR);
-                                const prevD = wallDepth * Math.sin(prevT * Math.PI * 0.5);
-
-                                const pTopL = prevC.clone().add(perpAxis.clone().multiplyScalar(-prevW));
-                                const pTopR = prevC.clone().add(perpAxis.clone().multiplyScalar(prevW));
-                                const pFloorL = pTopL.clone().add(depthAxis.clone().multiplyScalar(prevD));
-                                const pFloorR = pTopR.clone().add(depthAxis.clone().multiplyScalar(prevD));
-
-                                // A. Wedge Channel Floor (Clean Slate Interior)
-                                floorPositions.push(pFloorL.x, pFloorL.y, pFloorL.z, pFloorR.x, pFloorR.y, pFloorR.z, floorL.x, floorL.y, floorL.z);
-                                floorPositions.push(pFloorR.x, pFloorR.y, pFloorR.z, floorR.x, floorR.y, floorR.z, floorL.x, floorL.y, floorL.z);
-
-                                // B. Left Vertical 3D Wall (Carved depth)
-                                wallPositions.push(pTopL.x, pTopL.y, pTopL.z, pFloorL.x, pFloorL.y, pFloorL.z, topL.x, topL.y, topL.z);
-                                wallPositions.push(pFloorL.x, pFloorL.y, pFloorL.z, floorL.x, floorL.y, floorL.z, topL.x, topL.y, topL.z);
-
-                                // C. Right Vertical 3D Wall (Carved depth)
-                                wallPositions.push(pTopR.x, pTopR.y, pTopR.z, topR.x, topR.y, topR.z, pFloorR.x, pFloorR.y, pFloorR.z);
-                                wallPositions.push(pFloorR.x, pFloorR.y, pFloorR.z, topR.x, topR.y, topR.z, floorR.x, floorR.y, floorR.z);
+                        ballGroup.traverse((child) => {{
+                            if (child.isMesh && child !== whiteBall) {{
+                                child.material.clippingPlanes = [clipPlane1, clipPlane2, clipPlane3];
+                                child.material.clipIntersection = true;
                             }}
-                        }}
-
-                        // A. Render Wedge Floor (Clean light slate)
-                        const floorGeo = new THREE.BufferGeometry();
-                        floorGeo.setAttribute('position', new THREE.Float32BufferAttribute(floorPositions, 3));
-                        floorGeo.computeVertexNormals();
-                        const floorMat = new THREE.MeshBasicMaterial({{
-                            color: 0xe2e8f0,
-                            side: THREE.DoubleSide,
-                            depthTest: false,
-                            depthWrite: false
                         }});
-                        const floorMesh = new THREE.Mesh(floorGeo, floorMat);
-                        floorMesh.renderOrder = 948;
-                        ballGroup.add(floorMesh);
 
-                        // B. Render 3D Side Walls (Shadow slate for physical carved depth)
-                        const wallGeo = new THREE.BufferGeometry();
-                        wallGeo.setAttribute('position', new THREE.Float32BufferAttribute(wallPositions, 3));
-                        wallGeo.computeVertexNormals();
-                        const wallMat = new THREE.MeshBasicMaterial({{
-                            color: 0x94a3b8,
-                            side: THREE.DoubleSide,
-                            depthTest: false,
-                            depthWrite: false
+                        // 2. Solid Cross-Section Interior Cap Faces meeting at O(0,0,0)
+                        const capMat = new THREE.MeshStandardMaterial({{
+                            color: 0xe2e8f0, // Clean light slate cross-section
+                            roughness: 0.30,
+                            metalness: 0.05,
+                            side: THREE.DoubleSide
                         }});
-                        const wallMesh = new THREE.Mesh(wallGeo, wallMat);
-                        wallMesh.renderOrder = 949;
-                        ballGroup.add(wallMesh);
 
-                        // C. Dark Slate Seam Border Outline
-                        const rimPts = [...rimPtsLeft, ...rimPtsRight.reverse()];
-                        const rimGeo = new THREE.BufferGeometry().setFromPoints(rimPts);
-                        const rimMat = new THREE.LineBasicMaterial({{
-                            color: 0x1e293b,
-                            linewidth: 3,
-                            depthTest: false,
-                            depthWrite: false
-                        }});
-                        const rimLine = new THREE.Line(rimGeo, rimMat);
-                        rimLine.renderOrder = 950;
-                        ballGroup.add(rimLine);
+                        // Horizontal cross-section plane (X-Z plane)
+                        const hCapGeo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI * 0.5);
+                        const hCap = new THREE.Mesh(hCapGeo, capMat);
+                        hCap.rotation.x = Math.PI * 0.5;
+                        ballGroup.add(hCap);
 
-                        // 4. Central Vector Ray OP (runs straight down the spine from O to P)
+                        // Vertical cross-section plane (X-Y plane)
+                        const vCapGeo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI * 0.5);
+                        const vCap = new THREE.Mesh(vCapGeo, capMat);
+                        ballGroup.add(vCap);
+
+                        // Vertical cross-section plane (Y-Z plane)
+                        const sCapGeo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI * 0.5);
+                        const sCap = new THREE.Mesh(sCapGeo, capMat);
+                        sCap.rotation.y = -Math.PI * 0.5;
+                        ballGroup.add(sCap);
+
+                        // 3. Central Ray OP on the exposed 1st octant surface
+                        const pLocalDir = new THREE.Vector3(0.58, 0.70, 0.42).normalize();
+                        const pPos = pLocalDir.clone().multiplyScalar(ballRadius);
+
+                        // Blue Vector Line from O(0,0,0) to P(x,y,z)
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             pPos
@@ -851,7 +791,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         rayLine.renderOrder = 997;
                         ballGroup.add(rayLine);
 
-                        // Arrowhead sitting right at P in the center of the outer curved rim
+                        // Arrowhead sitting right at P on the outer rim
                         const coneGeo = new THREE.ConeGeometry(0.08, 0.22, 16);
                         const coneMat = new THREE.MeshBasicMaterial({{
                             color: 0x2563eb,
@@ -860,11 +800,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }});
                         const cone = new THREE.Mesh(coneGeo, coneMat);
                         cone.position.copy(pPos);
-                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pDir);
+                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pLocalDir);
                         cone.renderOrder = 998;
                         ballGroup.add(cone);
 
-                        // 5. Center Origin O(0,0,0) at the sharp apex
+                        // 4. Center Origin O(0,0,0) at the internal intersection corner
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const oMat = new THREE.MeshBasicMaterial({{
                             color: 0xdc2626,
@@ -876,10 +816,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(oDot);
 
                         const oSprite = makeMathTextSprite("O (0, 0, 0)", "#dc2626");
-                        oSprite.position.set(-0.68, -0.28, 0.08);
+                        oSprite.position.set(-0.68, -0.28, 0.1);
                         ballGroup.add(oSprite);
 
-                        // 6. Point P(x,y,z) in the center of the wide outer curved rim
+                        // 5. Point P(x,y,z) on the outer curved rim
                         const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const pMat = new THREE.MeshBasicMaterial({{
                             color: 0x1d4ed8,
@@ -892,7 +832,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(pDot);
 
                         const pSprite = makeMathTextSprite("P (x, y, z)", "#1d4ed8");
-                        pSprite.position.copy(pPos).add(new THREE.Vector3(0.60, 0.24, 0));
+                        pSprite.position.copy(pPos).add(new THREE.Vector3(0.62, 0.24, 0));
                         ballGroup.add(pSprite);
                     }}
                 }}
