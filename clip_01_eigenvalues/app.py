@@ -591,7 +591,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(rimLight);
 
                 
-// Helper: Clean Math Text with white halo (No badge box)
+// Helper: Clean Academic Math Text with crisp halo (No background badge)
                 function makeMathTextSprite(text, color) {{
                     const fontface = "Georgia, serif";
                     const fontsize = 52;
@@ -604,7 +604,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
 
-                    // Crisp white outline stroke for readability
+                    // Crisp white stroke halo for high legibility over turf & ball
                     ctx.strokeStyle = "#ffffff";
                     ctx.lineWidth = 8;
                     ctx.lineJoin = "round";
@@ -726,84 +726,133 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                      // ========================================================
-                    // CLICK 4 (State >= 11): 40° Cutaway + Center O + P + Ray OP
+                    // CLICK 4 (State >= 11): Solid 25° Radial Octant Wedge
                     // ========================================================
                     if (currentState >= 11) {{
-                        const wedge = 0.70; // ~40 degree slice
+                        // 1. Central Axis Direction uP (1st Octant facing camera)
+                        const uP = new THREE.Vector3(0.55, 0.72, 0.42).normalize();
+                        const pPos = uP.clone().multiplyScalar(ballRadius);
+                        const rayEnd = uP.clone().multiplyScalar(ballRadius * 1.58);
 
-                        // 1. Cut the outer white sphere by updating geometry
-                        whiteBall.geometry.dispose();
-                        whiteBall.geometry = new THREE.SphereGeometry(
-                            ballRadius, 64, 64,
-                            wedge, Math.PI * 2 - wedge,
-                            0, Math.PI
-                        );
+                        // 2. Build the Solid 25° Radial Wedge Pocket originating at O(0,0,0)
+                        // Orthogonal basis vectors around uP
+                        const upRef = new THREE.Vector3(0, 1, 0);
+                        const tangentU = new THREE.Vector3().crossVectors(uP, upRef).normalize();
+                        const tangentV = new THREE.Vector3().crossVectors(uP, tangentU).normalize();
 
-                        // 2. Add the two exposed interior cut faces meeting at O(0,0,0)
-                        const cutMat = new THREE.MeshStandardMaterial({{
-                            color: 0xe2e8f0,
+                        const halfAngle = 0.22; // ~12.5 deg half-width (25 deg total opening)
+                        const segments = 16;
+                        const arcPtsLeft = [];
+                        const arcPtsRight = [];
+
+                        for (let i = 0; i <= segments; i++) {{
+                            const t = (i / segments) * Math.PI * 0.5 - (Math.PI * 0.25);
+                            const dirLeft = uP.clone()
+                                .add(tangentU.clone().multiplyScalar(-Math.sin(halfAngle)))
+                                .add(tangentV.clone().multiplyScalar(Math.sin(t) * 0.35))
+                                .normalize();
+                            const dirRight = uP.clone()
+                                .add(tangentU.clone().multiplyScalar(Math.sin(halfAngle)))
+                                .add(tangentV.clone().multiplyScalar(Math.sin(t) * 0.35))
+                                .normalize();
+
+                            arcPtsLeft.push(dirLeft.multiplyScalar(ballRadius));
+                            arcPtsRight.push(dirRight.multiplyScalar(ballRadius));
+                        }}
+
+                        // Solid Inner Radial Walls Geometry (Meeting at Apex O)
+                        const wallGeo = new THREE.BufferGeometry();
+                        const positions = [];
+                        const oPoint = [0, 0, 0];
+
+                        // Wall 1: Left Radial Wall from O to outer curve
+                        for (let i = 0; i < segments; i++) {{
+                            positions.push(...oPoint, arcPtsLeft[i].x, arcPtsLeft[i].y, arcPtsLeft[i].z, arcPtsLeft[i+1].x, arcPtsLeft[i+1].y, arcPtsLeft[i+1].z);
+                        }}
+                        // Wall 2: Right Radial Wall from O to outer curve
+                        for (let i = 0; i < segments; i++) {{
+                            positions.push(...oPoint, arcPtsRight[i+1].x, arcPtsRight[i+1].y, arcPtsRight[i+1].z, arcPtsRight[i].x, arcPtsRight[i].y, arcPtsRight[i].z);
+                        }}
+                        // Floor Wall: Closing the bottom of the wedge to seal against the sphere interior
+                        for (let i = 0; i < segments; i++) {{
+                            positions.push(
+                                arcPtsLeft[i].x, arcPtsLeft[i].y, arcPtsLeft[i].z,
+                                arcPtsRight[i].x, arcPtsRight[i].y, arcPtsRight[i].z,
+                                arcPtsRight[i+1].x, arcPtsRight[i+1].y, arcPtsRight[i+1].z
+                            );
+                            positions.push(
+                                arcPtsLeft[i].x, arcPtsLeft[i].y, arcPtsLeft[i].z,
+                                arcPtsRight[i+1].x, arcPtsRight[i+1].y, arcPtsRight[i+1].z,
+                                arcPtsLeft[i+1].x, arcPtsLeft[i+1].y, arcPtsLeft[i+1].z
+                            );
+                        }}
+
+                        wallGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                        wallGeo.computeVertexNormals();
+
+                        const wallMat = new THREE.MeshStandardMaterial({{
+                            color: 0xcfd8dc, // Clean solid engineering slate-grey interior
                             roughness: 0.35,
                             metalness: 0.05,
                             side: THREE.DoubleSide
                         }});
+                        const wedgeMesh = new THREE.Mesh(wallGeo, wallMat);
+                        wedgeMesh.renderOrder = 50;
+                        ballGroup.add(wedgeMesh);
 
-                        // Interior Wall 1 (at angle 0)
-                        const w1Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
-                        const w1 = new THREE.Mesh(w1Geo, cutMat);
-                        w1.rotation.y = 0;
-                        ballGroup.add(w1);
-
-                        // Interior Wall 2 (at angle wedge)
-                        const w2Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
-                        const w2 = new THREE.Mesh(w2Geo, cutMat);
-                        w2.rotation.y = -wedge;
-                        ballGroup.add(w2);
-
-                        // 3. Direction Vector along the exposed inner wall
-                        const pLocalDir = new THREE.Vector3(
-                            Math.cos(wedge * 0.5),
-                            0.78,
-                            Math.sin(wedge * 0.5)
-                        ).normalize();
-
-                        const pPos = pLocalDir.clone().multiplyScalar(ballRadius);
-                        const rayEnd = pLocalDir.clone().multiplyScalar(ballRadius * 1.6);
-
-                        // 4. Ray Line from internal Center O(0,0,0) out through P
+                        // 3. Central Ray OP: Starts at O(0,0,0), passes through midpoint P, shoots outward
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             rayEnd
                         ]);
                         const lineMat = new THREE.LineBasicMaterial({{
                             color: 0x2563eb,
-                            linewidth: 4
+                            linewidth: 4,
+                            depthTest: false,
+                            depthWrite: false
                         }});
                         const rayLine = new THREE.Line(lineGeo, lineMat);
+                        rayLine.renderOrder = 997;
                         ballGroup.add(rayLine);
 
                         // Arrowhead at the tip of the ray
                         const coneGeo = new THREE.ConeGeometry(0.07, 0.20, 16);
-                        const coneMat = new THREE.MeshBasicMaterial({{ color: 0x2563eb }});
+                        const coneMat = new THREE.MeshBasicMaterial({{
+                            color: 0x2563eb,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
                         const cone = new THREE.Mesh(coneGeo, coneMat);
                         cone.position.copy(rayEnd);
-                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pLocalDir);
+                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), uP);
+                        cone.renderOrder = 998;
                         ballGroup.add(cone);
 
-                        // 5. Origin O(0,0,0) at the internal intersection corner
-                        const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
-                        const oMat = new THREE.MeshBasicMaterial({{ color: 0xdc2626 }});
+                        // 4. Physical Origin O(0,0,0) at the sharp interior apex
+                        const oGeo = new THREE.SphereGeometry(0.07, 24, 24);
+                        const oMat = new THREE.MeshBasicMaterial({{
+                            color: 0xdc2626,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
                         const oDot = new THREE.Mesh(oGeo, oMat);
+                        oDot.renderOrder = 998;
                         ballGroup.add(oDot);
 
                         const oSprite = makeMathTextSprite("O (0, 0, 0)", "#dc2626");
-                        oSprite.position.set(-0.55, -0.22, 0.1);
+                        oSprite.position.set(-0.62, -0.22, 0.05);
                         ballGroup.add(oSprite);
 
-                        // 6. Point P(x,y,z) sitting on the outer curved rim
-                        const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
-                        const pMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
+                        // 5. Point P(x,y,z) centered at the midpoint of the outer curved rim
+                        const pGeo = new THREE.SphereGeometry(0.07, 24, 24);
+                        const pMat = new THREE.MeshBasicMaterial({{
+                            color: 0x1d4ed8,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
                         const pDot = new THREE.Mesh(pGeo, pMat);
                         pDot.position.copy(pPos);
+                        pDot.renderOrder = 998;
                         ballGroup.add(pDot);
 
                         const pSprite = makeMathTextSprite("P (x, y, z)", "#1d4ed8");
