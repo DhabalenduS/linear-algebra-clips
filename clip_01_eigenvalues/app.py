@@ -737,8 +737,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         const phiOP = Math.atan2(pLocalDir.z, pLocalDir.x); // ~0.58 rad
                         const halfWedge = 0.22; // ~12.5 deg half-width (25 deg total strip)
 
-                        const phiStart = phiOP + halfWedge;
-                        const phiLength = Math.PI * 2 - (halfWedge * 2);
+                        //const phiStart = phiOP + halfWedge;
+                        //const phiLength = Math.PI * 2 - (halfWedge * 2);
+                        const phiStart = phiOP ;
+                        const phiLength = Math.PI * 2 ;
+
 
                         // 2. Cut the sphere exactly where OP is located
                         whiteBall.geometry.dispose();
