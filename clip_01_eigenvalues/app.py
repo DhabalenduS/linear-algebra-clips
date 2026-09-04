@@ -726,56 +726,60 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                      // ========================================================
-                    // CLICK 4 (State >= 11): 25° Strip Perfectly Aligned with OP
+                    // CLICK 4 (State >= 11): Exact Cartesian 25° Radial Strip
                     // ========================================================
                     if (currentState >= 11) {{
-                        // 1. Central Direction for Point P in 1st Octant
-                        const pLocalDir = new THREE.Vector3(0.58, 0.72, 0.38).normalize();
-                        const pPos = pLocalDir.clone().multiplyScalar(ballRadius);
+                        // 1. Exact Direction Vector for Point P (1st Octant)
+                        const pDir = new THREE.Vector3(0.58, 0.72, 0.38).normalize();
+                        const pPos = pDir.clone().multiplyScalar(ballRadius);
 
-                        // Azimuth angle of OP
-                        const phiOP = Math.atan2(pLocalDir.z, pLocalDir.x); // ~0.58 rad
-                        const halfWedge = 0.22; // ~12.5 deg half-width (25 deg total strip)
+                        // 2. Build 3D Orthogonal Basis for the Strip
+                        const perpAxis = new THREE.Vector3(0, 1, 0).cross(pDir).normalize(); // Width axis
+                        const normalAxis = new THREE.Vector3().crossVectors(pDir, perpAxis).normalize(); // Depth axis
 
-                        //const phiStart = phiOP + halfWedge;
-                        //const phiLength = Math.PI * 2 - (halfWedge * 2);
-                        const phiStart = halfWedge ;
-                        const phiLength = Math.PI * 2 ;
+                        // 3. Construct the 25° Radial Channel (Widens from 0 at O to outer rim at P)
+                        const halfAngle = 0.22; // ~12.5 degrees half-width
+                        const steps = 20;
+                        const channelGeo = new THREE.BufferGeometry();
+                        const positions = [];
 
+                        for (let i = 0; i < steps; i++) {{
+                            const r1 = (i / steps) * ballRadius;
+                            const r2 = ((i + 1) / steps) * ballRadius;
 
-                        // 2. Cut the sphere exactly where OP is located
-                        whiteBall.geometry.dispose();
-                        whiteBall.geometry = new THREE.SphereGeometry(
-                            ballRadius,
-                            64,
-                            64,
-                            phiStart,
-                            phiLength,
-                            0,
-                            Math.PI
-                        );
+                            const w1 = r1 * Math.tan(halfAngle);
+                            const w2 = r2 * Math.tan(halfAngle);
 
-                        // 3. Solid Interior Walls sealing the strip from O to rim
-                        const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0xe2e8f0, // Clean light slate-grey interior
-                            roughness: 0.35,
-                            metalness: 0.05,
+                            // Centerline points along OP
+                            const c1 = pDir.clone().multiplyScalar(r1);
+                            const c2 = pDir.clone().multiplyScalar(r2);
+
+                            // Left and Right wall vertices
+                            const l1 = c1.clone().add(perpAxis.clone().multiplyScalar(-w1));
+                            const r_pt1 = c1.clone().add(perpAxis.clone().multiplyScalar(w1));
+                            const l2 = c2.clone().add(perpAxis.clone().multiplyScalar(-w2));
+                            const r_pt2 = c2.clone().add(perpAxis.clone().multiplyScalar(w2));
+
+                            // Channel Floor Quad (2 triangles)
+                            positions.push(l1.x, l1.y, l1.z, r_pt1.x, r_pt1.y, r_pt1.z, l2.x, l2.y, l2.z);
+                            positions.push(r_pt1.x, r_pt1.y, r_pt1.z, r_pt2.x, r_pt2.y, r_pt2.z, l2.x, l2.y, l2.z);
+                        }}
+
+                        channelGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                        channelGeo.computeVertexNormals();
+
+                        // Clean Slate-Grey Inner Channel Material
+                        const channelMat = new THREE.MeshStandardMaterial({{
+                            color: 0xcfd8dc,
+                            roughness: 0.30,
+                            metalness: 0.08,
                             side: THREE.DoubleSide
                         }});
+                        const channelMesh = new THREE.Mesh(channelGeo, channelMat);
+                        channelMesh.renderOrder = 90;
+                        ballGroup.add(channelMesh);
 
-                        // Left interior wall (at phiOP - halfWedge)
-                        const w1Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
-                        const w1 = new THREE.Mesh(w1Geo, wallMat);
-                        w1.rotation.y = -(phiOP - halfWedge);
-                        ballGroup.add(w1);
-
-                        // Right interior wall (at phiOP + halfWedge)
-                        const w2Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
-                        const w2 = new THREE.Mesh(w2Geo, wallMat);
-                        w2.rotation.y = -(phiOP + halfWedge);
-                        ballGroup.add(w2);
-
-                        // 4. Central Vector Ray OP (runs straight down the middle of the strip)
+                        // 4. Central Vector Ray OP (runs straight down the spine from O to P)
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             pPos
@@ -799,11 +803,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }});
                         const cone = new THREE.Mesh(coneGeo, coneMat);
                         cone.position.copy(pPos);
-                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pLocalDir);
+                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pDir);
                         cone.renderOrder = 998;
                         ballGroup.add(cone);
 
-                        // 5. Center Origin O(0,0,0) at internal center
+                        // 5. Center Origin O(0,0,0) at the sharp interior apex
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const oMat = new THREE.MeshBasicMaterial({{
                             color: 0xdc2626,
@@ -818,7 +822,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oSprite.position.set(-0.62, -0.22, 0.05);
                         ballGroup.add(oSprite);
 
-                        // 6. Point P(x,y,z) at the outer rim in the middle of the strip
+                        // 6. Point P(x,y,z) centered at the outer curved rim
                         const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const pMat = new THREE.MeshBasicMaterial({{
                             color: 0x1d4ed8,
