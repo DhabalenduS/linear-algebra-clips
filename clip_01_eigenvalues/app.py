@@ -1,8 +1,7 @@
 # Clip 01 - Eigenvalues and Eigenvectors
 # Slides 1-3 Complete Implementation (True TV-Grade WebGL 3D Visualization)
-# Immediately before version slide 3 upto Clic 3 is locked
-# In this commit we are trying to achieve Click 4 with OP
-#But this will change the Click 3 also, as 3D Football  will be slightly transparanet 
+# Click 4 Added: Origin O(0,0,0) and Surface Point P(x,y,z)
+# 1st Commit for Click 4 of slide 3 
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -591,6 +590,53 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
 
+                // Helper: Crisp Text Sprite Maker
+                function makeTextSprite(text, color, bgColor, borderColor) {{
+                    const fontface = "Georgia, serif";
+                    const fontsize = 52;
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 512;
+                    canvas.height = 256;
+                    const ctx = canvas.getContext('2d');
+
+                    ctx.font = "Bold " + fontsize + "px " + fontface;
+                    const metrics = ctx.measureText(text);
+                    const textWidth = metrics.width;
+
+                    const padX = 30;
+                    const padY = 20;
+                    const bx = (512 - textWidth - padX * 2) / 2;
+                    const by = (256 - fontsize - padY * 2) / 2;
+                    const bw = textWidth + padX * 2;
+                    const bh = fontsize + padY * 2;
+
+                    // Rounded Pill Box
+                    ctx.fillStyle = bgColor || "rgba(15, 23, 42, 0.88)";
+                    ctx.strokeStyle = borderColor || "rgba(255, 255, 255, 0.9)";
+                    ctx.lineWidth = 5;
+                    ctx.beginPath();
+                    ctx.roundRect(bx, by, bw, bh, 20);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Text
+                    ctx.fillStyle = color || "#ffffff";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillText(text, 256, 128);
+
+                    const texture = new THREE.CanvasTexture(canvas);
+                    const spriteMat = new THREE.SpriteMaterial({{
+                        map: texture,
+                        depthTest: false,
+                        depthWrite: false
+                    }});
+                    const sprite = new THREE.Sprite(spriteMat);
+                    sprite.renderOrder = 999;
+                    sprite.scale.set(1.5, 0.75, 1);
+                    return sprite;
+                }}
+
                 // ============================================================
                 // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
                 // ============================================================
@@ -690,6 +736,76 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.rotation.z = -0.15;
 
                     scene.add(ballGroup);
+
+                    // ========================================================
+                    // CLICK 4 (State >= 11): O(0,0,0) and P(x,y,z) Appearance
+                    // ========================================================
+                    if (currentState >= 11) {{
+                        // A. Origin O(0,0,0) at geometric center with X-ray core glow
+                        const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                        const oMat = new THREE.MeshBasicMaterial({{
+                            color: 0xef4444, // Vibrant Red Origin
+                            depthTest: false,
+                            depthWrite: false
+                        }});
+                        const oMesh = new THREE.Mesh(oGeo, oMat);
+                        oMesh.renderOrder = 998;
+                        ballGroup.add(oMesh);
+
+                        // Origin Halo Ring
+                        const ringGeo = new THREE.RingGeometry(0.12, 0.16, 32);
+                        const ringMat = new THREE.MeshBasicMaterial({{
+                            color: 0xfca5a5,
+                            side: THREE.DoubleSide,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
+                        const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+                        ringMesh.lookAt(camera.position);
+                        ringMesh.renderOrder = 998;
+                        ballGroup.add(ringMesh);
+
+                        // Origin Label O(0,0,0)
+                        const oSprite = makeTextSprite("O (0,0,0)", "#ffffff", "rgba(220, 38, 38, 0.9)", "#ffffff");
+                        oSprite.position.set(-0.55, -0.25, 0);
+                        oSprite.scale.set(1.1, 0.55, 1);
+                        ballGroup.add(oSprite);
+
+                        // B. Point P(x,y,z) on Front-Facing Upper Patch
+                        const pLocalDir = new THREE.Vector3(0.48, 0.72, 0.48).normalize();
+                        const pLocalPos = pLocalDir.clone().multiplyScalar(ballRadius * 1.01);
+
+                        const pGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                        const pMat = new THREE.MeshBasicMaterial({{
+                            color: 0x2563eb, // High-contrast Blue Point P
+                            depthTest: false,
+                            depthWrite: false
+                        }});
+                        const pMesh = new THREE.Mesh(pGeo, pMat);
+                        pMesh.position.copy(pLocalPos);
+                        pMesh.renderOrder = 998;
+                        ballGroup.add(pMesh);
+
+                        // Point P Halo Ring
+                        const pRingGeo = new THREE.RingGeometry(0.12, 0.16, 32);
+                        const pRingMat = new THREE.MeshBasicMaterial({{
+                            color: 0x93c5fd,
+                            side: THREE.DoubleSide,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
+                        const pRingMesh = new THREE.Mesh(pRingGeo, pRingMat);
+                        pRingMesh.position.copy(pLocalPos);
+                        pRingMesh.lookAt(camera.position);
+                        pRingMesh.renderOrder = 998;
+                        ballGroup.add(pRingMesh);
+
+                        // Point P Label P(x,y,z)
+                        const pSprite = makeTextSprite("P (x, y, z)", "#ffffff", "rgba(37, 99, 235, 0.9)", "#ffffff");
+                        pSprite.position.copy(pLocalPos).add(new THREE.Vector3(0.55, 0.28, 0));
+                        pSprite.scale.set(1.2, 0.6, 1);
+                        ballGroup.add(pSprite);
+                    }}
                 }}
 
                 // Render Loop (Stationary)
