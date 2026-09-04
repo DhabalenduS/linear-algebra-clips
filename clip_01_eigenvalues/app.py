@@ -726,60 +726,79 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                      // ========================================================
-                    // CLICK 4 (State >= 11): Exact Cartesian 25° Radial Strip
+                    // CLICK 4 (State >= 11): 25° High-Contrast Radial Strip
                     // ========================================================
                     if (currentState >= 11) {{
-                        // 1. Exact Direction Vector for Point P (1st Octant)
+                        // 1. Central Direction for Point P (1st Octant)
                         const pDir = new THREE.Vector3(0.58, 0.72, 0.38).normalize();
                         const pPos = pDir.clone().multiplyScalar(ballRadius);
 
-                        // 2. Build 3D Orthogonal Basis for the Strip
-                        const perpAxis = new THREE.Vector3(0, 1, 0).cross(pDir).normalize(); // Width axis
-                        const normalAxis = new THREE.Vector3().crossVectors(pDir, perpAxis).normalize(); // Depth axis
+                        // 2. Orthogonal Basis for the Strip
+                        const perpAxis = new THREE.Vector3(0, 1, 0).cross(pDir).normalize();
 
-                        // 3. Construct the 25° Radial Channel (Widens from 0 at O to outer rim at P)
-                        const halfAngle = 0.22; // ~12.5 degrees half-width
+                        // 3. Construct the 25° Radial Wedge Mesh (Widens from 0 at O to outer rim at P)
+                        const halfAngle = 0.22; // ~12.5 degrees half-width (25° total)
                         const steps = 20;
                         const channelGeo = new THREE.BufferGeometry();
                         const positions = [];
+                        const borderPtsLeft = [new THREE.Vector3(0, 0, 0)];
+                        const borderPtsRight = [new THREE.Vector3(0, 0, 0)];
 
-                        for (let i = 0; i < steps; i++) {{
-                            const r1 = (i / steps) * ballRadius;
-                            const r2 = ((i + 1) / steps) * ballRadius;
+                        for (let i = 0; i <= steps; i++) {{
+                            const r = (i / steps) * ballRadius;
+                            const w = r * Math.tan(halfAngle);
+                            const c = pDir.clone().multiplyScalar(r);
 
-                            const w1 = r1 * Math.tan(halfAngle);
-                            const w2 = r2 * Math.tan(halfAngle);
+                            const ptL = c.clone().add(perpAxis.clone().multiplyScalar(-w));
+                            const ptR = c.clone().add(perpAxis.clone().multiplyScalar(w));
 
-                            // Centerline points along OP
-                            const c1 = pDir.clone().multiplyScalar(r1);
-                            const c2 = pDir.clone().multiplyScalar(r2);
+                            if (i > 0) {{
+                                const prevR = ((i - 1) / steps) * ballRadius;
+                                const prevW = prevR * Math.tan(halfAngle);
+                                const prevC = pDir.clone().multiplyScalar(prevR);
+                                const prevL = prevC.clone().add(perpAxis.clone().multiplyScalar(-prevW));
+                                const prevR_pt = prevC.clone().add(perpAxis.clone().multiplyScalar(prevW));
 
-                            // Left and Right wall vertices
-                            const l1 = c1.clone().add(perpAxis.clone().multiplyScalar(-w1));
-                            const r_pt1 = c1.clone().add(perpAxis.clone().multiplyScalar(w1));
-                            const l2 = c2.clone().add(perpAxis.clone().multiplyScalar(-w2));
-                            const r_pt2 = c2.clone().add(perpAxis.clone().multiplyScalar(w2));
+                                // Add Quad (2 triangles)
+                                positions.push(prevL.x, prevL.y, prevL.z, prevR_pt.x, prevR_pt.y, prevR_pt.z, ptL.x, ptL.y, ptL.z);
+                                positions.push(prevR_pt.x, prevR_pt.y, prevR_pt.z, ptR.x, ptR.y, ptR.z, ptL.x, ptL.y, ptL.z);
+                            }}
 
-                            // Channel Floor Quad (2 triangles)
-                            positions.push(l1.x, l1.y, l1.z, r_pt1.x, r_pt1.y, r_pt1.z, l2.x, l2.y, l2.z);
-                            positions.push(r_pt1.x, r_pt1.y, r_pt1.z, r_pt2.x, r_pt2.y, r_pt2.z, l2.x, l2.y, l2.z);
+                            borderPtsLeft.push(ptL);
+                            borderPtsRight.push(ptR);
                         }}
 
                         channelGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
                         channelGeo.computeVertexNormals();
 
-                        // Clean Slate-Grey Inner Channel Material
-                        const channelMat = new THREE.MeshStandardMaterial({{
-                            color: 0xcfd8dc,
-                            roughness: 0.30,
-                            metalness: 0.08,
-                            side: THREE.DoubleSide
+                        // Clean Slate-Grey Inner Wedge Material (depthTest: false ensures 100% visibility)
+                        const channelMat = new THREE.MeshBasicMaterial({{
+                            color: 0xd1d5db, // Light grey cross-section
+                            side: THREE.DoubleSide,
+                            depthTest: false,
+                            depthWrite: false
                         }});
                         const channelMesh = new THREE.Mesh(channelGeo, channelMat);
-                        channelMesh.renderOrder = 90;
+                        channelMesh.renderOrder = 950;
                         ballGroup.add(channelMesh);
 
-                        // 4. Central Vector Ray OP (runs straight down the spine from O to P)
+                        // 4. Crisp Dark Boundary Seam around the Wedge
+                        const borderPoints = [
+                            ...borderPtsLeft,
+                            ...borderPtsRight.reverse()
+                        ];
+                        const borderGeo = new THREE.BufferGeometry().setFromPoints(borderPoints);
+                        const borderMat = new THREE.LineBasicMaterial({{
+                            color: 0x475569, // Dark slate boundary line
+                            linewidth: 3,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
+                        const borderLine = new THREE.Line(borderGeo, borderMat);
+                        borderLine.renderOrder = 951;
+                        ballGroup.add(borderLine);
+
+                        // 5. Central Vector Ray OP (runs straight down the spine from O to P)
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             pPos
@@ -807,7 +826,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         cone.renderOrder = 998;
                         ballGroup.add(cone);
 
-                        // 5. Center Origin O(0,0,0) at the sharp interior apex
+                        // 6. Center Origin O(0,0,0) at the sharp interior apex
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const oMat = new THREE.MeshBasicMaterial({{
                             color: 0xdc2626,
@@ -822,7 +841,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oSprite.position.set(-0.62, -0.22, 0.05);
                         ballGroup.add(oSprite);
 
-                        // 6. Point P(x,y,z) centered at the outer curved rim
+                        // 7. Point P(x,y,z) centered at the outer curved rim
                         const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const pMat = new THREE.MeshBasicMaterial({{
                             color: 0x1d4ed8,
