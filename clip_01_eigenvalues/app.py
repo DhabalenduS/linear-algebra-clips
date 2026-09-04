@@ -591,7 +591,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(rimLight);
 
                 
-// Helper: Crisp Academic Math Text (No background badge)
+// Helper: Clean Math Text with white halo (No badge box)
                 function makeMathTextSprite(text, color) {{
                     const fontface = "Georgia, serif";
                     const fontsize = 52;
@@ -604,7 +604,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
 
-                    // Crisp white outline stroke for maximum contrast
+                    // Crisp white outline stroke for readability
                     ctx.strokeStyle = "#ffffff";
                     ctx.lineWidth = 8;
                     ctx.lineJoin = "round";
@@ -726,20 +726,50 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                      // ========================================================
-                    // CLICK 4 (State >= 11): Physical Center O, Surface P, Ray OP
+                    // CLICK 4 (State >= 11): 40° Cutaway + Center O + P + Ray OP
                     // ========================================================
                     if (currentState >= 11) {{
-                        // Vector direction along the exposed inner cut wall
+                        const wedge = 0.70; // ~40 degree slice
+
+                        // 1. Cut the outer white sphere by updating geometry
+                        whiteBall.geometry.dispose();
+                        whiteBall.geometry = new THREE.SphereGeometry(
+                            ballRadius, 64, 64,
+                            wedge, Math.PI * 2 - wedge,
+                            0, Math.PI
+                        );
+
+                        // 2. Add the two exposed interior cut faces meeting at O(0,0,0)
+                        const cutMat = new THREE.MeshStandardMaterial({{
+                            color: 0xe2e8f0,
+                            roughness: 0.35,
+                            metalness: 0.05,
+                            side: THREE.DoubleSide
+                        }});
+
+                        // Interior Wall 1 (at angle 0)
+                        const w1Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
+                        const w1 = new THREE.Mesh(w1Geo, cutMat);
+                        w1.rotation.y = 0;
+                        ballGroup.add(w1);
+
+                        // Interior Wall 2 (at angle wedge)
+                        const w2Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
+                        const w2 = new THREE.Mesh(w2Geo, cutMat);
+                        w2.rotation.y = -wedge;
+                        ballGroup.add(w2);
+
+                        // 3. Direction Vector along the exposed inner wall
                         const pLocalDir = new THREE.Vector3(
-                            Math.cos(wedgeAngle * 0.5), 
-                            0.78, 
-                            Math.sin(wedgeAngle * 0.5)
+                            Math.cos(wedge * 0.5),
+                            0.78,
+                            Math.sin(wedge * 0.5)
                         ).normalize();
 
                         const pPos = pLocalDir.clone().multiplyScalar(ballRadius);
                         const rayEnd = pLocalDir.clone().multiplyScalar(ballRadius * 1.6);
 
-                        // 1. Ray Line from Center O(0,0,0) out through P into free space
+                        // 4. Ray Line from internal Center O(0,0,0) out through P
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             rayEnd
@@ -751,7 +781,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         const rayLine = new THREE.Line(lineGeo, lineMat);
                         ballGroup.add(rayLine);
 
-                        // Arrowhead
+                        // Arrowhead at the tip of the ray
                         const coneGeo = new THREE.ConeGeometry(0.07, 0.20, 16);
                         const coneMat = new THREE.MeshBasicMaterial({{ color: 0x2563eb }});
                         const cone = new THREE.Mesh(coneGeo, coneMat);
@@ -759,7 +789,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pLocalDir);
                         ballGroup.add(cone);
 
-                        // 2. Physical Origin O(0,0,0) at internal intersection vertex
+                        // 5. Origin O(0,0,0) at the internal intersection corner
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const oMat = new THREE.MeshBasicMaterial({{ color: 0xdc2626 }});
                         const oDot = new THREE.Mesh(oGeo, oMat);
@@ -769,7 +799,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oSprite.position.set(-0.55, -0.22, 0.1);
                         ballGroup.add(oSprite);
 
-                        // 3. Point P(x,y,z) sitting on the outer curved rim
+                        // 6. Point P(x,y,z) sitting on the outer curved rim
                         const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const pMat = new THREE.MeshBasicMaterial({{ color: 0x1d4ed8 }});
                         const pDot = new THREE.Mesh(pGeo, pMat);
