@@ -591,7 +591,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(rimLight);
 
                 // Helper: Crisp Academic Math Text (No background badge)
-                function makeMathTextSprite(text, color) {
+                function makeMathTextSprite(text, color) {{
                     const fontface = "Georgia, serif";
                     const fontsize = 54;
                     const canvas = document.createElement('canvas');
@@ -615,16 +615,16 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.fillText(text, 256, 80);
 
                     const texture = new THREE.CanvasTexture(canvas);
-                    const spriteMat = new THREE.SpriteMaterial({
+                    const spriteMat = new THREE.SpriteMaterial({{
                         map: texture,
                         depthTest: false,
                         depthWrite: false
-                    });
+                    }});
                     const sprite = new THREE.Sprite(spriteMat);
                     sprite.renderOrder = 999;
                     sprite.scale.set(1.35, 0.42, 1);
                     return sprite;
-                }
+                }}
                 // ============================================================
                 // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
                 // ============================================================
@@ -728,7 +728,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // ========================================================
                     // CLICK 4 (State >= 11): Option 1 - Vector Ray OP Depth Cue
                     // ========================================================
-                    if (currentState >= 11) {
+                    if (currentState >= 11) {{
                         // Point P Direction & Position on the surface
                         const pDir = new THREE.Vector3(0.50, 0.70, 0.50).normalize();
                         const pPos = pDir.clone().multiplyScalar(ballRadius * 1.005);
@@ -739,23 +739,23 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             new THREE.Vector3(0, 0, 0),
                             rayEnd
                         ]);
-                        const lineMat = new THREE.LineBasicMaterial({
+                        const lineMat = new THREE.LineBasicMaterial({{
                             color: 0x2563eb,
                             linewidth: 3,
                             depthTest: false,
                             depthWrite: false
-                        });
+                        }});
                         const rayLine = new THREE.Line(lineGeo, lineMat);
                         rayLine.renderOrder = 997;
                         ballGroup.add(rayLine);
 
                         // 2. Arrowhead at the extending tip
                         const coneGeo = new THREE.ConeGeometry(0.07, 0.20, 16);
-                        const coneMat = new THREE.MeshBasicMaterial({
+                        const coneMat = new THREE.MeshBasicMaterial({{
                             color: 0x2563eb,
                             depthTest: false,
                             depthWrite: false
-                        });
+                        }});
                         const cone = new THREE.Mesh(coneGeo, coneMat);
                         cone.position.copy(rayEnd);
                         cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pDir);
@@ -764,11 +764,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         // 3. Center Origin O(0,0,0) dot & clean label
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
-                        const oMat = new THREE.MeshBasicMaterial({
+                        const oMat = new THREE.MeshBasicMaterial({{
                             color: 0xdc2626, // Crimson Red Origin
                             depthTest: false,
                             depthWrite: false
-                        });
+                        }});
                         const oDot = new THREE.Mesh(oGeo, oMat);
                         oDot.renderOrder = 998;
                         ballGroup.add(oDot);
@@ -779,11 +779,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         // 4. Surface Point P(x,y,z) dot & clean label
                         const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
-                        const pMat = new THREE.MeshBasicMaterial({
+                        const pMat = new THREE.MeshBasicMaterial({{
                             color: 0x1d4ed8, // Deep Blue Point P
                             depthTest: false,
                             depthWrite: false
-                        });
+                        }});
                         const pDot = new THREE.Mesh(pGeo, pMat);
                         pDot.position.copy(pPos);
                         pDot.renderOrder = 998;
@@ -792,7 +792,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         const pSprite = makeMathTextSprite("P (x, y, z)", "#1d4ed8");
                         pSprite.position.copy(pPos).add(new THREE.Vector3(0.55, 0.22, 0));
                         ballGroup.add(pSprite);
-                    }
+                    }}
                 }}
 
                 // Render Loop (Stationary)
