@@ -739,7 +739,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         //const phiStart = phiOP + halfWedge;
                         //const phiLength = Math.PI * 2 - (halfWedge * 2);
-                        const phiStart = phiOP ;
+                        const phiStart = halfWedge ;
                         const phiLength = Math.PI * 2 ;
 
 
