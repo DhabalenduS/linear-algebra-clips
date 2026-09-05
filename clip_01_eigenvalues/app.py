@@ -592,48 +592,43 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                 
 
-// Helper: TV-Grade Math Text Pill Badges (100% Readable on Any Background)
+// Helper: Crash-Proof Universal Math Pill Badge (100% Cross-Browser)
                 function makeMathTextSprite(text, dotColor, textColor) {{
                     const canvas = document.createElement('canvas');
                     canvas.width = 1024;
                     canvas.height = 320;
                     const ctx = canvas.getContext('2d');
 
-                    // 1. Draw Sleek White Pill Badge Container
-                    const padX = 60;
-                    const padY = 50;
-                    const w = 1024 - (2 * padX);
-                    const h = 320 - (2 * padY);
-                    const r = h / 2;
+                    const x = 60, y = 50, w = 904, h = 220, r = 110;
 
+                    // Standard Universal Rounded Pill
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
-                    ctx.shadowBlur = 24;
-                    ctx.shadowOffsetY = 8;
-
-                    // Rounded Pill
                     ctx.beginPath();
-                    ctx.roundRect(padX, padY, w, h, r);
+                    ctx.moveTo(x + r, y);
+                    ctx.lineTo(x + w - r, y);
+                    ctx.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2);
+                    ctx.lineTo(x + r, y + h);
+                    ctx.arc(x + r, y + r, r, Math.PI / 2, -Math.PI / 2);
+                    ctx.closePath();
                     ctx.fill();
 
-                    // Subtle Border
-                    ctx.shadowColor = 'transparent';
-                    ctx.strokeStyle = '#cbd5e1';
+                    // Crisp Border
+                    ctx.strokeStyle = '#94a3b8';
                     ctx.lineWidth = 6;
                     ctx.stroke();
 
-                    // 2. Colored Indicator Dot
+                    // Colored Indicator Dot
                     ctx.fillStyle = dotColor || '#2563eb';
                     ctx.beginPath();
-                    ctx.arc(padX + 75, 160, 24, 0, Math.PI * 2);
+                    ctx.arc(x + 85, y + r, 26, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 3. Bold LaTeX-style Typography
-                    ctx.font = "Bold italic 68px Georgia, serif";
+                    // Bold Typography
+                    ctx.font = "bold italic 64px Georgia, serif";
                     ctx.textAlign = "left";
                     ctx.textBaseline = "middle";
                     ctx.fillStyle = textColor || "#0f172a";
-                    ctx.fillText(text, padX + 130, 162);
+                    ctx.fillText(text, x + 145, y + r + 2);
 
                     const texture = new THREE.CanvasTexture(canvas);
                     const spriteMat = new THREE.SpriteMaterial({{
@@ -760,10 +755,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const worldPlane1 = localPlane1.clone().applyMatrix4(ballGroup.matrixWorld);
                     const worldPlane2 = localPlane2.clone().applyMatrix4(ballGroup.matrixWorld);
 
-                    // Apply clipping to sphere & pentagons, and hide hollow seam lines
+                    // Apply clipping to sphere & pentagons, and hide hollow seam lines cleanly
                     ballGroup.traverse((child) => {{
                         if (child.isLine) {{
-                            child.visible = false; // Eliminates all spiderweb wireframe lines cleanly!
+                            child.visible = false;
                         }} else if (child.material) {{
                             child.material.clippingPlanes = [worldPlane1, worldPlane2];
                             child.material.clipIntersection = true;
