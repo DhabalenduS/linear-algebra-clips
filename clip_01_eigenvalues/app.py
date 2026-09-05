@@ -750,7 +750,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    cutGroup.rotation.set(0.35, -0.40, 0.05); // Cinematic 3D camera angle
+                    cutGroup.rotation.set(0.22, 1.20, -0.08); // Cinematic 3D camera angle
 
                     const R = ballRadius;          // 1.35
                     const rBore = 0.20;            // Central Cylinder Bore Radius
@@ -843,13 +843,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oSphere.position.set(0, 0, 0); // Absolute Origin
                     cutGroup.add(oSphere);
 
-                    // Origin Badge: [ • O(0,0,0) ] anchored cleanly in left green turf
+                    // Origin Badge [ • O(0,0,0) ] in clean left turf space
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(2.4, 0.75, 1);
-                    oLabel.position.set(-2.6, -0.5, 0.5);
+                    oLabel.position.set(-2.4, -0.5, 0.5);
                     cutGroup.add(oLabel);
-
-                    // 6. Surface Point P(x,y,z) - Vibrant Cyan Sphere on Outer Curve
+                    
+                    // 6. Surface Point P(x,y,z) - Sits on the upper-right rim of the open wedge
                     const pLocal = new THREE.Vector3(
                         R * 0.707 * 0.99,
                         R * 0.707 * 0.99,
@@ -866,12 +866,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     cutGroup.add(pSphere);
 
-                    // Point P Badge: [ • P(x,y,z) ] anchored cleanly in top-right turf
+                    // Point P Badge [ • P(x,y,z) ] in clean top-right turf space
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(2.4, 0.75, 1);
-                    pLabel.position.set(pLocal.x + 1.35, pLocal.y + 0.55, pLocal.z + 0.2);
+                    pLabel.position.set(2.1, 1.8, 0.5);
                     cutGroup.add(pLabel);
-
                     scene.add(cutGroup);
                 }}
                 // Render Loop (Stationary)
