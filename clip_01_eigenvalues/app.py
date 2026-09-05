@@ -833,6 +833,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // Attach to ballGroup
                     ballGroup.add(click4Group);
                 }}
+
+                // Render Loop (Stationary)
+                function animate() {{
+                    requestAnimationFrame(animate);
+                    renderer.render(scene, camera);
+                }}
                 animate();
 
                 window.addEventListener('resize', () => {{
