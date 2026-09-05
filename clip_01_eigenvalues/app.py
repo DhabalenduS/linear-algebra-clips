@@ -742,54 +742,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Broadcast-Grade Cutaway & Compact Badges
+                // CLICK 4 (State >= 11): Incremental Step (O, P & Bore Only)
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    renderer.localClippingEnabled = true;
-
-                    // 1. Local-to-World Clipping Planes
-                    const localPlane1 = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
-                    const localPlane2 = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
-
-                    ballGroup.updateMatrixWorld(true);
-                    const worldPlane1 = localPlane1.clone().applyMatrix4(ballGroup.matrixWorld);
-                    const worldPlane2 = localPlane2.clone().applyMatrix4(ballGroup.matrixWorld);
-
-                    // Apply clipping and hide hollow seam lines
-                    ballGroup.traverse((child) => {{
-                        if (child.isLine) {{
-                            child.visible = false;
-                        }} else if (child.material) {{
-                            child.material.clippingPlanes = [worldPlane1, worldPlane2];
-                            child.material.clipIntersection = true;
-                            child.material.needsUpdate = true;
-                        }}
-                    }});
-
                     const click4Group = new THREE.Group();
 
-                    // 2. Matte Slate Cut Faces
-                    const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x181e29,
-                        roughness: 0.85,
-                        metalness: 0.1,
-                        side: THREE.DoubleSide
-                    }});
-
-                    // Horizontal Base Floor
-                    const floorGeo = new THREE.CircleGeometry(ballRadius * 0.995, 48, 0, Math.PI / 2);
-                    const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                    floorMesh.rotation.x = Math.PI / 2;
-                    click4Group.add(floorMesh);
-
-                    // Vertical Side Wall
-                    const wallGeo = new THREE.CircleGeometry(ballRadius * 0.995, 48, 0, Math.PI / 2);
-                    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
-                    wallMesh.rotation.y = -Math.PI / 2;
-                    click4Group.add(wallMesh);
-
-                    // 3. Center Origin O(0,0,0) - Glowing Golden Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.11, 32, 32);
+                    // 1. Center Origin O(0,0,0) - Glowing Golden Amber Sphere
+                    const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
@@ -800,20 +759,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oSphere.position.set(0, 0, 0);
                     click4Group.add(oSphere);
 
-                    // Origin Badge: Anchored neatly in lower-left negative space
+                    // Origin Badge - Positioned clearly in the left open turf space
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
-                    oLabel.scale.set(2.1, 0.65, 1);
-                    oLabel.position.set(-1.35, -0.75, 0.5);
+                    oLabel.scale.set(2.4, 0.75, 1);
+                    oLabel.position.set(-2.2, -0.2, 0.4);
                     click4Group.add(oLabel);
 
-                    // 4. Surface Point P(x,y,z) - Vibrant Cyan Sphere on Rim
+                    // 2. Surface Point P(x,y,z) - Vibrant Cyan Sphere on Outer Shell
                     const pLocal = new THREE.Vector3(
-                        ballRadius * 0.707 * 0.99,
-                        ballRadius * 0.707 * 0.99,
-                        0.0
+                        ballRadius * 0.65,
+                        ballRadius * 0.70,
+                        ballRadius * 0.30
                     );
 
-                    const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.12, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
@@ -824,11 +783,25 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     click4Group.add(pSphere);
 
-                    // Point P Badge: Anchored neatly in upper-right negative space
+                    // Point P Badge - Positioned clearly in the top-right open turf space
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
-                    pLabel.scale.set(2.1, 0.65, 1);
-                    pLabel.position.set(pLocal.x + 1.15, pLocal.y + 0.45, pLocal.z + 0.1);
+                    pLabel.scale.set(2.4, 0.75, 1);
+                    pLabel.position.set(pLocal.x + 1.2, pLocal.y + 0.6, pLocal.z + 0.2);
                     click4Group.add(pLabel);
+
+                    // 3. Central Cylinder Bore (Framing Negative Space along Z-axis)
+                    const boreRadius = 0.22;
+                    const boreHeight = ballRadius * 2.1;
+                    const boreGeo = new THREE.CylinderGeometry(boreRadius, boreRadius, boreHeight, 32, 1, true);
+                    const boreMat = new THREE.MeshStandardMaterial({{
+                        color: 0x1e2430,
+                        roughness: 0.8,
+                        metalness: 0.2,
+                        side: THREE.DoubleSide
+                    }});
+                    const boreMesh = new THREE.Mesh(boreGeo, boreMat);
+                    boreMesh.rotation.x = Math.PI / 2; // Aligned through center
+                    click4Group.add(boreMesh);
 
                     // Attach to ballGroup
                     ballGroup.add(click4Group);
