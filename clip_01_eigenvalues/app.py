@@ -769,7 +769,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const botMesh = new THREE.Mesh(botGeo, ballMat);
                     cutGroup.add(botMesh);
 
-                    // 1b. Top Hemisphere (3 of 4 Quadrants Solid, leaving 1st Octant [0, PI/2] open)
+                    // 1b. Top Hemisphere (3 of 4 Quadrants Solid, leaving 1st Octant open)
                     const topGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI * 0.5, Math.PI * 1.5, 0, Math.PI / 2);
                     const topMesh = new THREE.Mesh(topGeo, ballMat);
                     cutGroup.add(topMesh);
@@ -881,6 +881,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.scale.set(2.4, 0.75, 1);
                     pLabel.position.set(oPos.x + 2.2, oPos.y + 1.8, 0.5);
                     scene.add(pLabel);
+                }}
+
+                // Render Loop (Stationary)
+                function animate() {{
+                    requestAnimationFrame(animate);
+                    renderer.render(scene, camera);
                 }}
                 animate();
 
