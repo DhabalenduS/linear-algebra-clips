@@ -728,19 +728,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Hardware-Clipped Wedge + Bore + O & P
+                // CLICK 4 (State >= 11): Broadcast-Grade Precision Cutaway
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // 1. Enable hardware clipping on renderer
+                    // 1. Enable Hardware Clipping
                     renderer.localClippingEnabled = true;
 
-                    // 2. Define the two 45° Clipping Planes (removing 1st octant wedge)
+                    // 2. Define the Wedge Cutout Planes
+                    // Slices an unobstructed 45° window facing the camera
                     const plane1 = new THREE.Plane(new THREE.Vector3(0, -1, 0), oPos.y);
-                    const plane2 = new THREE.Plane(new THREE.Vector3(0.92, -0.38, 0).normalize(), oPos.y * 0.35);
+                    const plane2 = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
 
-                    // Apply clipping to all ball meshes (white sphere + black pentagons)
+                    // Apply clipping to EVERYTHING inside the ball (Spheres, Pentagons, and Seam Lines)
                     ballGroup.traverse((child) => {{
-                        if (child.isMesh) {{
+                        if (child.material) {{
                             child.material.clippingPlanes = [plane1, plane2];
                             child.material.clipIntersection = true;
                             child.material.needsUpdate = true;
@@ -749,68 +750,66 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const click4Group = new THREE.Group();
 
-                    // 3. Charcoal Matte Interior Cut Walls (CAD Finish)
+                    // 3. Matte Charcoal Interior Cut Walls
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1e2430,
-                        roughness: 0.8,
+                        color: 0x181c24,
+                        roughness: 0.85,
                         metalness: 0.1,
                         side: THREE.DoubleSide
                     }});
 
-                    // Wall 1: Horizontal base cut
-                    const wall1Geo = new THREE.PlaneGeometry(ballRadius * 1.05, ballRadius * 1.05);
+                    // Horizontal Base Wall
+                    const wall1Geo = new THREE.PlaneGeometry(ballRadius * 1.02, ballRadius * 1.02);
                     const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
                     wall1Mesh.rotation.x = Math.PI / 2;
-                    wall1Mesh.position.set(ballRadius * 0.45, 0, 0);
+                    wall1Mesh.position.set(ballRadius * 0.5, 0, 0);
                     click4Group.add(wall1Mesh);
 
-                    // Wall 2: 45-degree angled vertical cut
-                    const wall2Geo = new THREE.PlaneGeometry(ballRadius * 1.05, ballRadius * 1.05);
+                    // Vertical Side Wall
+                    const wall2Geo = new THREE.PlaneGeometry(ballRadius * 1.02, ballRadius * 1.02);
                     const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
-                    wall2Mesh.rotation.x = Math.PI / 2;
-                    wall2Mesh.rotation.y = -Math.PI / 4;
-                    wall2Mesh.position.set(ballRadius * 0.32, ballRadius * 0.32, 0);
+                    wall2Mesh.rotation.y = Math.PI / 2;
+                    wall2Mesh.position.set(0, ballRadius * 0.5, 0);
                     click4Group.add(wall2Mesh);
 
-                    // 4. Smooth Bored-Out Cylinder Stage at Origin (r = 0.12)
-                    const boreRadius = 0.14;
-                    const boreGeo = new THREE.CylinderGeometry(boreRadius, boreRadius, ballRadius * 1.8, 32, 1, true);
+                    // 4. Cylindrical Bore at Origin (Negative Space Stage)
+                    const boreRadius = 0.15;
+                    const boreGeo = new THREE.CylinderGeometry(boreRadius, boreRadius, ballRadius * 1.2, 32, 1, true);
                     const boreMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a,
-                        roughness: 0.9,
+                        color: 0x090d16,
+                        roughness: 0.95,
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.rotation.z = Math.PI / 4;
+                    boreMesh.rotation.z = Math.PI / 2;
                     click4Group.add(boreMesh);
 
-                    // 5. Origin Point O(0,0,0) - Vibrant Golden Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.085, 32, 32);
+                    // 5. Origin Point O(0,0,0) - Glowing Amber Core
+                    const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
-                        emissiveIntensity: 0.8,
+                        emissiveIntensity: 0.9,
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.position.set(0, 0, 0);
                     click4Group.add(oSphere);
 
-                    // Origin Label O(0,0,0) - Scaled for high-definition 3D camera
+                    // Origin Label O(0,0,0) - Crisp and Floating in Front
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#d97706");
-                    oLabel.scale.set(2.4, 0.75, 1);
-                    oLabel.position.set(-0.55, -0.35, 0.3);
+                    oLabel.scale.set(2.6, 0.8, 1);
+                    oLabel.position.set(-0.65, -0.38, 0.45);
                     click4Group.add(oLabel);
 
-                    // 6. Surface Point P(x,y,z) - Sits on the exposed outer cut curve
-                    const angleP = Math.PI / 4;
+                    // 6. Surface Point P(x,y,z) - Sits on the Outer Exposed Arc
                     const pLocal = new THREE.Vector3(
-                        ballRadius * Math.cos(angleP) * 0.98,
-                        ballRadius * Math.sin(angleP) * 0.98,
-                        0.28
+                        ballRadius * 0.72,
+                        ballRadius * 0.72,
+                        0.18
                     );
 
-                    const pGeo = new THREE.SphereGeometry(0.085, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.09, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
@@ -821,13 +820,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     click4Group.add(pSphere);
 
-                    // Point Label P(x,y,z)
+                    // Point Label P(x,y,z) - High Visibility
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#0284c7");
-                    pLabel.scale.set(2.4, 0.75, 1);
-                    pLabel.position.set(pLocal.x + 0.65, pLocal.y + 0.35, pLocal.z + 0.1);
+                    pLabel.scale.set(2.6, 0.8, 1);
+                    pLabel.position.set(pLocal.x + 0.65, pLocal.y + 0.35, pLocal.z + 0.2);
                     click4Group.add(pLabel);
 
-                    // Attach to ballGroup
+                    // Attach cleanly to ballGroup
                     ballGroup.add(click4Group);
                 }}
                 // Render Loop (Stationary)
