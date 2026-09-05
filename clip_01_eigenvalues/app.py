@@ -727,12 +727,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Final Broadcast-Grade Visual Lock
+                // CLICK 4 (State >= 11): Broadcast-Grade Clean Finish
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     renderer.localClippingEnabled = true;
 
-                    // 1. Local-to-World Aligned Clipping Planes
+                    // 1. Local-to-World Clipping Planes (Aligned to the ball's tilt)
                     const localPlane1 = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
                     const localPlane2 = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
 
@@ -740,7 +740,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const worldPlane1 = localPlane1.clone().applyMatrix4(ballGroup.matrixWorld);
                     const worldPlane2 = localPlane2.clone().applyMatrix4(ballGroup.matrixWorld);
 
-                    // Apply clipping to all ball meshes and seams
+                    // Clip all meshes and lines
                     ballGroup.traverse((child) => {{
                         if (child.material) {{
                             child.material.clippingPlanes = [worldPlane1, worldPlane2];
@@ -751,78 +751,69 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const click4Group = new THREE.Group();
 
-                    // 2. Sealed Matte Charcoal Cut Faces (Watertight Interior)
+                    // 2. Solid Charcoal Cut Faces (With Depth Priority to eliminate wireframe lines)
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x141820,
+                        color: 0x181e29,
                         roughness: 0.85,
-                        metalness: 0.05,
-                        side: THREE.DoubleSide
+                        metalness: 0.1,
+                        side: THREE.DoubleSide,
+                        polygonOffset: true,
+                        polygonOffsetFactor: -2,
+                        polygonOffsetUnits: -2
                     }});
 
-                    // Base Cut Face (Horizontal quadrant)
-                    const floorGeo = new THREE.CircleGeometry(ballRadius * 0.995, 48, 0, Math.PI / 2);
+                    // Horizontal Base Floor
+                    const floorGeo = new THREE.CircleGeometry(ballRadius * 0.998, 48, 0, Math.PI / 2);
                     const floorMesh = new THREE.Mesh(floorGeo, wallMat);
                     floorMesh.rotation.x = Math.PI / 2;
                     click4Group.add(floorMesh);
 
-                    // Side Cut Face (Vertical quadrant)
-                    const wallGeo = new THREE.CircleGeometry(ballRadius * 0.995, 48, 0, Math.PI / 2);
+                    // Vertical Side Wall
+                    const wallGeo = new THREE.CircleGeometry(ballRadius * 0.998, 48, 0, Math.PI / 2);
                     const wallMesh = new THREE.Mesh(wallGeo, wallMat);
                     wallMesh.rotation.y = -Math.PI / 2;
                     click4Group.add(wallMesh);
 
-                    // Back Inner Seal (Prevents any wireframe leak through the cut)
-                    const backSealGeo = new THREE.SphereGeometry(ballRadius * 0.985, 32, 32, 0, Math.PI * 2, 0, Math.PI);
-                    const backSealMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a,
-                        roughness: 0.9,
-                        side: THREE.BackSide,
-                        clippingPlanes: [worldPlane1, worldPlane2],
-                        clipIntersection: true
-                    }});
-                    const backSealMesh = new THREE.Mesh(backSealGeo, backSealMat);
-                    click4Group.add(backSealMesh);
-
-                    // 3. Center Origin O(0,0,0) - Glowing Golden Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    // 3. Origin Point O(0,0,0) - Vibrant Glowing Golden Core
+                    const oGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
-                        emissiveIntensity: 1.0,
+                        emissiveIntensity: 1.2,
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.position.set(0, 0, 0);
                     click4Group.add(oSphere);
 
-                    // Origin Label O(0,0,0) - Cleanly anchored in negative space
+                    // Origin Label O(0,0,0) - Shifted clearly to the left into green turf space
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#b45309");
-                    oLabel.scale.set(3.2, 1.0, 1);
-                    oLabel.position.set(-0.95, -0.65, 0.4);
+                    oLabel.scale.set(4.2, 1.3, 1);
+                    oLabel.position.set(-1.25, -0.65, 0.6);
                     click4Group.add(oLabel);
 
-                    // 4. Surface Point P(x,y,z) - Exactly on the Outer Rim Arc
+                    // 4. Surface Point P(x,y,z) - Bold Cyan Marker on Rim
                     const pLocal = new THREE.Vector3(
                         ballRadius * 0.707 * 0.99,
                         ballRadius * 0.707 * 0.99,
                         0.0
                     );
 
-                    const pGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
-                        emissiveIntensity: 1.0,
+                        emissiveIntensity: 1.2,
                         roughness: 0.1
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     click4Group.add(pSphere);
 
-                    // Point Label P(x,y,z) - Cleanly positioned above the rim
-                    const pLabel = makeMathTextSprite("P (x, y, z)", "#0369a1");
-                    pLabel.scale.set(3.2, 1.0, 1);
-                    pLabel.position.set(pLocal.x + 0.95, pLocal.y + 0.45, pLocal.z + 0.1);
+                    // Point Label P(x,y,z) - Shifted clearly to the upper right
+                    const pLabel = makeMathTextSprite("P (x, y, z)", "#0284c7");
+                    pLabel.scale.set(4.2, 1.3, 1);
+                    pLabel.position.set(pLocal.x + 1.2, pLocal.y + 0.6, pLocal.z + 0.2);
                     click4Group.add(pLabel);
 
                     // Attach to ballGroup
