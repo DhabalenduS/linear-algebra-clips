@@ -1,7 +1,7 @@
 # Clip 01 - Eigenvalues and Eigenvectors
 # Slides 1-3 Complete Implementation (True TV-Grade WebGL 3D Visualization)
 # Click 4 Added: Origin O(0,0,0) and Surface Point P(x,y,z)
-# Try to restore to 3 to 4 iteration back 
+# Try to separate Click 3 and Click 4
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -725,7 +725,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.rotation.z = -0.15;
 
                     scene.add(ballGroup);
-
+               
+                }}
                      // ========================================================
                     // CLICK 4 (State >= 11): Generous 60° Carved Sector + Core Bowl
                     // ========================================================
@@ -904,7 +905,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         pSprite.position.copy(pPos).add(new THREE.Vector3(0.60, 0.24, 0));
                         ballGroup.add(pSprite);
                     }}
-                }}
                 // Render Loop (Stationary)
                 function animate() {{
                     requestAnimationFrame(animate);
