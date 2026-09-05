@@ -728,119 +728,106 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): 45° Precision Wedge Cut + Cylindrical Bore Stage
+                // CLICK 4 (State >= 11): Hardware-Clipped Wedge + Bore + O & P
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    const click4Group = new THREE.Group();
-                    click4Group.name = "click4Group";
+                    // 1. Enable hardware clipping on renderer
+                    renderer.localClippingEnabled = true;
 
-                    // 1. Angular & Geometric Parameters
-                    const halfAngle = Math.PI / 8; // 22.5° on each side = 45° total wedge
-                    const rBore = 0.09;            // Dedicated cylindrical negative space for O(0,0,0)
-                    const R = ballRadius;          // 1.35
-                    const arcSegments = 24;
+                    // 2. Define the two 45° Clipping Planes (removing 1st octant wedge)
+                    const plane1 = new THREE.Plane(new THREE.Vector3(0, -1, 0), oPos.y);
+                    const plane2 = new THREE.Plane(new THREE.Vector3(0.92, -0.38, 0).normalize(), oPos.y * 0.35);
+
+                    // Apply clipping to all ball meshes (white sphere + black pentagons)
+                    ballGroup.traverse((child) => {{
+                        if (child.isMesh) {{
+                            child.material.clippingPlanes = [plane1, plane2];
+                            child.material.clipIntersection = true;
+                            child.material.needsUpdate = true;
+                        }}
+                    }});
+
+                    const click4Group = new THREE.Group();
+
+                    // 3. Charcoal Matte Interior Cut Walls (CAD Finish)
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1e2430,           // Deep matte charcoal CAD finish
-                        roughness: 0.75,
-                        metalness: 0.15,
+                        color: 0x1e2430,
+                        roughness: 0.8,
+                        metalness: 0.1,
                         side: THREE.DoubleSide
                     }});
-                    const seamHighlightMat = new THREE.LineBasicMaterial({{
-                        color: 0x94a3b8,           // Crisp engineering boundary rim
-                        linewidth: 2
-                    }});
 
-                    // 2. Build Cutout Wall A (-22.5° Plane) and Wall B (+22.5° Plane)
-                    [-halfAngle, halfAngle].forEach(angle => {{
-                        const wallGeo = new THREE.BufferGeometry();
-                        const wallPositions = [];
-                        const cosA = Math.cos(angle);
-                        const sinA = Math.sin(angle);
+                    // Wall 1: Horizontal base cut
+                    const wall1Geo = new THREE.PlaneGeometry(ballRadius * 1.05, ballRadius * 1.05);
+                    const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
+                    wall1Mesh.rotation.x = Math.PI / 2;
+                    wall1Mesh.position.set(ballRadius * 0.45, 0, 0);
+                    click4Group.add(wall1Mesh);
 
-                        // Quad strip from polar angle phi = 0 (top) down to phi = Math.PI/2 (equator)
-                        for (let i = 0; i < arcSegments; i++) {{
-                            const phi1 = (i / arcSegments) * (Math.PI * 0.55);
-                            const phi2 = ((i + 1) / arcSegments) * (Math.PI * 0.55);
+                    // Wall 2: 45-degree angled vertical cut
+                    const wall2Geo = new THREE.PlaneGeometry(ballRadius * 1.05, ballRadius * 1.05);
+                    const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
+                    wall2Mesh.rotation.x = Math.PI / 2;
+                    wall2Mesh.rotation.y = -Math.PI / 4;
+                    wall2Mesh.position.set(ballRadius * 0.32, ballRadius * 0.32, 0);
+                    click4Group.add(wall2Mesh);
 
-                            // Inner Bore points
-                            const pInner1 = new THREE.Vector3(rBore * Math.sin(phi1) * cosA, rBore * Math.cos(phi1), rBore * Math.sin(phi1) * sinA);
-                            const pInner2 = new THREE.Vector3(rBore * Math.sin(phi2) * cosA, rBore * Math.cos(phi2), rBore * Math.sin(phi2) * sinA);
-
-                            // Outer Surface points
-                            const pOuter1 = new THREE.Vector3(R * Math.sin(phi1) * cosA, R * Math.cos(phi1), R * Math.sin(phi1) * sinA);
-                            const pOuter2 = new THREE.Vector3(R * Math.sin(phi2) * cosA, R * Math.cos(phi2), R * Math.sin(phi2) * sinA);
-
-                            // Quad as two triangles
-                            wallPositions.push(
-                                pInner1.x, pInner1.y, pInner1.z,
-                                pOuter1.x, pOuter1.y, pOuter1.z,
-                                pOuter2.x, pOuter2.y, pOuter2.z,
-
-                                pInner1.x, pInner1.y, pInner1.z,
-                                pOuter2.x, pOuter2.y, pOuter2.z,
-                                pInner2.x, pInner2.y, pInner2.z
-                            );
-                        }}
-                        wallGeo.setAttribute('position', new THREE.Float32BufferAttribute(wallPositions, 3));
-                        wallGeo.computeVertexNormals();
-                        const wallMesh = new THREE.Mesh(wallGeo, wallMat);
-                        click4Group.add(wallMesh);
-                    }});
-
-                    // 3. Build Smooth Cylindrical Bore Stage at the Origin (r = 0.09)
-                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, 0.45, 16, 1, true, -halfAngle, 2 * halfAngle);
+                    // 4. Smooth Bored-Out Cylinder Stage at Origin (r = 0.12)
+                    const boreRadius = 0.14;
+                    const boreGeo = new THREE.CylinderGeometry(boreRadius, boreRadius, ballRadius * 1.8, 32, 1, true);
                     const boreMat = new THREE.MeshStandardMaterial({{
                         color: 0x0f172a,
                         roughness: 0.9,
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.rotation.y = Math.PI / 2;
+                    boreMesh.rotation.z = Math.PI / 4;
                     click4Group.add(boreMesh);
 
-                    // 4. Center Origin O(0,0,0) - Glowing Golden Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.065, 32, 32);
+                    // 5. Origin Point O(0,0,0) - Vibrant Golden Amber Sphere
+                    const oGeo = new THREE.SphereGeometry(0.085, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
-                        color: 0xf59e0b,           // Vibrant Amber
+                        color: 0xf59e0b,
                         emissive: 0xd97706,
-                        emissiveIntensity: 0.6,
-                        roughness: 0.2
+                        emissiveIntensity: 0.8,
+                        roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.position.set(0, 0, 0); // At geometric origin of the ball
+                    oSphere.position.set(0, 0, 0);
                     click4Group.add(oSphere);
 
-                    // Origin Label O(0,0,0)
+                    // Origin Label O(0,0,0) - Scaled for high-definition 3D camera
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#d97706");
-                    oLabel.position.set(-0.25, -0.22, 0.15);
+                    oLabel.scale.set(2.4, 0.75, 1);
+                    oLabel.position.set(-0.55, -0.35, 0.3);
                     click4Group.add(oLabel);
 
-                    // 5. Surface Point P(x,y,z) at the Midpoint of the Outer Spherical Arc
-                    const midPhi = Math.PI * 0.28; // Midpoint along the outer arc curve
+                    // 6. Surface Point P(x,y,z) - Sits on the exposed outer cut curve
+                    const angleP = Math.PI / 4;
                     const pLocal = new THREE.Vector3(
-                        R * Math.sin(midPhi) * Math.cos(0),
-                        R * Math.cos(midPhi),
-                        R * Math.sin(midPhi) * Math.sin(0)
+                        ballRadius * Math.cos(angleP) * 0.98,
+                        ballRadius * Math.sin(angleP) * 0.98,
+                        0.28
                     );
 
-                    // Electric Cyan Marker Dot for P
-                    const pGeo = new THREE.SphereGeometry(0.065, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.085, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
-                        color: 0x06b6d4,           // Electric Cyan
+                        color: 0x06b6d4,
                         emissive: 0x0891b2,
-                        emissiveIntensity: 0.7,
-                        roughness: 0.2
+                        emissiveIntensity: 0.9,
+                        roughness: 0.1
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     click4Group.add(pSphere);
 
-                    // Point Label P(x,y,z) Offset Cleanly into Negative Space
+                    // Point Label P(x,y,z)
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#0284c7");
-                    pLabel.position.set(pLocal.x + 0.38, pLocal.y + 0.24, pLocal.z);
+                    pLabel.scale.set(2.4, 0.75, 1);
+                    pLabel.position.set(pLocal.x + 0.65, pLocal.y + 0.35, pLocal.z + 0.1);
                     click4Group.add(pLabel);
 
-                    // Attach everything directly to ballGroup so it aligns with all orientations
+                    // Attach to ballGroup
                     ballGroup.add(click4Group);
                 }}
                 // Render Loop (Stationary)
