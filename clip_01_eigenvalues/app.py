@@ -728,21 +728,25 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Broadcast-Grade Precision Cutaway
+                // CLICK 4 (State >= 11): Watertight Precision Cutaway
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // 1. Enable Hardware Clipping
                     renderer.localClippingEnabled = true;
 
-                    // 2. Define the Wedge Cutout Planes
-                    // Slices an unobstructed 45° window facing the camera
-                    const plane1 = new THREE.Plane(new THREE.Vector3(0, -1, 0), oPos.y);
-                    const plane2 = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
+                    // 1. Mathematically Aligned Clipping Planes in Local Ball Space
+                    // We define planes directly through the ball center (0,0,0) in local coordinates
+                    const localPlane1 = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
+                    const localPlane2 = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
 
-                    // Apply clipping to EVERYTHING inside the ball (Spheres, Pentagons, and Seam Lines)
+                    // Transform local planes to World Space so they rotate perfectly with the ball
+                    ballGroup.updateMatrixWorld(true);
+                    const worldPlane1 = localPlane1.clone().applyMatrix4(ballGroup.matrixWorld);
+                    const worldPlane2 = localPlane2.clone().applyMatrix4(ballGroup.matrixWorld);
+
+                    // Apply clipping to all ball parts (Spheres, Pentagons, Seams)
                     ballGroup.traverse((child) => {{
                         if (child.material) {{
-                            child.material.clippingPlanes = [plane1, plane2];
+                            child.material.clippingPlanes = [worldPlane1, worldPlane2];
                             child.material.clipIntersection = true;
                             child.material.needsUpdate = true;
                         }}
@@ -750,83 +754,82 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const click4Group = new THREE.Group();
 
-                    // 3. Matte Charcoal Interior Cut Walls
+                    // 2. Sealed Matte Slate Cut Faces (Watertight fit)
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x181c24,
-                        roughness: 0.85,
+                        color: 0x1e2430,
+                        roughness: 0.8,
                         metalness: 0.1,
                         side: THREE.DoubleSide
                     }});
 
-                    // Horizontal Base Wall
-                    const wall1Geo = new THREE.PlaneGeometry(ballRadius * 1.02, ballRadius * 1.02);
-                    const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
-                    wall1Mesh.rotation.x = Math.PI / 2;
-                    wall1Mesh.position.set(ballRadius * 0.5, 0, 0);
-                    click4Group.add(wall1Mesh);
+                    // Horizontal Base Floor (Local XZ Plane, X > 0, Z from -R to +R)
+                    const floorGeo = new THREE.CircleGeometry(ballRadius * 0.99, 32, 0, Math.PI);
+                    const floorMesh = new THREE.Mesh(floorGeo, wallMat);
+                    floorMesh.rotation.x = Math.PI / 2;
+                    floorMesh.rotation.z = -Math.PI / 2;
+                    click4Group.add(floorMesh);
 
-                    // Vertical Side Wall
-                    const wall2Geo = new THREE.PlaneGeometry(ballRadius * 1.02, ballRadius * 1.02);
-                    const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
-                    wall2Mesh.rotation.y = Math.PI / 2;
-                    wall2Mesh.position.set(0, ballRadius * 0.5, 0);
-                    click4Group.add(wall2Mesh);
+                    // Vertical Side Wall (Local YZ Plane, Y > 0, Z from -R to +R)
+                    const wallGeo = new THREE.CircleGeometry(ballRadius * 0.99, 32, 0, Math.PI);
+                    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+                    wallMesh.rotation.y = Math.PI / 2;
+                    click4Group.add(wallMesh);
 
-                    // 4. Cylindrical Bore at Origin (Negative Space Stage)
-                    const boreRadius = 0.15;
-                    const boreGeo = new THREE.CylinderGeometry(boreRadius, boreRadius, ballRadius * 1.2, 32, 1, true);
+                    // 3. Central Bore Recess (Stage for O)
+                    const boreGeo = new THREE.CylinderGeometry(0.16, 0.16, ballRadius * 1.5, 32, 1, true, 0, Math.PI);
                     const boreMat = new THREE.MeshStandardMaterial({{
-                        color: 0x090d16,
-                        roughness: 0.95,
+                        color: 0x0f172a,
+                        roughness: 0.9,
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
                     boreMesh.rotation.z = Math.PI / 2;
+                    boreMesh.position.set(0, 0, 0);
                     click4Group.add(boreMesh);
 
-                    // 5. Origin Point O(0,0,0) - Glowing Amber Core
-                    const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    // 4. Center Origin O(0,0,0) - Glowing Golden Amber Sphere
+                    const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
-                        emissiveIntensity: 0.9,
+                        emissiveIntensity: 0.95,
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.position.set(0, 0, 0);
                     click4Group.add(oSphere);
 
-                    // Origin Label O(0,0,0) - Crisp and Floating in Front
+                    // High-Definition Origin Label O(0,0,0)
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#d97706");
-                    oLabel.scale.set(2.6, 0.8, 1);
-                    oLabel.position.set(-0.65, -0.38, 0.45);
+                    oLabel.scale.set(3.4, 1.05, 1);
+                    oLabel.position.set(-0.85, -0.45, 0.5);
                     click4Group.add(oLabel);
 
-                    // 6. Surface Point P(x,y,z) - Sits on the Outer Exposed Arc
+                    // 5. Surface Point P(x,y,z) - Anchored at the Midpoint of the Outer Exposed Arc
                     const pLocal = new THREE.Vector3(
-                        ballRadius * 0.72,
-                        ballRadius * 0.72,
-                        0.18
+                        ballRadius * 0.707 * 0.99,
+                        ballRadius * 0.707 * 0.99,
+                        0.0
                     );
 
-                    const pGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
-                        emissiveIntensity: 0.9,
+                        emissiveIntensity: 0.95,
                         roughness: 0.1
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     click4Group.add(pSphere);
 
-                    // Point Label P(x,y,z) - High Visibility
+                    // High-Definition Point Label P(x,y,z)
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#0284c7");
-                    pLabel.scale.set(2.6, 0.8, 1);
-                    pLabel.position.set(pLocal.x + 0.65, pLocal.y + 0.35, pLocal.z + 0.2);
+                    pLabel.scale.set(3.4, 1.05, 1);
+                    pLabel.position.set(pLocal.x + 0.85, pLocal.y + 0.45, pLocal.z + 0.2);
                     click4Group.add(pLabel);
 
-                    // Attach cleanly to ballGroup
+                    // Attach to ballGroup
                     ballGroup.add(click4Group);
                 }}
                 // Render Loop (Stationary)
