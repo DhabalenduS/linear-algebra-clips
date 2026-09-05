@@ -742,7 +742,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): True 3D Depth Cutaway + Distinct Bore
+                // CLICK 4 (State >= 11): True CAD Pie Slice + Machined Cylinder Bore
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     // Hide the solid Click 3 ball
@@ -750,31 +750,34 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    // Cinematic 3D isometric perspective: look down onto the floor into the core
-                    cutGroup.rotation.set(0.38, 0.72, -0.06);
+                    // Elevated 3D perspective to look directly into the drilled bore and open wedge
+                    cutGroup.rotation.set(0.38, 0.45, -0.05);
 
                     const R = ballRadius;          // 1.35
-                    const rBore = 0.12;            // Clearly visible cylindrical stage (9% radius)
+                    const rBore = 0.18;            // Distinct 13% Machined Bore Radius (Visibly Obvious)
+                    const sliceAngle = Math.PI / 3;// 60° Wide Obvious Pie Slice
+                    const centerAngle = Math.PI / 2; // Facing the camera
 
-                    // 1. Outer White Leather Shell (7 of 8 Octants Solid)
-                    const ballMat = new THREE.MeshStandardMaterial({{
+                    const startAngle = centerAngle + (sliceAngle / 2);
+                    const rightAngle = centerAngle - (sliceAngle / 2);
+                    const sweepAngle = (Math.PI * 2) - sliceAngle; // 300° Solid Shell
+
+                    // 1. Solid Outer White Leather Shell (Remaining 300° Body)
+                    const cutBallGeo = new THREE.SphereGeometry(
+                        R, 64, 64,
+                        startAngle, sweepAngle,
+                        0, Math.PI
+                    );
+                    const cutBallMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10,
                         side: THREE.DoubleSide
                     }});
+                    const cutBallMesh = new THREE.Mesh(cutBallGeo, cutBallMat);
+                    cutGroup.add(cutBallMesh);
 
-                    // 1a. Bottom Hemisphere (100% Solid)
-                    const botGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                    const botMesh = new THREE.Mesh(botGeo, ballMat);
-                    cutGroup.add(botMesh);
-
-                    // 1b. Top Hemisphere (Leaving 1st Octant open)
-                    const topGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI * 0.5, Math.PI * 1.5, 0, Math.PI / 2);
-                    const topMesh = new THREE.Mesh(topGeo, ballMat);
-                    cutGroup.add(topMesh);
-
-                    // 2. Black Pentagons (Only on the 7 solid octants)
+                    // 2. Black Pentagons (Only on the solid 300° shell)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -794,7 +797,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     icoVerts.forEach(v => {{
-                        if (!(v.x > 0.05 && v.y > 0.05 && v.z > 0.05)) {{
+                        let az = Math.atan2(v.z, v.x);
+                        if (az < 0) az += Math.PI * 2;
+                        const inSlice = (az >= rightAngle && az <= startAngle);
+                        if (!inSlice) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -803,55 +809,40 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                     }});
 
-                    // 3. High-Depth 3D Cut Faces (Contrasting Floor & Wall Lighting)
-                    // Floor: Top-lit slate finish
-                    const floorMat = new THREE.MeshStandardMaterial({{
-                        color: 0x242d3d,
-                        roughness: 0.6,
+                    // 3. Matte Charcoal Slate Radial Cut Walls (Knife-Cut Faces)
+                    const wallMat = new THREE.MeshStandardMaterial({{
+                        color: 0x181e28,
+                        roughness: 0.75,
                         metalness: 0.15,
                         side: THREE.DoubleSide
                     }});
-                    const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
-                    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
-                    floorMesh.rotation.x = Math.PI / 2;
-                    cutGroup.add(floorMesh);
 
-                    // Wall: Shaded vertical back wall for deep 3D contrast
-                    const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x131822,
-                        roughness: 0.85,
-                        metalness: 0.1,
-                        side: THREE.DoubleSide
-                    }});
-                    const wallGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
-                    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
-                    cutGroup.add(wallMesh);
+                    // Half-Ring disc spanning from the bore outer radius to sphere outer radius
+                    const ringGeo = new THREE.RingGeometry(rBore, R * 0.998, 48, 1, -Math.PI / 2, Math.PI);
 
-                    // 4. Clearly Defined Cylindrical Bore Stage around Origin O(0,0,0)
-                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 0.95, 32, 1, true, 0, Math.PI / 2);
+                    // Left Radial Wall
+                    const leftWall = new THREE.Mesh(ringGeo, wallMat);
+                    leftWall.rotation.y = -startAngle + Math.PI / 2;
+                    cutGroup.add(leftWall);
+
+                    // Right Radial Wall
+                    const rightWall = new THREE.Mesh(ringGeo, wallMat);
+                    rightWall.rotation.y = -rightAngle + Math.PI / 2;
+                    cutGroup.add(rightWall);
+
+                    // 4. True Machined Cylindrical Bore Tunnel (Visibly Curved Inner Stage)
+                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.9, 32, 1, true, startAngle, sweepAngle);
                     const boreMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0a0e17,
-                        roughness: 0.95,
+                        color: 0x0a0f18,
+                        roughness: 0.5,
+                        metalness: 0.4, // Subtle metallic sheen to emphasize the machined tunnel curve
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.position.set(0, (R * 0.95) / 2, 0);
+                    boreMesh.rotation.y = Math.PI / 2;
                     cutGroup.add(boreMesh);
 
-                    // Visible Bore Pedestal Ring (Creates the distinct circular clearance at origin)
-                    const boreRingGeo = new THREE.RingGeometry(rBore * 0.85, rBore, 32);
-                    const boreRingMat = new THREE.MeshStandardMaterial({{
-                        color: 0x475569, // Polished slate ring highlight
-                        metalness: 0.5,
-                        roughness: 0.2,
-                        side: THREE.DoubleSide
-                    }});
-                    const boreRing = new THREE.Mesh(boreRingGeo, boreRingMat);
-                    boreRing.rotation.x = Math.PI / 2;
-                    boreRing.position.set(0, 0.005, 0);
-                    cutGroup.add(boreRing);
-
-                    // 5. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere (Deep at Core)
+                    // 5. Center Origin O(0,0,0) - Floating Crisp Amber Sphere
                     const oGeo = new THREE.SphereGeometry(0.075, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -860,14 +851,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.position.set(0, 0, 0); // At geometric center inside the bore stage
+                    oSphere.position.set(0, 0, 0); // Suspended at the center of the cylinder bore
                     cutGroup.add(oSphere);
 
-                    // 6. Surface Point P(x,y,z) - Sits on the Outer Leather Surface
+                    // 6. Surface Point P(x,y,z) - Anchored on the Right Wall Outer Rim (Away from Axis)
+                    const elevAngle = Math.PI * 0.32; // Elevated on the upper sphere surface
                     const pLocal = new THREE.Vector3(
-                        R * 0.707 * 0.998,
-                        R * 0.707 * 0.998,
-                        0.0
+                        R * Math.cos(rightAngle) * Math.sin(elevAngle) * 0.998,
+                        R * Math.cos(elevAngle) * 0.998,
+                        R * Math.sin(rightAngle) * Math.sin(elevAngle) * 0.998
                     );
                     const pGeo = new THREE.SphereGeometry(0.085, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
@@ -886,13 +878,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // 7. World-Anchored Broadcast Badges
                     // ========================================================
 
-                    // Origin Badge: Anchored permanently in clear left turf space
+                    // Origin Badge: Pinned cleanly in left turf space
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(2.4, 0.75, 1);
                     oLabel.position.set(oPos.x - 2.5, oPos.y - 0.2, 0.5);
                     scene.add(oLabel);
 
-                    // Point P Badge: Anchored permanently in clear top-right turf space
+                    // Point P Badge: Pinned cleanly in top-right turf space
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(2.4, 0.75, 1);
                     pLabel.position.set(oPos.x + 2.2, oPos.y + 1.8, 0.5);
