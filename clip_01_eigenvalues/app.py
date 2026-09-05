@@ -592,17 +592,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                 
 
-// Helper: Crash-Proof Universal Math Pill Badge (100% Cross-Browser)
-                function makeMathTextSprite(text, dotColor, textColor) {{
+// Helper: Compact TV-Grade Math Pill Badge
+                function makeMathTextSprite(text, dotColor) {{
                     const canvas = document.createElement('canvas');
-                    canvas.width = 1024;
-                    canvas.height = 320;
+                    canvas.width = 640;
+                    canvas.height = 200;
                     const ctx = canvas.getContext('2d');
 
-                    const x = 60, y = 50, w = 904, h = 220, r = 110;
+                    const x = 30, y = 25, w = 580, h = 150, r = 75;
 
-                    // Standard Universal Rounded Pill
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.96)';
+                    // 1. Crisp White Pill Badge
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
                     ctx.beginPath();
                     ctx.moveTo(x + r, y);
                     ctx.lineTo(x + w - r, y);
@@ -612,23 +612,23 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.closePath();
                     ctx.fill();
 
-                    // Crisp Border
-                    ctx.strokeStyle = '#94a3b8';
+                    // 2. High-Contrast Slate Border
+                    ctx.strokeStyle = '#64748b';
                     ctx.lineWidth = 6;
                     ctx.stroke();
 
-                    // Colored Indicator Dot
+                    // 3. Vibrant Indicator Dot
                     ctx.fillStyle = dotColor || '#2563eb';
                     ctx.beginPath();
-                    ctx.arc(x + 85, y + r, 26, 0, Math.PI * 2);
+                    ctx.arc(x + 65, y + r, 24, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Bold Typography
-                    ctx.font = "bold italic 64px Georgia, serif";
+                    // 4. Ultra-Bold Dark Typography (High Visibility)
+                    ctx.font = "bold italic 60px Georgia, serif";
                     ctx.textAlign = "left";
                     ctx.textBaseline = "middle";
-                    ctx.fillStyle = textColor || "#0f172a";
-                    ctx.fillText(text, x + 145, y + r + 2);
+                    ctx.fillStyle = "#0f172a"; // Deep pitch black
+                    ctx.fillText(text, x + 115, y + r + 2);
 
                     const texture = new THREE.CanvasTexture(canvas);
                     const spriteMat = new THREE.SpriteMaterial({{
@@ -742,12 +742,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Broadcast-Grade Cutaway & UI Badges
+                // CLICK 4 (State >= 11): Broadcast-Grade Cutaway & Compact Badges
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     renderer.localClippingEnabled = true;
 
-                    // 1. Local-to-World Clipping Planes (Matches Ball's 3D Orientation)
+                    // 1. Local-to-World Clipping Planes
                     const localPlane1 = new THREE.Plane(new THREE.Vector3(0, -1, 0), 0);
                     const localPlane2 = new THREE.Plane(new THREE.Vector3(1, 0, 0), 0);
 
@@ -755,7 +755,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const worldPlane1 = localPlane1.clone().applyMatrix4(ballGroup.matrixWorld);
                     const worldPlane2 = localPlane2.clone().applyMatrix4(ballGroup.matrixWorld);
 
-                    // Apply clipping to sphere & pentagons, and hide hollow seam lines cleanly
+                    // Apply clipping and hide hollow seam lines
                     ballGroup.traverse((child) => {{
                         if (child.isLine) {{
                             child.visible = false;
@@ -768,7 +768,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const click4Group = new THREE.Group();
 
-                    // 2. Solid Matte Slate Cut Faces (Watertight Interior)
+                    // 2. Matte Slate Cut Faces
                     const wallMat = new THREE.MeshStandardMaterial({{
                         color: 0x181e29,
                         roughness: 0.85,
@@ -788,7 +788,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     wallMesh.rotation.y = -Math.PI / 2;
                     click4Group.add(wallMesh);
 
-                    // 3. Center Origin O(0,0,0) - Glowing Amber Core
+                    // 3. Center Origin O(0,0,0) - Glowing Golden Amber Sphere
                     const oGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -800,13 +800,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oSphere.position.set(0, 0, 0);
                     click4Group.add(oSphere);
 
-                    // Origin Broadcast Badge: [ • O (0, 0, 0) ]
-                    const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b", "#0f172a");
-                    oLabel.scale.set(3.8, 1.2, 1);
-                    oLabel.position.set(-1.45, -0.65, 0.6);
+                    // Origin Badge: Anchored neatly in lower-left negative space
+                    const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
+                    oLabel.scale.set(2.1, 0.65, 1);
+                    oLabel.position.set(-1.35, -0.75, 0.5);
                     click4Group.add(oLabel);
 
-                    // 4. Surface Point P(x,y,z) - Sits on the Outer Rim
+                    // 4. Surface Point P(x,y,z) - Vibrant Cyan Sphere on Rim
                     const pLocal = new THREE.Vector3(
                         ballRadius * 0.707 * 0.99,
                         ballRadius * 0.707 * 0.99,
@@ -824,10 +824,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     click4Group.add(pSphere);
 
-                    // Point P Broadcast Badge: [ • P (x, y, z) ]
-                    const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4", "#0f172a");
-                    pLabel.scale.set(3.8, 1.2, 1);
-                    pLabel.position.set(pLocal.x + 1.45, pLocal.y + 0.65, pLocal.z + 0.2);
+                    // Point P Badge: Anchored neatly in upper-right negative space
+                    const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
+                    pLabel.scale.set(2.1, 0.65, 1);
+                    pLabel.position.set(pLocal.x + 1.15, pLocal.y + 0.45, pLocal.z + 0.1);
                     click4Group.add(pLabel);
 
                     // Attach to ballGroup
