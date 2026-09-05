@@ -742,13 +742,72 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Incremental Step (O, P & Bore Only)
+                // CLICK 4 (State >= 11): Direct CAD Cutaway + Center Cylinder Bore
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    const click4Group = new THREE.Group();
+                    // Hide the solid Click 3 ball so we can show the precision cutaway model
+                    ballGroup.visible = false;
 
-                    // 1. Center Origin O(0,0,0) - Glowing Golden Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
+                    const cutGroup = new THREE.Group();
+                    cutGroup.position.copy(oPos);
+                    cutGroup.rotation.set(0.28, 0.48, -0.15); // Matches Click 3 ball orientation
+
+                    const R = ballRadius;       // 1.35
+                    const rBore = 0.20;         // Cylindrical bore radius at the origin
+                    const halfWedge = Math.PI / 6; // 30° on each side = 60° total opening facing camera
+                    const wedgeOpen = 2 * halfWedge;
+                    const remainingAngle = Math.PI * 2 - wedgeOpen;
+
+                    // 1. Outer Football Shell (Remaining 300° Body)
+                    const cutBallGeo = new THREE.SphereGeometry(
+                        R, 48, 48,
+                        halfWedge, remainingAngle,
+                        0, Math.PI
+                    );
+                    const cutBallMat = new THREE.MeshStandardMaterial({{
+                        color: 0xf8fafc,
+                        roughness: 0.18,
+                        metalness: 0.10,
+                        side: THREE.DoubleSide
+                    }});
+                    const cutBallMesh = new THREE.Mesh(cutBallGeo, cutBallMat);
+                    cutGroup.add(cutBallMesh);
+
+                    // 2. Matte Slate Material for Cut Interior
+                    const wallMat = new THREE.MeshStandardMaterial({{
+                        color: 0x181e29,
+                        roughness: 0.85,
+                        metalness: 0.1,
+                        side: THREE.DoubleSide
+                    }});
+
+                    // 3. Left Cut Wall (Flat plane from Bore radius to Outer Radius)
+                    const wallGeo = new THREE.PlaneGeometry(R - rBore, R * 1.8);
+                    
+                    const leftWall = new THREE.Mesh(wallGeo, wallMat);
+                    leftWall.position.set((R + rBore) / 2 * Math.cos(halfWedge), 0, (R + rBore) / 2 * Math.sin(halfWedge));
+                    leftWall.rotation.y = -halfWedge + Math.PI / 2;
+                    cutGroup.add(leftWall);
+
+                    // 4. Right Cut Wall
+                    const rightWall = new THREE.Mesh(wallGeo, wallMat);
+                    rightWall.position.set((R + rBore) / 2 * Math.cos(-halfWedge), 0, (R + rBore) / 2 * Math.sin(-halfWedge));
+                    rightWall.rotation.y = halfWedge + Math.PI / 2;
+                    cutGroup.add(rightWall);
+
+                    // 5. Central Smooth Cylinder Bore Channel (Frames O in negative space)
+                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.8, 32, 1, true, -halfWedge, wedgeOpen);
+                    const boreMat = new THREE.MeshStandardMaterial({{
+                        color: 0x0f172a,
+                        roughness: 0.9,
+                        side: THREE.BackSide
+                    }});
+                    const boreMesh = new THREE.Mesh(boreGeo, boreMat);
+                    boreMesh.rotation.y = Math.PI;
+                    cutGroup.add(boreMesh);
+
+                    // 6. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
+                    const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
@@ -757,22 +816,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.position.set(0, 0, 0);
-                    click4Group.add(oSphere);
+                    cutGroup.add(oSphere);
 
-                    // Origin Badge - Positioned clearly in the left open turf space
+                    // Origin Badge [ • O(0,0,0) ]
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(2.4, 0.75, 1);
-                    oLabel.position.set(-2.2, -0.2, 0.4);
-                    click4Group.add(oLabel);
+                    oLabel.position.set(-1.8, -0.6, 0.4);
+                    cutGroup.add(oLabel);
 
-                    // 2. Surface Point P(x,y,z) - Vibrant Cyan Sphere on Outer Shell
+                    // 7. Surface Point P(x,y,z) - Sits on the Right Outer Cut Rim
                     const pLocal = new THREE.Vector3(
-                        ballRadius * 0.65,
-                        ballRadius * 0.70,
-                        ballRadius * 0.30
+                        R * Math.cos(-halfWedge) * 0.98,
+                        R * 0.45,
+                        R * Math.sin(-halfWedge) * 0.98
                     );
-
-                    const pGeo = new THREE.SphereGeometry(0.12, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
@@ -781,30 +839,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
-                    click4Group.add(pSphere);
+                    cutGroup.add(pSphere);
 
-                    // Point P Badge - Positioned clearly in the top-right open turf space
+                    // Point P Badge [ • P(x,y,z) ]
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(2.4, 0.75, 1);
-                    pLabel.position.set(pLocal.x + 1.2, pLocal.y + 0.6, pLocal.z + 0.2);
-                    click4Group.add(pLabel);
+                    pLabel.position.set(pLocal.x + 1.2, pLocal.y + 0.45, pLocal.z + 0.2);
+                    cutGroup.add(pLabel);
 
-                    // 3. Central Cylinder Bore (Framing Negative Space along Z-axis)
-                    const boreRadius = 0.22;
-                    const boreHeight = ballRadius * 2.1;
-                    const boreGeo = new THREE.CylinderGeometry(boreRadius, boreRadius, boreHeight, 32, 1, true);
-                    const boreMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1e2430,
-                        roughness: 0.8,
-                        metalness: 0.2,
-                        side: THREE.DoubleSide
-                    }});
-                    const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.rotation.x = Math.PI / 2; // Aligned through center
-                    click4Group.add(boreMesh);
-
-                    // Attach to ballGroup
-                    ballGroup.add(click4Group);
+                    scene.add(cutGroup);
                 }}
 
                 // Render Loop (Stationary)
