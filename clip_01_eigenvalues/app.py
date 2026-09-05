@@ -750,8 +750,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    // Optimal 3D isometric tilt to look right down into the open amphitheater
-                    cutGroup.rotation.set(0.35, -0.65, 0.12);
+                    // Perfect forward-facing broadcast angle
+                    cutGroup.rotation.set(0.32, 0.10, -0.05);
 
                     const R = ballRadius; // 1.35
                     const rBore = 0.20;   // Cylindrical Bore Radius
@@ -771,7 +771,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const cutBallMesh = new THREE.Mesh(cutBallGeo, cutBallMat);
                     cutGroup.add(cutBallMesh);
 
-                    // 2. Black Pentagons (Only on the 270° Solid Shell)
+                    // 2. Black Pentagons (Filtered for the 270° Solid Shell)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -792,7 +792,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     icoVerts.forEach(v => {{
                         // Filter out pentagons located in the open 1st octant
-                        if (!(v.x > 0.05 && v.z > 0.05)) {{
+                        if (!(v.x > 0.05 && v.y > 0.05 && v.z > -0.05)) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -818,6 +818,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // Vertical Side Wall (Quadrant in XY plane)
                     const wallGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+                    wallMesh.rotation.y = -Math.PI / 2;
                     cutGroup.add(wallMesh);
 
                     // 4. Central Cylinder Bore Channel (Negative Space Stage for O)
@@ -863,7 +864,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(cutGroup);
 
                     // ========================================================
-                    // 7. World-Anchored Broadcast Badges (Immune to Ball Tilts)
+                    // 7. World-Anchored Broadcast Badges (Pinned to Turf)
                     // ========================================================
 
                     // Origin Badge: Anchored permanently in clear left turf space
