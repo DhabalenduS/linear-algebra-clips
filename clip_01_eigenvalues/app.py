@@ -742,7 +742,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Deterministic 3D Cutaway + Live Drag
+                // CLICK 4 (State >= 11): Broadcast CAD Cutaway with Edge Rims
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     // Hide the solid Click 3 ball
@@ -750,29 +750,31 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
+                    // Perfect fixed 3D perspective: view directly into the floor & wall
+                    cutGroup.rotation.set(0.36, -0.68, 0.12);
 
                     const R = ballRadius;          // 1.35
-                    const rBore = 0.22;            // Clearly defined 16% machined bore
+                    const rBore = 0.22;            // Clearly defined 16% machined bore stage
 
-                    // 1. Outer White Leather Shell (Missing 1st Octant [x>0, y>0, z>0])
+                    // 1. Solid Outer White Leather Shell (7 of 8 Octants Solid)
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
-                        roughness: 0.2,
-                        metalness: 0.1,
+                        roughness: 0.18,
+                        metalness: 0.10,
                         side: THREE.DoubleSide
                     }});
 
-                    // Bottom Hemisphere (100% Solid)
+                    // Bottom Hemisphere
                     const botGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                     const botMesh = new THREE.Mesh(botGeo, ballMat);
                     cutGroup.add(botMesh);
 
-                    // Top Hemisphere (Solid except 1st Octant)
+                    // Top Hemisphere (3 of 4 Quadrants Solid)
                     const topGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI * 0.5, Math.PI * 1.5, 0, Math.PI / 2);
                     const topMesh = new THREE.Mesh(topGeo, ballMat);
                     cutGroup.add(topMesh);
 
-                    // 2. Black Pentagons (On the solid body only)
+                    // 2. Black Pentagons (On the 7 solid octants only)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -802,36 +804,32 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // 3. Matte Charcoal Slate Interior Cut Faces
                     const floorMat = new THREE.MeshStandardMaterial({{
-                        color: 0x222a38, // Top-lit slate floor
+                        color: 0x1e2532,
                         roughness: 0.65,
+                        metalness: 0.15,
                         side: THREE.DoubleSide
                     }});
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x121722, // Shaded vertical back wall
+                        color: 0x10151f,
                         roughness: 0.85,
                         side: THREE.DoubleSide
                     }});
 
-                    // Horizontal Floor (at y = 0, in XZ plane)
+                    // Horizontal Floor (at y = 0, XZ plane)
                     const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
                     floorMesh.rotation.x = Math.PI / 2;
                     cutGroup.add(floorMesh);
 
-                    // Vertical Wall 1 (at z = 0, in XY plane)
+                    // Vertical Wall (at z = 0, XY plane)
                     const wallGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
-                    const wallMesh1 = new THREE.Mesh(wallGeo, wallMat);
-                    cutGroup.add(wallMesh1);
+                    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+                    cutGroup.add(wallMesh);
 
-                    // Vertical Wall 2 (at x = 0, in YZ plane)
-                    const wallMesh2 = new THREE.Mesh(wallGeo, wallMat);
-                    wallMesh2.rotation.y = -Math.PI / 2;
-                    cutGroup.add(wallMesh2);
-
-                    // 4. Machined Vertical Bore Tunnel (Drilled down along Y-axis)
+                    // 4. Machined Cylinder Bore Stage (Drilled down along Y-axis)
                     const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.0, 32, 1, true, 0, Math.PI / 2);
                     const boreMat = new THREE.MeshStandardMaterial({{
-                        color: 0x090d16,
+                        color: 0x080c14,
                         roughness: 0.4,
                         metalness: 0.6,
                         side: THREE.BackSide
@@ -840,7 +838,28 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     boreMesh.position.set(0, R * 0.5, 0);
                     cutGroup.add(boreMesh);
 
-                    // 5. Origin O(0,0,0) - Suspended Glowing Amber Sphere
+                    // 5. CAD Engineering Rim Outlines (Makes 3D Depth Instantly Obvious)
+                    const rimLineMat = new THREE.LineBasicMaterial({{ color: 0x94a3b8, linewidth: 2 }});
+
+                    // Outline 1: Circular rim around the bored center stage
+                    const boreRimPts = [];
+                    for (let i = 0; i <= 32; i++) {{
+                        const a = (i / 32) * (Math.PI / 2);
+                        boreRimPts.push(new THREE.Vector3(rBore * Math.cos(a), 0.005, rBore * Math.sin(a)));
+                    }}
+                    const boreRimLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(boreRimPts), rimLineMat);
+                    cutGroup.add(boreRimLine);
+
+                    // Outline 2: Outer arc curve where the pie slice meets the outer leather
+                    const outerArcPts = [];
+                    for (let i = 0; i <= 32; i++) {{
+                        const a = (i / 32) * (Math.PI / 2);
+                        outerArcPts.push(new THREE.Vector3(R * Math.cos(a), 0.005, R * Math.sin(a)));
+                    }}
+                    const outerArcLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(outerArcPts), rimLineMat);
+                    cutGroup.add(outerArcLine);
+
+                    // 6. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
                     const oGeo = new THREE.SphereGeometry(0.08, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -852,7 +871,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oSphere.position.set(0, 0, 0);
                     cutGroup.add(oSphere);
 
-                    // 6. Point P(x,y,z) - Anchored at 45° Elevation on the Outer Arc
+                    // 7. Surface Point P(x,y,z) - Anchored at 45° Elevation on the Outer Arc
                     const pLocal = new THREE.Vector3(
                         R * 0.707 * 0.998,
                         R * 0.707 * 0.998,
@@ -871,7 +890,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     scene.add(cutGroup);
 
-                    // 7. World-Anchored Badges
+                    // ========================================================
+                    // 8. World-Anchored Broadcast Badges
+                    // ========================================================
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(2.4, 0.75, 1);
                     oLabel.position.set(oPos.x - 2.5, oPos.y - 0.2, 0.5);
@@ -881,31 +902,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.scale.set(2.4, 0.75, 1);
                     pLabel.position.set(oPos.x + 2.2, oPos.y + 1.8, 0.5);
                     scene.add(pLabel);
-
-                    // Interactive Mouse Dragging to rotate the view freely in real time!
-                    let isDragging = false;
-                    let prevMouseX = 0, prevMouseY = 0;
-
-                    window.addEventListener('mousedown', (e) => {{
-                        isDragging = true;
-                        prevMouseX = e.clientX;
-                        prevMouseY = e.clientY;
-                    }});
-
-                    window.addEventListener('mousemove', (e) => {{
-                        if (isDragging) {{
-                            const deltaX = e.clientX - prevMouseX;
-                            const deltaY = e.clientY - prevMouseY;
-                            cutGroup.rotation.y += deltaX * 0.01;
-                            cutGroup.rotation.x += deltaY * 0.01;
-                            prevMouseX = e.clientX;
-                            prevMouseY = e.clientY;
-                        }}
-                    }});
-
-                    window.addEventListener('mouseup', () => {{
-                        isDragging = false;
-                    }});
                 }}
 
                 // Render Loop
