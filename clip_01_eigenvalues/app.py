@@ -741,9 +741,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
                
                 }}
-                # ========================================================
-                # CLICK 4 (State >= 11): 1st-Octant 45° Pie Slice + 5% Bore
-                # ========================================================
+                // ========================================================
+                // CLICK 4 (State >= 11): 1st-Octant 45° Pie Slice + 5% Bore
+                // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     // Hide the solid Click 3 ball to display the 45° pie-slice model
                     ballGroup.visible = false;
@@ -837,6 +837,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
+                    boreMesh.rotation.y = Math.PI / 2;
                     cutGroup.add(boreMesh);
 
                     // 5. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
