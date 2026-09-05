@@ -742,26 +742,28 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Direct CAD Cutaway + Center Cylinder Bore
+                // CLICK 4 (State >= 11): Front-Facing CAD Cutaway + Pentagons + Bore
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Hide the solid Click 3 ball so we can show the precision cutaway model
+                    // Hide the solid Click 3 ball to display the precision cutaway model
                     ballGroup.visible = false;
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    cutGroup.rotation.set(0.28, 0.48, -0.15); // Matches Click 3 ball orientation
+                    cutGroup.rotation.set(0.25, 0.40, -0.10); // Natural broadcast viewing angle
 
-                    const R = ballRadius;       // 1.35
-                    const rBore = 0.20;         // Cylindrical bore radius at the origin
-                    const halfWedge = Math.PI / 6; // 30° on each side = 60° total opening facing camera
-                    const wedgeOpen = 2 * halfWedge;
-                    const remainingAngle = Math.PI * 2 - wedgeOpen;
+                    const R = ballRadius;          // 1.35
+                    const rBore = 0.22;            // Central Cylinder Bore Radius
+                    const halfWedge = Math.PI / 7; // ~26° half-angle (52° clean opening)
+                    const centerAngle = Math.PI * 0.52; // Directly facing camera line-of-sight
 
-                    // 1. Outer Football Shell (Remaining 300° Body)
+                    const startAngle = centerAngle + halfWedge;
+                    const sweepAngle = (Math.PI * 2) - (2 * halfWedge);
+
+                    // 1. Outer White Leather Shell (Remaining Solid 308°)
                     const cutBallGeo = new THREE.SphereGeometry(
                         R, 48, 48,
-                        halfWedge, remainingAngle,
+                        startAngle, sweepAngle,
                         0, Math.PI
                     );
                     const cutBallMat = new THREE.MeshStandardMaterial({{
@@ -773,7 +775,42 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const cutBallMesh = new THREE.Mesh(cutBallGeo, cutBallMat);
                     cutGroup.add(cutBallMesh);
 
-                    // 2. Matte Slate Material for Cut Interior
+                    // 2. Black Pentagons (Rendered only on the remaining solid shell)
+                    const phi = (1 + Math.sqrt(5)) / 2;
+                    const rawVerts = [
+                        [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
+                        [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
+                        [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
+                    ];
+                    const icoVerts = rawVerts.map(v => {{
+                        const len = Math.hypot(v[0], v[1], v[2]);
+                        return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
+                    }});
+
+                    const pentagonMat = new THREE.MeshStandardMaterial({{
+                        color: 0x0f172a,
+                        roughness: 0.25,
+                        metalness: 0.08,
+                        side: THREE.DoubleSide
+                    }});
+
+                    icoVerts.forEach(v => {{
+                        // Calculate spherical azimuthal angle of pentagon
+                        let az = Math.atan2(v.z, v.x);
+                        if (az < 0) az += Math.PI * 2;
+                        
+                        // Only add pentagon if it sits outside the open cut wedge
+                        const diff = Math.abs(az - centerAngle);
+                        if (diff > halfWedge && (Math.PI * 2 - diff) > halfWedge) {{
+                            const pentGeo = new THREE.CircleGeometry(0.39, 5);
+                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                            pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
+                            pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
+                            cutGroup.add(pentMesh);
+                        }}
+                    }});
+
+                    // 3. Matte Charcoal Slate Interior Cut Faces
                     const wallMat = new THREE.MeshStandardMaterial({{
                         color: 0x181e29,
                         roughness: 0.85,
@@ -781,75 +818,71 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
 
-                    // 3. Left Cut Wall (Flat plane from Bore radius to Outer Radius)
-                    const wallGeo = new THREE.PlaneGeometry(R - rBore, R * 1.8);
-                    
-                    const leftWall = new THREE.Mesh(wallGeo, wallMat);
-                    leftWall.position.set((R + rBore) / 2 * Math.cos(halfWedge), 0, (R + rBore) / 2 * Math.sin(halfWedge));
-                    leftWall.rotation.y = -halfWedge + Math.PI / 2;
-                    cutGroup.add(leftWall);
+                    // Left Cut Face (Semi-circle disc matching angle)
+                    const leftFaceGeo = new THREE.CircleGeometry(R * 0.995, 32);
+                    const leftFace = new THREE.Mesh(leftFaceGeo, wallMat);
+                    leftFace.rotation.y = -(centerAngle - halfWedge) + Math.PI / 2;
+                    cutGroup.add(leftFace);
 
-                    // 4. Right Cut Wall
-                    const rightWall = new THREE.Mesh(wallGeo, wallMat);
-                    rightWall.position.set((R + rBore) / 2 * Math.cos(-halfWedge), 0, (R + rBore) / 2 * Math.sin(-halfWedge));
-                    rightWall.rotation.y = halfWedge + Math.PI / 2;
-                    cutGroup.add(rightWall);
+                    // Right Cut Face
+                    const rightFaceGeo = new THREE.CircleGeometry(R * 0.995, 32);
+                    const rightFace = new THREE.Mesh(rightFaceGeo, wallMat);
+                    rightFace.rotation.y = -(centerAngle + halfWedge) + Math.PI / 2;
+                    cutGroup.add(rightFace);
 
-                    // 5. Central Smooth Cylinder Bore Channel (Frames O in negative space)
-                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.8, 32, 1, true, -halfWedge, wedgeOpen);
+                    // 4. Central Cylinder Bore Stage at Origin (Frames O)
+                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.6, 32, 1, true);
                     const boreMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a,
+                        color: 0x0a0e17,
                         roughness: 0.9,
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.rotation.y = Math.PI;
                     cutGroup.add(boreMesh);
 
-                    // 6. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    // 5. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
+                    const oGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
-                        emissiveIntensity: 1.2,
+                        emissiveIntensity: 1.3,
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.position.set(0, 0, 0);
                     cutGroup.add(oSphere);
 
-                    // Origin Badge [ • O(0,0,0) ]
+                    // Origin Badge: [ • O(0,0,0) ] anchored in lower-left turf space
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(2.4, 0.75, 1);
-                    oLabel.position.set(-1.8, -0.6, 0.4);
+                    oLabel.position.set(-1.85, -0.85, 0.4);
                     cutGroup.add(oLabel);
 
-                    // 7. Surface Point P(x,y,z) - Sits on the Right Outer Cut Rim
+                    // 6. Surface Point P(x,y,z) - Sits on the Right Exposed Cut Rim
                     const pLocal = new THREE.Vector3(
-                        R * Math.cos(-halfWedge) * 0.98,
+                        R * Math.cos(centerAngle - halfWedge) * 0.98,
                         R * 0.45,
-                        R * Math.sin(-halfWedge) * 0.98
+                        R * Math.sin(centerAngle - halfWedge) * 0.98
                     );
-                    const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
-                        emissiveIntensity: 1.2,
+                        emissiveIntensity: 1.3,
                         roughness: 0.1
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     cutGroup.add(pSphere);
 
-                    // Point P Badge [ • P(x,y,z) ]
+                    // Point P Badge: [ • P(x,y,z) ] anchored in upper-right turf space
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(2.4, 0.75, 1);
-                    pLabel.position.set(pLocal.x + 1.2, pLocal.y + 0.45, pLocal.z + 0.2);
+                    pLabel.position.set(pLocal.x + 1.25, pLocal.y + 0.45, pLocal.z + 0.2);
                     cutGroup.add(pLabel);
 
                     scene.add(cutGroup);
                 }}
-
                 // Render Loop (Stationary)
                 function animate() {{
                     requestAnimationFrame(animate);
