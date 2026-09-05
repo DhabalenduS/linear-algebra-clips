@@ -750,7 +750,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    cutGroup.rotation.set(0.28, 0.45, -0.12); // Cinematic 3D camera angle
+                    cutGroup.rotation.set(0.35, -0.40, 0.05); // Cinematic 3D camera angle
 
                     const R = ballRadius;          // 1.35
                     const rBore = 0.20;            // Central Cylinder Bore Radius
