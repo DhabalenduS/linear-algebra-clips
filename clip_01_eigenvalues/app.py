@@ -741,29 +741,29 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
                
                 }}
-                // ========================================================
-                // CLICK 4 (State >= 11): Front-Facing (+Z) Wide 3D Cutaway
-                // ========================================================
+                # ========================================================
+                # CLICK 4 (State >= 11): 1st-Octant 45° Pie Slice + 5% Bore
+                # ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Hide the solid Click 3 ball
+                    // Hide the solid Click 3 ball to display the 45° pie-slice model
                     ballGroup.visible = false;
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    // Gentle forward tilt to look down into the core
-                    cutGroup.rotation.set(0.22, 0.0, 0.0);
+                    // Broadcast three-quarter isometric viewing angle
+                    cutGroup.rotation.set(0.28, 0.35, -0.08);
 
-                    const R = ballRadius;          // 1.35
-                    const rBore = 0.20;            // Central Cylinder Bore Radius
-                    const halfWedge = Math.PI / 5; // 36° on each side = 72° wide canyon!
-                    const centerAngle = Math.PI / 2; // Directly facing camera (+Z)
+                    const R = ballRadius;            // 1.35
+                    const rBore = R * 0.052;         // Exact tight 5% Cylinder Bore (0.070)
+                    const sliceAngle = Math.PI / 4;  // Exact 45° Longitudinal Pie Slice
+                    const centerAngle = Math.PI / 2; // Facing the camera line-of-sight
 
-                    const startAngle = centerAngle + halfWedge;
-                    const sweepAngle = (Math.PI * 2) - (2 * halfWedge); // 288° solid shell
+                    const startAngle = centerAngle + (sliceAngle / 2);
+                    const sweepAngle = (Math.PI * 2) - sliceAngle; // 315° Solid Shell
 
-                    // 1. Outer White Leather Shell (Solid 288° Body)
+                    // 1. Solid Outer White Leather Shell (Remaining 315° Body)
                     const cutBallGeo = new THREE.SphereGeometry(
-                        R, 48, 48,
+                        R, 64, 64,
                         startAngle, sweepAngle,
                         0, Math.PI
                     );
@@ -776,7 +776,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const cutBallMesh = new THREE.Mesh(cutBallGeo, cutBallMat);
                     cutGroup.add(cutBallMesh);
 
-                    // 2. Black Pentagons (Filtered for the 288° Solid Shell only)
+                    // 2. Black Pentagons (Rendered only on the 315° Solid Shell)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -798,9 +798,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     icoVerts.forEach(v => {{
                         let az = Math.atan2(v.z, v.x);
                         if (az < 0) az += Math.PI * 2;
-                        // Only add pentagons outside the open front 72° wedge
-                        const inCut = (az >= (centerAngle - halfWedge) && az <= (centerAngle + halfWedge));
-                        if (!inCut) {{
+                        const inSlice = (az >= (centerAngle - sliceAngle/2) && az <= (centerAngle + sliceAngle/2));
+                        if (!inSlice) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -809,7 +808,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                     }});
 
-                    // 3. Matte Charcoal Semi-Circular Cut Faces
+                    // 3. Matte Charcoal Slate Interior Cut Faces
                     const wallMat = new THREE.MeshStandardMaterial({{
                         color: 0x141820,
                         roughness: 0.85,
@@ -819,18 +818,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const ringGeo = new THREE.RingGeometry(rBore, R * 0.998, 48, 1, -Math.PI / 2, Math.PI);
 
-                    // Left Wall (At angle startAngle)
+                    // Left Cut Face (At angle startAngle)
                     const leftWall = new THREE.Mesh(ringGeo, wallMat);
                     leftWall.rotation.y = -startAngle + Math.PI / 2;
                     cutGroup.add(leftWall);
 
-                    // Right Wall (At angle centerAngle - halfWedge)
-                    const rightAngle = centerAngle - halfWedge;
+                    // Right Cut Face (At angle centerAngle - sliceAngle/2)
+                    const rightAngle = centerAngle - (sliceAngle / 2);
                     const rightWall = new THREE.Mesh(ringGeo, wallMat);
                     rightWall.rotation.y = -rightAngle + Math.PI / 2;
                     cutGroup.add(rightWall);
 
-                    // 4. Central Cylinder Bore Backing (Stage for O)
+                    // 4. Central Tight 5% Cylinder Bore Stage (r = 0.070)
                     const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.95, 32, 1, true, startAngle, sweepAngle);
                     const boreMat = new THREE.MeshStandardMaterial({{
                         color: 0x090d16,
@@ -838,32 +837,32 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.rotation.y = 0;
                     cutGroup.add(boreMesh);
 
                     // 5. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
+                    const oGeo = new THREE.SphereGeometry(0.065, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
-                        emissiveIntensity: 1.5,
+                        emissiveIntensity: 1.6,
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.position.set(0, 0, 0); // Geometric Origin
+                    oSphere.position.set(0, 0, 0); // Geometric Center
                     cutGroup.add(oSphere);
 
-                    // 6. Surface Point P(x,y,z) - Sits on the Right Exposed Rim (Front-Right)
+                    // 6. Surface Point P(x,y,z) - At the Midpoint of the 45° Outer Arc
+                    const midPhi = centerAngle; // Midpoint longitude (facing camera)
                     const pLocal = new THREE.Vector3(
-                        R * Math.cos(rightAngle) * 0.99,
-                        R * 0.45,
-                        R * Math.sin(rightAngle) * 0.99
+                        R * Math.cos(midPhi) * Math.sin(Math.PI * 0.35),
+                        R * Math.cos(Math.PI * 0.35),
+                        R * Math.sin(midPhi) * Math.sin(Math.PI * 0.35)
                     );
-                    const pGeo = new THREE.SphereGeometry(0.12, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.08, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
-                        emissiveIntensity: 1.5,
+                        emissiveIntensity: 1.6,
                         roughness: 0.1
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
@@ -873,16 +872,16 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(cutGroup);
 
                     // ========================================================
-                    // 7. World-Anchored Broadcast Badges (Pinned to Turf)
+                    // 7. World-Anchored Broadcast Badges (Immune to Ball Tilts)
                     // ========================================================
 
-                    // Origin Badge: Anchored permanently in left turf space
+                    // Origin Badge: Anchored permanently in clear left turf space
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(2.4, 0.75, 1);
                     oLabel.position.set(oPos.x - 2.5, oPos.y - 0.2, 0.5);
                     scene.add(oLabel);
 
-                    // Point P Badge: Anchored permanently in top-right turf space
+                    // Point P Badge: Anchored permanently in clear top-right turf space
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(2.4, 0.75, 1);
                     pLabel.position.set(oPos.x + 2.2, oPos.y + 1.8, 0.5);
