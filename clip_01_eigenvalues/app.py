@@ -1,7 +1,7 @@
 # Clip 01 - Eigenvalues and Eigenvectors
 # Slides 1-3 Complete Implementation (True TV-Grade WebGL 3D Visualization)
 # Click 4 Added: Origin O(0,0,0) and Surface Point P(x,y,z)
-# 1st Commit for Click 4 of slide 3 
+# Try to restore to 3 to 4 iteration back 
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -591,28 +591,29 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 scene.add(rimLight);
 
                 
-// Helper: Crisp Academic Math Text (Zero blur, clear white halo)
+
+// Helper: Clean Academic Math Text with crisp halo (No background badge)
                 function makeMathTextSprite(text, color) {{
                     const fontface = "Georgia, serif";
-                    const fontsize = 54;
+                    const fontsize = 52;
                     const canvas = document.createElement('canvas');
                     canvas.width = 512;
-                    canvas.height = 180;
+                    canvas.height = 160;
                     const ctx = canvas.getContext('2d');
 
                     ctx.font = "Bold italic " + fontsize + "px " + fontface;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
 
-                    // Crisp white outline stroke for contrast
+                    // Crisp white stroke halo for high legibility over turf & ball
                     ctx.strokeStyle = "#ffffff";
-                    ctx.lineWidth = 10;
+                    ctx.lineWidth = 8;
                     ctx.lineJoin = "round";
-                    ctx.strokeText(text, 256, 90);
+                    ctx.strokeText(text, 256, 80);
 
                     // Solid text fill
                     ctx.fillStyle = color || "#1d4ed8";
-                    ctx.fillText(text, 256, 90);
+                    ctx.fillText(text, 256, 80);
 
                     const texture = new THREE.CanvasTexture(canvas);
                     const spriteMat = new THREE.SpriteMaterial({{
@@ -622,15 +623,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
                     const sprite = new THREE.Sprite(spriteMat);
                     sprite.renderOrder = 999;
-                    sprite.scale.set(1.4, 0.48, 1);
+                    sprite.scale.set(1.35, 0.42, 1);
                     return sprite;
                 }}
                 // ============================================================
-                // CLICK 3 (State 10): Full Intact 3D Football
-                // CLICK 4 (State >= 11): Dedicated Solid 3D Cutaway Football
+                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
                 // ============================================================
                 let ballGroup = null;
-                const ballRadius = 1.35;
+                const ballRadius = 1.35; // Proportioned to sit cleanly inside center circle
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
                 // Helper: Soft Ground Contact Shadow Texture
@@ -649,7 +649,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 if (currentState >= 10) {{
-                    // 1. Soft Ground Contact Shadow
+                    // 1. Soft Ground Contact Shadow at turf level
                     const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
                     const shadowMat = new THREE.MeshBasicMaterial({{
                         map: createContactShadowTexture(),
@@ -661,46 +661,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
+                    // 2. White Leather Sphere with Glossy 3D Highlights
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
-                    // 2. Leather Sphere Geometry (Full 360° at Click 3, Sliced 270° at Click 4)
-                    const isCutaway = (currentState >= 11);
-                    const phiLength = isCutaway ? (Math.PI * 1.5) : (Math.PI * 2);
-
-                    const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64, 0, phiLength, 0, Math.PI);
+                    const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
-                        metalness: 0.10,
-                        side: THREE.DoubleSide
+                        metalness: 0.10
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                     ballGroup.add(whiteBall);
 
-                    // 3. Solid Interior Cut Faces (Only for Click 4, meeting at O(0,0,0))
-                    if (isCutaway) {{
-                        const cutMat = new THREE.MeshStandardMaterial({{
-                            color: 0xe2e8f0, // Clean solid matte slate cross-section
-                            roughness: 0.30,
-                            metalness: 0.05,
-                            side: THREE.DoubleSide
-                        }});
-
-                        // Vertical Wall 1 (at angle 0)
-                        const w1Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
-                        const w1 = new THREE.Mesh(w1Geo, cutMat);
-                        w1.rotation.y = 0;
-                        ballGroup.add(w1);
-
-                        // Vertical Wall 2 (at angle 270°)
-                        const w2Geo = new THREE.CircleGeometry(ballRadius, 32, 0, Math.PI);
-                        const w2 = new THREE.Mesh(w2Geo, cutMat);
-                        w2.rotation.y = -Math.PI * 0.5;
-                        ballGroup.add(w2);
-                    }}
-
-                    // 4. Black Pentagons (Only on the intact surface)
+                    // 3. Exact 12 Icosahedral 3D Pentagon Coordinates
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -708,52 +682,170 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
                     ];
 
+                    const icoVerts = rawVerts.map(v => {{
+                        const len = Math.hypot(v[0], v[1], v[2]);
+                        return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
+                    }});
+
                     const pentagonMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a,
+                        color: 0x0f172a, // Deep Classic Black
                         roughness: 0.25,
                         metalness: 0.08,
                         side: THREE.DoubleSide
                     }});
 
-                    rawVerts.forEach(rv => {{
-                        const len = Math.hypot(rv[0], rv[1], rv[2]);
-                        const v = new THREE.Vector3(rv[0] / len, rv[1] / len, rv[2] / len);
+                    const pentagonRadius = 0.39; // Proportioned to 1.35 radius
 
-                        // If cutaway, do not render pentagons inside the 90° opening
-                        let skip = false;
-                        if (isCutaway) {{
-                            const az = Math.atan2(v.z, v.x);
-                            const normAz = (az < 0) ? az + Math.PI * 2 : az;
-                            if (normAz > Math.PI * 1.5 && normAz < Math.PI * 2) {{
-                                skip = true;
-                            }}
-                        }}
-
-                        if (!skip) {{
-                            const pentGeo = new THREE.CircleGeometry(0.38, 5);
-                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                            pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
-                            pentMesh.lookAt(v.clone().multiplyScalar(ballRadius * 2));
-                            ballGroup.add(pentMesh);
-                        }}
+                    // Place 12 Real 3D Pentagons on the Sphere Surface
+                    icoVerts.forEach(v => {{
+                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                        pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
+                        pentMesh.lookAt(v.clone().multiplyScalar(ballRadius * 2));
+                        ballGroup.add(pentMesh);
                     }});
 
-                    // Tilt ball naturally toward camera
+                    // 4. 3D Seam Lines Connecting Neighbors (20 Hexagons)
+                    const lineMat = new THREE.LineBasicMaterial({{ color: 0x64748b, linewidth: 2 }});
+                    for (let i = 0; i < icoVerts.length; i++) {{
+                        for (let j = i + 1; j < icoVerts.length; j++) {{
+                            if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
+                                const p1 = icoVerts[i].clone().multiplyScalar(ballRadius * 1.001);
+                                const p2 = icoVerts[j].clone().multiplyScalar(ballRadius * 1.001);
+                                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+                                const seam = new THREE.Line(lineGeo, lineMat);
+                                ballGroup.add(seam);
+                            }}
+                        }}
+                    }}
+
+                    // Angle the ball naturally toward the 3D TV camera
                     ballGroup.rotation.x = 0.28;
                     ballGroup.rotation.y = 0.48;
                     ballGroup.rotation.z = -0.15;
 
                     scene.add(ballGroup);
 
-                    // ========================================================
-                    // CLICK 4 (State >= 11): Physical Center O, Surface P, Ray OP
+                     // ========================================================
+                    // CLICK 4 (State >= 11): Generous 60° Carved Sector + Core Bowl
                     // ========================================================
                     if (currentState >= 11) {{
-                        // Point P on the exposed flat interior face at the rim
-                        const pLocalDir = new THREE.Vector3(0.68, 0.73, 0).normalize();
-                        const pPos = pLocalDir.clone().multiplyScalar(ballRadius);
+                        // 1. Central Direction for Point P (1st Octant)
+                        const pDir = new THREE.Vector3(0.58, 0.70, 0.42).normalize();
+                        const pPos = pDir.clone().multiplyScalar(ballRadius);
 
-                        // 1. Ray Line from Center O(0,0,0) to P(x,y,z)
+                        // Orthogonal basis vectors for width and depth
+                        const perpAxis = new THREE.Vector3(0.42, 0, -0.58).normalize(); // Pure horizontal width axis
+                        const depthAxis = new THREE.Vector3().crossVectors(pDir, perpAxis).normalize(); // Inward depth axis
+
+                        // 2. Geometry Parameters
+                        const coreR = 0.35;        // Large rounded central pocket radius
+                        const halfWedge = 0.52;    // ~30° half-width (60° total opening)
+                        const wallDepth = 0.26;    // 3D physical carving depth
+                        const steps = 24;
+
+                        const floorPositions = [];
+                        const wallPositions = [];
+                        const rimPtsLeft = [];
+                        const rimPtsRight = [];
+
+                        // 3. Build Central Core Bowl + Flaring 60° Channel
+                        for (let i = 0; i <= steps; i++) {{
+                            const t = i / steps;
+                            const r = t * ballRadius;
+
+                            // Width formula: circular bowl for r < coreR, flaring out to 60° for r >= coreR
+                            let w;
+                            if (r < coreR) {{
+                                const angle = (r / coreR) * (Math.PI * 0.5);
+                                w = Math.sin(angle) * coreR + 0.18;
+                            }} else {{
+                                w = coreR + (r - coreR) * Math.tan(halfWedge) * 1.35;
+                            }}
+
+                            const c = pDir.clone().multiplyScalar(r);
+
+                            // Top Surface Edges (Outer Leather)
+                            const topL = c.clone().add(perpAxis.clone().multiplyScalar(-w));
+                            const topR = c.clone().add(perpAxis.clone().multiplyScalar(w));
+
+                            // Sunken Floor Edges (Carved Depth)
+                            const dFactor = (r < coreR) ? wallDepth : wallDepth * (1.0 - t * 0.3);
+                            const floorL = topL.clone().add(depthAxis.clone().multiplyScalar(dFactor));
+                            const floorR = topR.clone().add(depthAxis.clone().multiplyScalar(dFactor));
+
+                            rimPtsLeft.push(topL);
+                            rimPtsRight.push(topR);
+
+                            if (i > 0) {{
+                                const prevT = (i - 1) / steps;
+                                const prevR = prevT * ballRadius;
+                                let prevW = (prevR < coreR) ? (Math.sin((prevR / coreR) * (Math.PI * 0.5)) * coreR + 0.18) : (coreR + (prevR - coreR) * Math.tan(halfWedge) * 1.35);
+
+                                const prevC = pDir.clone().multiplyScalar(prevR);
+                                const pTopL = prevC.clone().add(perpAxis.clone().multiplyScalar(-prevW));
+                                const pTopR = prevC.clone().add(perpAxis.clone().multiplyScalar(prevW));
+
+                                const prevDFactor = (prevR < coreR) ? wallDepth : wallDepth * (1.0 - prevT * 0.3);
+                                const pFloorL = pTopL.clone().add(depthAxis.clone().multiplyScalar(prevDFactor));
+                                const pFloorR = pTopR.clone().add(depthAxis.clone().multiplyScalar(prevDFactor));
+
+                                // Channel Floor Quads
+                                floorPositions.push(pFloorL.x, pFloorL.y, pFloorL.z, pFloorR.x, pFloorR.y, pFloorR.z, floorL.x, floorL.y, floorL.z);
+                                floorPositions.push(pFloorR.x, pFloorR.y, pFloorR.z, floorR.x, floorR.y, floorR.z, floorL.x, floorL.y, floorL.z);
+
+                                // Left 3D Vertical Side Wall
+                                wallPositions.push(pTopL.x, pTopL.y, pTopL.z, pFloorL.x, pFloorL.y, pFloorL.z, topL.x, topL.y, topL.z);
+                                wallPositions.push(pFloorL.x, pFloorL.y, pFloorL.z, floorL.x, floorL.y, floorL.z, topL.x, topL.y, topL.z);
+
+                                // Right 3D Vertical Side Wall
+                                wallPositions.push(pTopR.x, pTopR.y, pTopR.z, topR.x, topR.y, topR.z, pFloorR.x, pFloorR.y, pFloorR.z);
+                                wallPositions.push(pFloorR.x, pFloorR.y, pFloorR.z, topR.x, topR.y, topR.z, floorR.x, floorR.y, floorR.z);
+                            }}
+                        }}
+
+                        // A. Render Sunken Floor (Clean light slate)
+                        const floorGeo = new THREE.BufferGeometry();
+                        floorGeo.setAttribute('position', new THREE.Float32BufferAttribute(floorPositions, 3));
+                        floorGeo.computeVertexNormals();
+                        const floorMat = new THREE.MeshBasicMaterial({{
+                            color: 0xe2e8f0,
+                            side: THREE.DoubleSide,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
+                        const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+                        floorMesh.renderOrder = 948;
+                        ballGroup.add(floorMesh);
+
+                        // B. Render 3D Side Walls (Darker slate shadow for physical depth contrast)
+                        const wallGeo = new THREE.BufferGeometry();
+                        wallGeo.setAttribute('position', new THREE.Float32BufferAttribute(wallPositions, 3));
+                        wallGeo.computeVertexNormals();
+                        const wallMat = new THREE.MeshBasicMaterial({{
+                            color: 0x94a3b8, // Contrast shadow
+                            side: THREE.DoubleSide,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
+                        const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+                        wallMesh.renderOrder = 949;
+                        ballGroup.add(wallMesh);
+
+                        // C. Dark Slate Seam Border Outline
+                        const rimPts = [...rimPtsLeft, ...rimPtsRight.reverse()];
+                        const rimGeo = new THREE.BufferGeometry().setFromPoints(rimPts);
+                        const rimMat = new THREE.LineBasicMaterial({{
+                            color: 0x1e293b, // Dark seam line
+                            linewidth: 3,
+                            depthTest: false,
+                            depthWrite: false
+                        }});
+                        const rimLine = new THREE.Line(rimGeo, rimMat);
+                        rimLine.renderOrder = 950;
+                        ballGroup.add(rimLine);
+
+                        // 4. Central Vector Ray OP from Core O to Rim P
                         const lineGeo = new THREE.BufferGeometry().setFromPoints([
                             new THREE.Vector3(0, 0, 0),
                             pPos
@@ -768,7 +860,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         rayLine.renderOrder = 997;
                         ballGroup.add(rayLine);
 
-                        // 2. Arrowhead right at point P on the outer rim
+                        // Arrowhead right at point P on the outer rim
                         const coneGeo = new THREE.ConeGeometry(0.08, 0.22, 16);
                         const coneMat = new THREE.MeshBasicMaterial({{
                             color: 0x2563eb,
@@ -777,11 +869,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }});
                         const cone = new THREE.Mesh(coneGeo, coneMat);
                         cone.position.copy(pPos);
-                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pLocalDir);
+                        cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pDir);
                         cone.renderOrder = 998;
                         ballGroup.add(cone);
 
-                        // 3. Center Origin O(0,0,0) at the internal intersection corner
+                        // 5. Origin O(0,0,0) comfortably seated inside the core bowl
                         const oGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const oMat = new THREE.MeshBasicMaterial({{
                             color: 0xdc2626,
@@ -793,10 +885,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(oDot);
 
                         const oSprite = makeMathTextSprite("O (0, 0, 0)", "#dc2626");
-                        oSprite.position.set(-0.68, -0.28, 0.1);
+                        oSprite.position.set(-0.68, -0.28, 0.08);
                         ballGroup.add(oSprite);
 
-                        // 4. Point P(x,y,z) at the outer curved rim
+                        // 6. Point P(x,y,z) centered on the outer curved rim
                         const pGeo = new THREE.SphereGeometry(0.08, 24, 24);
                         const pMat = new THREE.MeshBasicMaterial({{
                             color: 0x1d4ed8,
@@ -809,7 +901,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(pDot);
 
                         const pSprite = makeMathTextSprite("P (x, y, z)", "#1d4ed8");
-                        pSprite.position.copy(pPos).add(new THREE.Vector3(0.62, 0.24, 0));
+                        pSprite.position.copy(pPos).add(new THREE.Vector3(0.60, 0.24, 0));
                         ballGroup.add(pSprite);
                     }}
                 }}
