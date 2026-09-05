@@ -742,20 +742,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Final Broadcast 3D CAD Cutaway
+                // CLICK 4 (State >= 11): Final Broadcast-Locked 3D Cutaway
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Hide the solid Click 3 ball to display the 3D cutaway
+                    // Hide the solid Click 3 ball
                     ballGroup.visible = false;
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    cutGroup.rotation.set(0.22, 1.20, -0.08); // Cinematic 3D camera angle
+                    // Optimal 3D isometric tilt to look right down into the open amphitheater
+                    cutGroup.rotation.set(0.35, -0.65, 0.12);
 
-                    const R = ballRadius;          // 1.35
-                    const rBore = 0.20;            // Central Cylinder Bore Radius
+                    const R = ballRadius; // 1.35
+                    const rBore = 0.20;   // Cylindrical Bore Radius
 
-                    // 1. Outer White Leather Shell (270° Solid Spherical Body)
+                    // 1. Outer White Leather Shell (Solid 270° Body)
                     const cutBallGeo = new THREE.SphereGeometry(
                         R, 48, 48,
                         Math.PI * 0.5, Math.PI * 1.5,
@@ -770,7 +771,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const cutBallMesh = new THREE.Mesh(cutBallGeo, cutBallMat);
                     cutGroup.add(cutBallMesh);
 
-                    // 2. Black Pentagons (Filtered for the 270° solid body only)
+                    // 2. Black Pentagons (Only on the 270° Solid Shell)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -790,8 +791,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     icoVerts.forEach(v => {{
-                        // Do not add pentagons in the 1st quadrant cutout
-                        if (!(v.x > 0.1 && v.y > 0.1 && v.z > -0.2)) {{
+                        // Filter out pentagons located in the open 1st octant
+                        if (!(v.x > 0.05 && v.z > 0.05)) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -800,7 +801,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                     }});
 
-                    // 3. Matte Charcoal Interior Cut Faces (Horizontal Floor + Vertical Wall)
+                    // 3. Matte Charcoal Interior Cut Faces (Floor + Wall)
                     const wallMat = new THREE.MeshStandardMaterial({{
                         color: 0x141820,
                         roughness: 0.85,
@@ -808,19 +809,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
 
-                    // Horizontal Base Floor (Quadrant disc from rBore to R)
+                    // Horizontal Base Floor (Quadrant in XZ plane)
                     const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const floorMesh = new THREE.Mesh(floorGeo, wallMat);
                     floorMesh.rotation.x = Math.PI / 2;
                     cutGroup.add(floorMesh);
 
-                    // Vertical Side Wall (Quadrant disc from rBore to R)
+                    // Vertical Side Wall (Quadrant in XY plane)
                     const wallGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const wallMesh = new THREE.Mesh(wallGeo, wallMat);
-                    wallMesh.rotation.y = -Math.PI / 2;
                     cutGroup.add(wallMesh);
 
-                    // 4. Central Cylinder Bore Backing (Negative Space Stage)
+                    // 4. Central Cylinder Bore Channel (Negative Space Stage for O)
                     const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.9, 32, 1, true, 0, Math.PI * 1.5);
                     const boreMat = new THREE.MeshStandardMaterial({{
                         color: 0x090d16,
@@ -840,16 +840,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.position.set(0, 0, 0); // Absolute Origin
+                    oSphere.position.set(0, 0, 0); // At geometric origin
                     cutGroup.add(oSphere);
 
-                    // Origin Badge [ • O(0,0,0) ] in clean left turf space
-                    const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
-                    oLabel.scale.set(2.4, 0.75, 1);
-                    oLabel.position.set(-2.4, -0.5, 0.5);
-                    cutGroup.add(oLabel);
-                    
-                    // 6. Surface Point P(x,y,z) - Sits on the upper-right rim of the open wedge
+                    // 6. Surface Point P(x,y,z) - Vibrant Cyan Sphere on Upper Exposed Arc
                     const pLocal = new THREE.Vector3(
                         R * 0.707 * 0.99,
                         R * 0.707 * 0.99,
@@ -866,12 +860,23 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     cutGroup.add(pSphere);
 
-                    // Point P Badge [ • P(x,y,z) ] in clean top-right turf space
+                    scene.add(cutGroup);
+
+                    // ========================================================
+                    // 7. World-Anchored Broadcast Badges (Immune to Ball Tilts)
+                    // ========================================================
+
+                    // Origin Badge: Anchored permanently in clear left turf space
+                    const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
+                    oLabel.scale.set(2.4, 0.75, 1);
+                    oLabel.position.set(oPos.x - 2.5, oPos.y - 0.2, 0.5);
+                    scene.add(oLabel);
+
+                    // Point P Badge: Anchored permanently in clear top-right turf space
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(2.4, 0.75, 1);
-                    pLabel.position.set(2.1, 1.8, 0.5);
-                    cutGroup.add(pLabel);
-                    scene.add(cutGroup);
+                    pLabel.position.set(oPos.x + 2.2, oPos.y + 1.8, 0.5);
+                    scene.add(pLabel);
                 }}
                 // Render Loop (Stationary)
                 function animate() {{
