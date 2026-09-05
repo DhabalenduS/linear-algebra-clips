@@ -742,7 +742,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Wide 72° Front-Facing 3D Canyon Cut
+                // CLICK 4 (State >= 11): Front-Facing (+Z) Wide 3D Cutaway
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     // Hide the solid Click 3 ball
@@ -750,18 +750,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    // Gentle broadcast tilt so viewer looks slightly down into the core
-                    cutGroup.rotation.set(0.25, 0.0, 0.0);
+                    // Gentle forward tilt to look down into the core
+                    cutGroup.rotation.set(0.22, 0.0, 0.0);
 
                     const R = ballRadius;          // 1.35
                     const rBore = 0.20;            // Central Cylinder Bore Radius
-                    const halfWedge = Math.PI / 5; // 36° on each side = 72° wide open canyon!
+                    const halfWedge = Math.PI / 5; // 36° on each side = 72° wide canyon!
+                    const centerAngle = Math.PI / 2; // Directly facing camera (+Z)
+
+                    const startAngle = centerAngle + halfWedge;
                     const sweepAngle = (Math.PI * 2) - (2 * halfWedge); // 288° solid shell
 
                     // 1. Outer White Leather Shell (Solid 288° Body)
                     const cutBallGeo = new THREE.SphereGeometry(
                         R, 48, 48,
-                        halfWedge, sweepAngle,
+                        startAngle, sweepAngle,
                         0, Math.PI
                     );
                     const cutBallMat = new THREE.MeshStandardMaterial({{
@@ -793,11 +796,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     icoVerts.forEach(v => {{
-                        // Calculate spherical angle
-                        let az = Math.atan2(v.x, v.z);
+                        let az = Math.atan2(v.z, v.x);
                         if (az < 0) az += Math.PI * 2;
-                        // Only add pentagon if outside the open 72° front wedge
-                        if (az > halfWedge && az < (Math.PI * 2 - halfWedge)) {{
+                        // Only add pentagons outside the open front 72° wedge
+                        const inCut = (az >= (centerAngle - halfWedge) && az <= (centerAngle + halfWedge));
+                        if (!inCut) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -814,28 +817,28 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
 
-                    // Half-Ring disc from rBore to outer radius R
                     const ringGeo = new THREE.RingGeometry(rBore, R * 0.998, 48, 1, -Math.PI / 2, Math.PI);
 
-                    // Left Wall (Angled at +36° to the left)
+                    // Left Wall (At angle startAngle)
                     const leftWall = new THREE.Mesh(ringGeo, wallMat);
-                    leftWall.rotation.y = halfWedge;
+                    leftWall.rotation.y = -startAngle + Math.PI / 2;
                     cutGroup.add(leftWall);
 
-                    // Right Wall (Angled at -36° to the right)
+                    // Right Wall (At angle centerAngle - halfWedge)
+                    const rightAngle = centerAngle - halfWedge;
                     const rightWall = new THREE.Mesh(ringGeo, wallMat);
-                    rightWall.rotation.y = -halfWedge;
+                    rightWall.rotation.y = -rightAngle + Math.PI / 2;
                     cutGroup.add(rightWall);
 
-                    // 4. Central Cylinder Bore Backing (Negative Space Stage for O)
-                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.9, 32, 1, true, -halfWedge, 2 * halfWedge);
+                    // 4. Central Cylinder Bore Backing (Stage for O)
+                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.95, 32, 1, true, startAngle, sweepAngle);
                     const boreMat = new THREE.MeshStandardMaterial({{
                         color: 0x090d16,
                         roughness: 0.95,
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.rotation.y = Math.PI;
+                    boreMesh.rotation.y = 0;
                     cutGroup.add(boreMesh);
 
                     // 5. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
@@ -847,14 +850,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.position.set(0, 0, 0); // Geometric Center
+                    oSphere.position.set(0, 0, 0); // Geometric Origin
                     cutGroup.add(oSphere);
 
-                    // 6. Surface Point P(x,y,z) - Sits on the Right Exposed Outer Rim
+                    // 6. Surface Point P(x,y,z) - Sits on the Right Exposed Rim (Front-Right)
                     const pLocal = new THREE.Vector3(
-                        R * Math.sin(-halfWedge) * 0.99,
-                        R * 0.40,
-                        R * Math.cos(-halfWedge) * 0.99
+                        R * Math.cos(rightAngle) * 0.99,
+                        R * 0.45,
+                        R * Math.sin(rightAngle) * 0.99
                     );
                     const pGeo = new THREE.SphereGeometry(0.12, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
@@ -870,16 +873,16 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(cutGroup);
 
                     // ========================================================
-                    // 7. World-Anchored Broadcast Badges (Pinned to Turf Space)
+                    // 7. World-Anchored Broadcast Badges (Pinned to Turf)
                     // ========================================================
 
-                    // Origin Badge: Anchored permanently in clear left turf space
+                    // Origin Badge: Anchored permanently in left turf space
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(2.4, 0.75, 1);
                     oLabel.position.set(oPos.x - 2.5, oPos.y - 0.2, 0.5);
                     scene.add(oLabel);
 
-                    // Point P Badge: Anchored permanently in clear top-right turf space
+                    // Point P Badge: Anchored permanently in top-right turf space
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(2.4, 0.75, 1);
                     pLabel.position.set(oPos.x + 2.2, oPos.y + 1.8, 0.5);
