@@ -742,23 +742,24 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): 1st-Octant 45° Pie Slice + 5% Bore
+                // CLICK 4 (State >= 11): Master 1st-Octant 45° Pie Slice + 5% Bore
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Hide the solid Click 3 ball to display the 45° pie-slice model
+                    // Hide the solid Click 3 ball
                     ballGroup.visible = false;
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
                     // Broadcast three-quarter isometric viewing angle
-                    cutGroup.rotation.set(0.28, 0.35, -0.08);
+                    cutGroup.rotation.set(0.26, 0.38, -0.06);
 
                     const R = ballRadius;            // 1.35
-                    const rBore = R * 0.052;         // Exact tight 5% Cylinder Bore (0.070)
+                    const rBore = R * 0.052;         // Tight 5% Cylinder Bore (0.070)
                     const sliceAngle = Math.PI / 4;  // Exact 45° Longitudinal Pie Slice
-                    const centerAngle = Math.PI / 2; // Facing the camera line-of-sight
+                    const centerAngle = Math.PI / 2; // Facing camera line-of-sight
 
                     const startAngle = centerAngle + (sliceAngle / 2);
+                    const rightAngle = centerAngle - (sliceAngle / 2);
                     const sweepAngle = (Math.PI * 2) - sliceAngle; // 315° Solid Shell
 
                     // 1. Solid Outer White Leather Shell (Remaining 315° Body)
@@ -818,13 +819,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const ringGeo = new THREE.RingGeometry(rBore, R * 0.998, 48, 1, -Math.PI / 2, Math.PI);
 
-                    // Left Cut Face (At angle startAngle)
+                    // Left Cut Face
                     const leftWall = new THREE.Mesh(ringGeo, wallMat);
                     leftWall.rotation.y = -startAngle + Math.PI / 2;
                     cutGroup.add(leftWall);
 
-                    // Right Cut Face (At angle centerAngle - sliceAngle/2)
-                    const rightAngle = centerAngle - (sliceAngle / 2);
+                    // Right Cut Face
                     const rightWall = new THREE.Mesh(ringGeo, wallMat);
                     rightWall.rotation.y = -rightAngle + Math.PI / 2;
                     cutGroup.add(rightWall);
@@ -852,12 +852,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oSphere.position.set(0, 0, 0); // Geometric Center
                     cutGroup.add(oSphere);
 
-                    // 6. Surface Point P(x,y,z) - At the Midpoint of the 45° Outer Arc
-                    const midPhi = centerAngle; // Midpoint longitude (facing camera)
+                    // 6. Surface Point P(x,y,z) - Exactly on the Outer Rim of the 45° Pie Slice
+                    const elevAngle = Math.PI * 0.25; // 45° elevation
                     const pLocal = new THREE.Vector3(
-                        R * Math.cos(midPhi) * Math.sin(Math.PI * 0.35),
-                        R * Math.cos(Math.PI * 0.35),
-                        R * Math.sin(midPhi) * Math.sin(Math.PI * 0.35)
+                        R * Math.cos(rightAngle) * Math.sin(elevAngle) * 0.998,
+                        R * Math.cos(elevAngle) * 0.998,
+                        R * Math.sin(rightAngle) * Math.sin(elevAngle) * 0.998
                     );
                     const pGeo = new THREE.SphereGeometry(0.08, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
@@ -873,7 +873,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(cutGroup);
 
                     // ========================================================
-                    // 7. World-Anchored Broadcast Badges (Immune to Ball Tilts)
+                    // 7. World-Anchored Broadcast Badges
                     // ========================================================
 
                     // Origin Badge: Anchored permanently in clear left turf space
