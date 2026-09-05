@@ -742,7 +742,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Master 1st-Octant 45° Pie Slice + 5% Bore
+                // CLICK 4 (State >= 11): Precision 1st-Octant Pie Slice + 5% Bore
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     // Hide the solid Click 3 ball
@@ -750,34 +750,31 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    // Broadcast three-quarter isometric viewing angle
-                    cutGroup.rotation.set(0.26, 0.38, -0.06);
+                    // Optimal 3D isometric angle looking onto the floor & wall
+                    cutGroup.rotation.set(0.30, -0.45, 0.08);
 
-                    const R = ballRadius;            // 1.35
-                    const rBore = R * 0.052;         // Tight 5% Cylinder Bore (0.070)
-                    const sliceAngle = Math.PI / 4;  // Exact 45° Longitudinal Pie Slice
-                    const centerAngle = Math.PI / 2; // Facing camera line-of-sight
+                    const R = ballRadius;          // 1.35
+                    const rBore = R * 0.052;       // Exact 5% Cylinder Bore (0.070)
 
-                    const startAngle = centerAngle + (sliceAngle / 2);
-                    const rightAngle = centerAngle - (sliceAngle / 2);
-                    const sweepAngle = (Math.PI * 2) - sliceAngle; // 315° Solid Shell
-
-                    // 1. Solid Outer White Leather Shell (Remaining 315° Body)
-                    const cutBallGeo = new THREE.SphereGeometry(
-                        R, 64, 64,
-                        startAngle, sweepAngle,
-                        0, Math.PI
-                    );
-                    const cutBallMat = new THREE.MeshStandardMaterial({{
+                    // 1. Outer White Leather Shell (7 of 8 Octants Solid)
+                    const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10,
                         side: THREE.DoubleSide
                     }});
-                    const cutBallMesh = new THREE.Mesh(cutBallGeo, cutBallMat);
-                    cutGroup.add(cutBallMesh);
 
-                    // 2. Black Pentagons (Rendered only on the 315° Solid Shell)
+                    // 1a. Entire Bottom Hemisphere (100% Solid)
+                    const botGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                    const botMesh = new THREE.Mesh(botGeo, ballMat);
+                    cutGroup.add(botMesh);
+
+                    // 1b. Top Hemisphere (3 of 4 Quadrants Solid, leaving 1st Octant open)
+                    const topGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI * 0.5, Math.PI * 1.5, 0, Math.PI / 2);
+                    const topMesh = new THREE.Mesh(topGeo, ballMat);
+                    cutGroup.add(topMesh);
+
+                    // 2. Black Pentagons (Rendered across all 7 solid octants)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -797,10 +794,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     icoVerts.forEach(v => {{
-                        let az = Math.atan2(v.z, v.x);
-                        if (az < 0) az += Math.PI * 2;
-                        const inSlice = (az >= (centerAngle - sliceAngle/2) && az <= (centerAngle + sliceAngle/2));
-                        if (!inSlice) {{
+                        // Filter out pentagons falling inside the open 1st octant
+                        const inFirstOctant = (v.x > 0.08 && v.y > 0.08 && v.z > 0.08);
+                        if (!inFirstOctant) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -809,7 +805,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                     }});
 
-                    // 3. Matte Charcoal Slate Interior Cut Faces
+                    // 3. Matte Charcoal Slate Cut Faces
                     const wallMat = new THREE.MeshStandardMaterial({{
                         color: 0x141820,
                         roughness: 0.85,
@@ -817,27 +813,26 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
 
-                    const ringGeo = new THREE.RingGeometry(rBore, R * 0.998, 48, 1, -Math.PI / 2, Math.PI);
+                    // Horizontal Floor (At y = 0 in 1st octant, from rBore to R)
+                    const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
+                    const floorMesh = new THREE.Mesh(floorGeo, wallMat);
+                    floorMesh.rotation.x = Math.PI / 2;
+                    cutGroup.add(floorMesh);
 
-                    // Left Cut Face
-                    const leftWall = new THREE.Mesh(ringGeo, wallMat);
-                    leftWall.rotation.y = -startAngle + Math.PI / 2;
-                    cutGroup.add(leftWall);
-
-                    // Right Cut Face
-                    const rightWall = new THREE.Mesh(ringGeo, wallMat);
-                    rightWall.rotation.y = -rightAngle + Math.PI / 2;
-                    cutGroup.add(rightWall);
+                    // Vertical Back Wall (At z = 0 in 1st octant, from rBore to R)
+                    const wallGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
+                    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
+                    cutGroup.add(wallMesh);
 
                     // 4. Central Tight 5% Cylinder Bore Stage (r = 0.070)
-                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.95, 32, 1, true, startAngle, sweepAngle);
+                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 0.95, 32, 1, true, 0, Math.PI / 2);
                     const boreMat = new THREE.MeshStandardMaterial({{
                         color: 0x090d16,
                         roughness: 0.95,
                         side: THREE.BackSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.rotation.y = Math.PI / 2;
+                    boreMesh.position.set(0, (R * 0.95) / 2, 0);
                     cutGroup.add(boreMesh);
 
                     // 5. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
@@ -849,15 +844,16 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.position.set(0, 0, 0); // Geometric Center
+                    oSphere.position.set(0, 0, 0); // Geometric Origin
                     cutGroup.add(oSphere);
 
-                    // 6. Surface Point P(x,y,z) - Exactly on the Outer Rim of the 45° Pie Slice
-                    const elevAngle = Math.PI * 0.25; // 45° elevation
+                    // 6. Surface Point P(x,y,z) - At 45° Midpoint of the Outer Leather Arc
+                    const elev = Math.PI * 0.25; // 45° elevation from floor
+                    const azim = Math.PI * 0.25; // 45° azimuth between X and Z
                     const pLocal = new THREE.Vector3(
-                        R * Math.cos(rightAngle) * Math.sin(elevAngle) * 0.998,
-                        R * Math.cos(elevAngle) * 0.998,
-                        R * Math.sin(rightAngle) * Math.sin(elevAngle) * 0.998
+                        R * Math.cos(azim) * Math.sin(elev) * 0.998,
+                        R * Math.cos(elev) * 0.998,
+                        R * Math.sin(azim) * Math.sin(elev) * 0.998
                     );
                     const pGeo = new THREE.SphereGeometry(0.08, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
@@ -873,7 +869,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(cutGroup);
 
                     // ========================================================
-                    // 7. World-Anchored Broadcast Badges
+                    // 7. World-Anchored Broadcast Badges (Pinned to Turf Space)
                     // ========================================================
 
                     // Origin Badge: Anchored permanently in clear left turf space
