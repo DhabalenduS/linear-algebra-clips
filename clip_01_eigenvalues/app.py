@@ -742,7 +742,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Precision 1st-Octant Pie Slice + 5% Bore
+                // CLICK 4 (State >= 11): True 3D Depth Cutaway + Distinct Bore
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     // Hide the solid Click 3 ball
@@ -750,11 +750,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    // Perfect angle: Tilts down (X=0.32) and turns 1st octant directly to camera (Y=0.75)
-                    cutGroup.rotation.set(0.32, 0.75, -0.05);
+                    // Cinematic 3D isometric perspective: look down onto the floor into the core
+                    cutGroup.rotation.set(0.38, 0.72, -0.06);
 
                     const R = ballRadius;          // 1.35
-                    const rBore = R * 0.052;       // Exact 5% Cylinder Bore (0.070)
+                    const rBore = 0.12;            // Clearly visible cylindrical stage (9% radius)
 
                     // 1. Outer White Leather Shell (7 of 8 Octants Solid)
                     const ballMat = new THREE.MeshStandardMaterial({{
@@ -764,17 +764,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
 
-                    // 1a. Entire Bottom Hemisphere (100% Solid)
+                    // 1a. Bottom Hemisphere (100% Solid)
                     const botGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                     const botMesh = new THREE.Mesh(botGeo, ballMat);
                     cutGroup.add(botMesh);
 
-                    // 1b. Top Hemisphere (3 of 4 Quadrants Solid, leaving 1st Octant open)
+                    // 1b. Top Hemisphere (Leaving 1st Octant open)
                     const topGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI * 0.5, Math.PI * 1.5, 0, Math.PI / 2);
                     const topMesh = new THREE.Mesh(topGeo, ballMat);
                     cutGroup.add(topMesh);
 
-                    // 2. Black Pentagons (Rendered across all 7 solid octants)
+                    // 2. Black Pentagons (Only on the 7 solid octants)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -794,9 +794,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     icoVerts.forEach(v => {{
-                        // Filter out pentagons located in the open 1st octant
-                        const inFirstOctant = (v.x > 0.05 && v.y > 0.05 && v.z > 0.05);
-                        if (!inFirstOctant) {{
+                        if (!(v.x > 0.05 && v.y > 0.05 && v.z > 0.05)) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -805,29 +803,34 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                     }});
 
-                    // 3. Matte Charcoal Slate Interior Cut Faces
+                    // 3. High-Depth 3D Cut Faces (Contrasting Floor & Wall Lighting)
+                    // Floor: Top-lit slate finish
+                    const floorMat = new THREE.MeshStandardMaterial({{
+                        color: 0x242d3d,
+                        roughness: 0.6,
+                        metalness: 0.15,
+                        side: THREE.DoubleSide
+                    }});
+                    const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
+                    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+                    floorMesh.rotation.x = Math.PI / 2;
+                    cutGroup.add(floorMesh);
+
+                    // Wall: Shaded vertical back wall for deep 3D contrast
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x141820,
+                        color: 0x131822,
                         roughness: 0.85,
                         metalness: 0.1,
                         side: THREE.DoubleSide
                     }});
-
-                    // Horizontal Floor (In XZ plane at y = 0, from rBore to R)
-                    const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
-                    const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                    floorMesh.rotation.x = Math.PI / 2;
-                    cutGroup.add(floorMesh);
-
-                    // Vertical Back Wall (In XY plane at z = 0, from rBore to R)
                     const wallGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const wallMesh = new THREE.Mesh(wallGeo, wallMat);
                     cutGroup.add(wallMesh);
 
-                    // 4. Central Tight 5% Cylinder Bore Stage (r = 0.070)
+                    // 4. Clearly Defined Cylindrical Bore Stage around Origin O(0,0,0)
                     const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 0.95, 32, 1, true, 0, Math.PI / 2);
                     const boreMat = new THREE.MeshStandardMaterial({{
-                        color: 0x090d16,
+                        color: 0x0a0e17,
                         roughness: 0.95,
                         side: THREE.BackSide
                     }});
@@ -835,29 +838,42 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     boreMesh.position.set(0, (R * 0.95) / 2, 0);
                     cutGroup.add(boreMesh);
 
-                    // 5. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.065, 32, 32);
+                    // Visible Bore Pedestal Ring (Creates the distinct circular clearance at origin)
+                    const boreRingGeo = new THREE.RingGeometry(rBore * 0.85, rBore, 32);
+                    const boreRingMat = new THREE.MeshStandardMaterial({{
+                        color: 0x475569, // Polished slate ring highlight
+                        metalness: 0.5,
+                        roughness: 0.2,
+                        side: THREE.DoubleSide
+                    }});
+                    const boreRing = new THREE.Mesh(boreRingGeo, boreRingMat);
+                    boreRing.rotation.x = Math.PI / 2;
+                    boreRing.position.set(0, 0.005, 0);
+                    cutGroup.add(boreRing);
+
+                    // 5. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere (Deep at Core)
+                    const oGeo = new THREE.SphereGeometry(0.075, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
-                        emissiveIntensity: 1.6,
+                        emissiveIntensity: 1.8,
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.position.set(0, 0, 0); // Absolute Origin
+                    oSphere.position.set(0, 0, 0); // At geometric center inside the bore stage
                     cutGroup.add(oSphere);
 
-                    // 6. Surface Point P(x,y,z) - At 45° Elevation on the Outer Rim
+                    // 6. Surface Point P(x,y,z) - Sits on the Outer Leather Surface
                     const pLocal = new THREE.Vector3(
                         R * 0.707 * 0.998,
                         R * 0.707 * 0.998,
                         0.0
                     );
-                    const pGeo = new THREE.SphereGeometry(0.08, 32, 32);
+                    const pGeo = new THREE.SphereGeometry(0.085, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
-                        emissiveIntensity: 1.6,
+                        emissiveIntensity: 1.8,
                         roughness: 0.1
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
@@ -867,22 +883,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(cutGroup);
 
                     // ========================================================
-                    // 7. World-Anchored Broadcast Badges (Pinned to Turf Space)
+                    // 7. World-Anchored Broadcast Badges
                     // ========================================================
 
-                    // Origin Badge: Anchored in clear left turf space
+                    // Origin Badge: Anchored permanently in clear left turf space
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(2.4, 0.75, 1);
                     oLabel.position.set(oPos.x - 2.5, oPos.y - 0.2, 0.5);
                     scene.add(oLabel);
 
-                    // Point P Badge: Anchored in clear top-right turf space
+                    // Point P Badge: Anchored permanently in clear top-right turf space
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(2.4, 0.75, 1);
                     pLabel.position.set(oPos.x + 2.2, oPos.y + 1.8, 0.5);
                     scene.add(pLabel);
                 }}
-
                 // Render Loop (Stationary)
                 function animate() {{
                     requestAnimationFrame(animate);
