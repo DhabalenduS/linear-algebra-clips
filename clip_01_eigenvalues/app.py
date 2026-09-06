@@ -737,28 +737,26 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.rotation.x = 0.28;
                     ballGroup.rotation.y = 0.48;
                     ballGroup.rotation.z = -0.15;
-                    ballGroup.rotation.set(0.35, -0.45, 0.0);
+                    ballGroup.rotation.set(0.38, -0.75, 0.0);
 
                     scene.add(ballGroup);
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Broadcast CAD Cutaway
+                // CLICK 4 (State >= 11): Architectural Cutaway & Bore
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Hide the solid Click 3 ball
                     ballGroup.visible = false;
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    // Match Click 3 rotation EXACTLY
                     cutGroup.rotation.copy(ballGroup.rotation);
 
                     const R = ballRadius;          // 1.35
-                    const rBore = 0.25;            // Clean, spacious bore stage
-                    const hBore = Math.sqrt(R * R - rBore * rBore); // ~1.326
+                    const rBore = 0.30;            // Prominent cylindrical bore stage
+                    const hBore = Math.sqrt(R * R - rBore * rBore); // 1.316
 
-                    // 1. Solid Outer White Leather Shell (7 of 8 Octants Solid)
+                    // 1. Solid Outer White Leather Shell (7 of 8 Octants)
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
@@ -771,12 +769,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const botMesh = new THREE.Mesh(botGeo, ballMat);
                     cutGroup.add(botMesh);
 
-                    // Top Hemisphere (leaving 1st octant open)
+                    // Top Hemisphere (leaving 1st octant X>0, Y>0, Z>0 open)
                     const topGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI * 0.5, Math.PI * 1.5, 0, Math.PI / 2);
                     const topMesh = new THREE.Mesh(topGeo, ballMat);
                     cutGroup.add(topMesh);
 
-                    // 2. Black Pentagons on Solid Octants
+                    // 2. Black Pentagons (Filtered for solid octants only)
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -795,7 +793,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     icoVerts.forEach(v => {{
-                        if (!(v.x > 0.15 && v.y > 0.15 && v.z > 0.15)) {{
+                        if (!(v.x > 0.2 && v.y > 0.2 && v.z > 0.2)) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -804,85 +802,83 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                     }});
 
-                    // 3. Crisp Charcoal Cut Faces with Visual Contrast
+                    // 3. Matte Graphite Cut Walls with Lighting Highlights
                     const floorMat = new THREE.MeshStandardMaterial({{
-                        color: 0x334155, // Rich slate floor
-                        roughness: 0.5,
+                        color: 0x334155, // Slate Floor
+                        roughness: 0.4,
                         metalness: 0.2,
                         side: THREE.DoubleSide
                     }});
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1e293b, // Deep charcoal walls
-                        roughness: 0.6,
+                        color: 0x1e293b, // Dark Charcoal Walls
+                        roughness: 0.5,
                         metalness: 0.2,
                         side: THREE.DoubleSide
                     }});
 
-                    // Floor (y = 0, XZ-plane)
+                    // Floor: y = 0, XZ plane
                     const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const floorMesh = new THREE.Mesh(floorGeo, floorMat);
                     floorMesh.rotation.x = Math.PI / 2;
                     cutGroup.add(floorMesh);
 
-                    // Wall 1 (z = 0, XY-plane)
+                    // Wall 1: z = 0, XY plane
                     const wall1Geo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
                     cutGroup.add(wall1Mesh);
 
-                    // Wall 2 (x = 0, YZ-plane)
+                    // Wall 2: x = 0, YZ plane
                     const wall2Geo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
                     wall2Mesh.rotation.y = -Math.PI / 2;
                     cutGroup.add(wall2Mesh);
 
-                    // 4. Machined Cylinder Bore Stage
+                    // 4. Clearly Visible Cylindrical Bore Stage (Surrounding O)
                     const boreGeo = new THREE.CylinderGeometry(rBore, rBore, hBore, 32, 1, true, 0, Math.PI / 2);
                     const boreMat = new THREE.MeshStandardMaterial({{
                         color: 0x0f172a,
-                        roughness: 0.35,
-                        metalness: 0.5,
-                        side: THREE.BackSide
+                        roughness: 0.2,
+                        metalness: 0.6,
+                        side: THREE.DoubleSide
                     }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
                     boreMesh.position.set(0, hBore / 2, 0);
                     cutGroup.add(boreMesh);
 
-                    // 5. Origin O(0,0,0) - High-Visibility Glowing Amber Sphere
-                    const oGeo = new THREE.SphereGeometry(0.11, 32, 32);
+                    // 5. Origin O(0,0,0) - Floating Amber Sphere
+                    const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xf59e0b,
-                        emissiveIntensity: 2.2,
+                        emissiveIntensity: 2.5,
                         roughness: 0.1
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.position.set(0, 0, 0);
                     cutGroup.add(oSphere);
 
-                    // 6. Surface Point P(x,y,z) - Glowing Cyan Marker on Outer Shell
-                    const pLocal = new THREE.Vector3(0.85, 0.75, 0.70); // Surface point (Norm = 1.35)
-                    const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    // 6. Point P(x,y,z) - Middle of 1st Octant on Shell
+                    const pLocal = new THREE.Vector3(0.779, 0.779, 0.779); // Norm = 1.35 = R
+                    const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x06b6d4,
-                        emissiveIntensity: 2.2,
+                        emissiveIntensity: 2.5,
                         roughness: 0.1
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     cutGroup.add(pSphere);
 
-                    // 7. Well-Spaced, TV-Grade Math Badges (No Overlap)
-                    // Badge O: Positioned to the upper-left of origin
+                    // 7. Math Badges
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
-                    oLabel.position.set(-1.15, 0.45, 0.1);
+                    oLabel.position.set(-1.25, 0.45, 0.2);
                     cutGroup.add(oLabel);
 
-                    // Badge P: Positioned to the upper-right above point P
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(1.4, 0.44, 1);
-                    pLabel.position.set(pLocal.x + 0.65, pLocal.y + 0.35, pLocal.z);
+                    pLabel.position.set(pLocal.x + 0.75, pLocal.y + 0.40, pLocal.z + 0.2);
                     cutGroup.add(pLabel);
 
                     scene.add(cutGroup);
