@@ -742,34 +742,35 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Broadcast CAD Cutaway with Edge Rims
+                // CLICK 4 (State >= 11): Broadcast CAD Cutaway
                 // ========================================================
-                if (currentState >= 11 && ballGroup) {{
+                if (currentState >= 11 && ballGroup) {
                     // Hide the solid Click 3 ball
                     ballGroup.visible = false;
 
                     const cutGroup = new THREE.Group();
                     cutGroup.position.copy(oPos);
-                    // Perfect fixed 3D perspective: view directly into the floor & wall
-                    cutGroup.rotation.set(0.36, -0.68, 0.12);
+                    // Match Click 3 rotation EXACTLY (Zero Jump)
+                    cutGroup.rotation.copy(ballGroup.rotation);
 
                     const R = ballRadius;          // 1.35
-                    const rBore = 0.22;            // Clearly defined 16% machined bore stage
+                    const rBore = 0.22;            // 16% machined bore stage radius
+                    const hBore = Math.sqrt(R * R - rBore * rBore); // Exact sphere cap height ~1.332
 
                     // 1. Solid Outer White Leather Shell (7 of 8 Octants Solid)
-                    const ballMat = new THREE.MeshStandardMaterial({{
+                    const ballMat = new THREE.MeshStandardMaterial({
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10,
                         side: THREE.DoubleSide
-                    }});
+                    });
 
-                    // Bottom Hemisphere
+                    // Bottom Hemisphere (All 4 octants)
                     const botGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                     const botMesh = new THREE.Mesh(botGeo, ballMat);
                     cutGroup.add(botMesh);
 
-                    // Top Hemisphere (3 of 4 Quadrants Solid)
+                    // Top Hemisphere (3 of 4 octants - leaving 1st octant open)
                     const topGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI * 0.5, Math.PI * 1.5, 0, Math.PI / 2);
                     const topMesh = new THREE.Mesh(topGeo, ballMat);
                     cutGroup.add(topMesh);
@@ -781,129 +782,103 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
                         [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
                     ];
-                    const icoVerts = rawVerts.map(v => {{
+                    const icoVerts = rawVerts.map(v => {
                         const len = Math.hypot(v[0], v[1], v[2]);
                         return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
-                    }});
+                    });
 
-                    const pentagonMat = new THREE.MeshStandardMaterial({{
+                    const pentagonMat = new THREE.MeshStandardMaterial({
                         color: 0x0f172a,
                         roughness: 0.25,
                         side: THREE.DoubleSide
-                    }});
+                    });
 
-                    icoVerts.forEach(v => {{
-                        if (!(v.x > 0.05 && v.y > 0.05 && v.z > 0.05)) {{
+                    icoVerts.forEach(v => {
+                        // Exclude pentagons that fall inside the removed 1st octant
+                        if (!(v.x > 0.1 && v.y > 0.1 && v.z > 0.1)) {
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
                             pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
                             cutGroup.add(pentMesh);
-                        }}
-                    }});
+                        }
+                    });
 
-                    // 3. Matte Charcoal Slate Interior Cut Faces
-                    const floorMat = new THREE.MeshStandardMaterial({{
+                    // 3. Matte Charcoal Interior Cut Faces (3 Closed Walls)
+                    const cutFaceMat = new THREE.MeshStandardMaterial({
                         color: 0x1e2532,
                         roughness: 0.65,
                         metalness: 0.15,
                         side: THREE.DoubleSide
-                    }});
-                    const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x10151f,
-                        roughness: 0.85,
-                        side: THREE.DoubleSide
-                    }});
+                    });
 
-                    // Horizontal Floor (at y = 0, XZ plane)
+                    // Wall A: Horizontal Floor (y = 0, XZ-plane)
                     const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
-                    const floorMesh = new THREE.Mesh(floorGeo, floorMat);
+                    const floorMesh = new THREE.Mesh(floorGeo, cutFaceMat);
                     floorMesh.rotation.x = Math.PI / 2;
                     cutGroup.add(floorMesh);
 
-                    // Vertical Wall (at z = 0, XY plane)
-                    const wallGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
-                    const wallMesh = new THREE.Mesh(wallGeo, wallMat);
-                    cutGroup.add(wallMesh);
+                    // Wall B: Vertical Wall 1 (z = 0, XY-plane)
+                    const wall1Geo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
+                    const wall1Mesh = new THREE.Mesh(wall1Geo, cutFaceMat);
+                    cutGroup.add(wall1Mesh);
 
-                    // 4. Machined Cylinder Bore Stage (Drilled down along Y-axis)
-                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, R * 1.0, 32, 1, true, 0, Math.PI / 2);
-                    const boreMat = new THREE.MeshStandardMaterial({{
-                        color: 0x080c14,
+                    // Wall C: Vertical Wall 2 (x = 0, YZ-plane) - Fixed missing wall
+                    const wall2Geo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
+                    const wall2Mesh = new THREE.Mesh(wall2Geo, cutFaceMat);
+                    wall2Mesh.rotation.y = -Math.PI / 2;
+                    cutGroup.add(wall2Mesh);
+
+                    // 4. Smooth Vertical Cylindrical Bore Stage along Y-axis
+                    const boreGeo = new THREE.CylinderGeometry(rBore, rBore, hBore, 32, 1, true, 0, Math.PI / 2);
+                    const boreMat = new THREE.MeshStandardMaterial({
+                        color: 0x0f172a,
                         roughness: 0.4,
-                        metalness: 0.6,
+                        metalness: 0.4,
                         side: THREE.BackSide
-                    }});
+                    });
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
-                    boreMesh.position.set(0, R * 0.5, 0);
+                    boreMesh.position.set(0, hBore / 2, 0);
                     cutGroup.add(boreMesh);
 
-                    // 5. CAD Engineering Rim Outlines (Makes 3D Depth Instantly Obvious)
-                    const rimLineMat = new THREE.LineBasicMaterial({{ color: 0x94a3b8, linewidth: 2 }});
-
-                    // Outline 1: Circular rim around the bored center stage
-                    const boreRimPts = [];
-                    for (let i = 0; i <= 32; i++) {{
-                        const a = (i / 32) * (Math.PI / 2);
-                        boreRimPts.push(new THREE.Vector3(rBore * Math.cos(a), 0.005, rBore * Math.sin(a)));
-                    }}
-                    const boreRimLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(boreRimPts), rimLineMat);
-                    cutGroup.add(boreRimLine);
-
-                    // Outline 2: Outer arc curve where the pie slice meets the outer leather
-                    const outerArcPts = [];
-                    for (let i = 0; i <= 32; i++) {{
-                        const a = (i / 32) * (Math.PI / 2);
-                        outerArcPts.push(new THREE.Vector3(R * Math.cos(a), 0.005, R * Math.sin(a)));
-                    }}
-                    const outerArcLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints(outerArcPts), rimLineMat);
-                    cutGroup.add(outerArcLine);
-
-                    // 6. Center Origin O(0,0,0) - Suspended Glowing Amber Sphere
+                    // 5. Origin O(0,0,0) - Suspended Glowing Amber Sphere
                     const oGeo = new THREE.SphereGeometry(0.08, 32, 32);
-                    const oMat = new THREE.MeshStandardMaterial({{
+                    const oMat = new THREE.MeshStandardMaterial({
                         color: 0xf59e0b,
                         emissive: 0xd97706,
                         emissiveIntensity: 1.8,
                         roughness: 0.1
-                    }});
+                    });
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.position.set(0, 0, 0);
                     cutGroup.add(oSphere);
 
-                    // 7. Surface Point P(x,y,z) - Anchored at 45° Elevation on the Outer Arc
-                    const pLocal = new THREE.Vector3(
-                        R * 0.707 * 0.998,
-                        R * 0.707 * 0.998,
-                        0.0
-                    );
+                    // 6. Surface Point P(x,y,z) - Sits on the outer spherical shell
+                    const pLocal = new THREE.Vector3(0.675, 0.955, 0.675); // Norm = 1.35 = R
                     const pGeo = new THREE.SphereGeometry(0.085, 32, 32);
-                    const pMat = new THREE.MeshStandardMaterial({{
+                    const pMat = new THREE.MeshStandardMaterial({
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
                         emissiveIntensity: 1.8,
                         roughness: 0.1
-                    }});
+                    });
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     cutGroup.add(pSphere);
 
-                    scene.add(cutGroup);
-
-                    // ========================================================
-                    // 8. World-Anchored Broadcast Badges
-                    // ========================================================
+                    // 7. Math Badges Attached to Local Coordinate Offsets
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
-                    oLabel.scale.set(2.4, 0.75, 1);
-                    oLabel.position.set(oPos.x - 2.5, oPos.y - 0.2, 0.5);
-                    scene.add(oLabel);
+                    oLabel.scale.set(1.8, 0.55, 1);
+                    oLabel.position.set(-0.85, 0.15, 0.2);
+                    cutGroup.add(oLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
-                    pLabel.scale.set(2.4, 0.75, 1);
-                    pLabel.position.set(oPos.x + 2.2, oPos.y + 1.8, 0.5);
-                    scene.add(pLabel);
-                }}
+                    pLabel.scale.set(1.8, 0.55, 1);
+                    pLabel.position.set(pLocal.x + 0.35, pLocal.y + 0.35, pLocal.z);
+                    cutGroup.add(pLabel);
 
+                    scene.add(cutGroup);
+                }
                 // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
