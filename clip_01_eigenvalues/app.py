@@ -779,7 +779,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize(); // Viewport Up tangent
 
                     // Elevated at 58 degrees towards vertical Y-axis
-                    const alpha = 58 * (Math.PI / 180);
+                    const alpha = 45 * (Math.PI / 180);
                     const pWorldOffset = new THREE.Vector3()
                         .addScaledVector(camRight, R * Math.cos(alpha))
                         .addScaledVector(camUp, R * Math.sin(alpha));
