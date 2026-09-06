@@ -743,7 +743,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Point & Axis Verification
+                // CLICK 4 (State >= 11): Point P on Outer Silhouette Boundary
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     const R = ballRadius; // 1.35
@@ -754,14 +754,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         color: 0xf59e0b,
                         emissive: 0xf59e0b,
                         emissiveIntensity: 2.0,
-                        depthTest: false // Visible through the shell for verification
+                        depthTest: false
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.renderOrder = 100;
                     oSphere.position.set(0, 0, 0);
                     ballGroup.add(oSphere);
 
-                    // 2. Vertical Top Point C'(0, R, 0) - Red/Magenta Marker
+                    // 2. Vertical Top Point C'(0, R, 0) - Locked & Verified
                     const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const cTopMat = new THREE.MeshStandardMaterial({{
                         color: 0xe11d48,
@@ -772,19 +772,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     cTopSphere.position.set(0, R, 0);
                     ballGroup.add(cTopSphere);
 
-                    // 3. Point P(x,y,z) on 1st Octant Boundary - Cyan Marker
-                    const pLocal = new THREE.Vector3(0.779, 0.779, 0.779); // Norm = 1.35 = R
-                    const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    // 3. Point P(x,y,z) strictly on the Outer Silhouette Boundary (z = 0, 45 deg)
+                    const pLocal = new THREE.Vector3(R * Math.SQRT1_2, R * Math.SQRT1_2, 0.0); // (0.955, 0.955, 0.0)
+                    const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x06b6d4,
-                        emissiveIntensity: 2.0
+                        emissiveIntensity: 2.5
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
-                    // 4. Vertical Axis Line (O -> C')
+                    // 4. Vertical Reference Axis Line (O -> C')
                     const axisMat = new THREE.LineDashedMaterial({{
                         color: 0xe11d48,
                         dashSize: 0.1,
@@ -793,17 +793,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
                     const axisGeo = new THREE.BufferGeometry().setFromPoints([
                         new THREE.Vector3(0, 0, 0),
-                        new THREE.Vector3(0, R * 1.2, 0)
+                        new THREE.Vector3(0, R * 1.15, 0)
                     ]);
                     const axisLine = new THREE.Line(axisGeo, axisMat);
                     axisLine.computeLineDistances();
                     axisLine.renderOrder = 99;
                     ballGroup.add(axisLine);
 
-                    // 5. Verification Badges
+                    // 5. Clean Badges (Placed in empty space outside the ball)
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
-                    oLabel.position.set(-1.25, 0.2, 0.2);
+                    oLabel.position.set(-1.35, 0.2, 0.2);
                     ballGroup.add(oLabel);
 
                     const cLabel = makeMathTextSprite("C' (0, R, 0)", "#e11d48");
@@ -813,7 +813,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(1.4, 0.44, 1);
-                    pLabel.position.set(pLocal.x + 0.65, pLocal.y + 0.35, pLocal.z);
+                    pLabel.position.set(pLocal.x + 0.85, pLocal.y + 0.35, 0.0);
                     ballGroup.add(pLabel);
                 }}
                 // Render Loop
