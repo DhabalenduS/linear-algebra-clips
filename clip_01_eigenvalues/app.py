@@ -743,12 +743,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Point P on Outer Silhouette Boundary
+                // CLICK 4 (State >= 11): Point P on Exact Silhouette Horizon
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     const R = ballRadius; // 1.35
 
-                    // 1. Center O(0,0,0) - Amber Sphere
+                    // 1. Center O(0,0,0) - Amber Sphere at Origin
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -761,7 +761,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oSphere.position.set(0, 0, 0);
                     ballGroup.add(oSphere);
 
-                    // 2. Vertical Top Point C'(0, R, 0) - Locked & Verified
+                    // 2. Vertical Top Point C'(0, R, 0) - Locked at True Apex
                     const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const cTopMat = new THREE.MeshStandardMaterial({{
                         color: 0xe11d48,
@@ -772,8 +772,24 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     cTopSphere.position.set(0, R, 0);
                     ballGroup.add(cTopSphere);
 
-                    // 3. Point P(x,y,z) strictly on the Outer Silhouette Boundary (z = 0, 45 deg)
-                    const pLocal = new THREE.Vector3(R * Math.SQRT1_2, R * Math.SQRT1_2, 0.0); // (0.955, 0.955, 0.0)
+                    // 3. Exact Point P on the True Visual Silhouette Horizon
+                    // Vector towards camera
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0); // Viewport Right
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize(); // Viewport Up tangent
+
+                    // Elevated at 58 degrees towards vertical Y-axis
+                    const alpha = 58 * (Math.PI / 180);
+                    const pWorldOffset = new THREE.Vector3()
+                        .addScaledVector(camRight, R * Math.cos(alpha))
+                        .addScaledVector(camUp, R * Math.sin(alpha));
+
+                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
+                    
+                    // Transform to Ball's Local Coordinates
+                    ballGroup.updateMatrixWorld(true);
+                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
+
                     const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
@@ -800,7 +816,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     axisLine.renderOrder = 99;
                     ballGroup.add(axisLine);
 
-                    // 5. Clean Badges (Placed in empty space outside the ball)
+                    // 5. Clean Badges in Empty Space Outside the Ball
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
                     oLabel.position.set(-1.35, 0.2, 0.2);
@@ -813,7 +829,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(1.4, 0.44, 1);
-                    pLabel.position.set(pLocal.x + 0.85, pLocal.y + 0.35, 0.0);
+                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
                     ballGroup.add(pLabel);
                 }}
                 // Render Loop
