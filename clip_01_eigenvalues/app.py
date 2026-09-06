@@ -737,6 +737,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.rotation.x = 0.28;
                     ballGroup.rotation.y = 0.48;
                     ballGroup.rotation.z = -0.15;
+                    ballGroup.rotation.set(0.35, -0.45, 0.0);
 
                     scene.add(ballGroup);
                
@@ -854,7 +855,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     cutGroup.add(oSphere);
 
                     // 6. Surface Point P(x,y,z) - Sits on the outer spherical shell
-                    const pLocal = new THREE.Vector3(0.675, 0.955, 0.675); // Norm = 1.35 = R
+                    const pLocal = new THREE.Vector3(0.85, 0.75, 0.70); // Norm ~ 1.35 = R
                     const pGeo = new THREE.SphereGeometry(0.085, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
@@ -869,12 +870,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // 7. Math Badges Attached to Local Coordinate Offsets
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.8, 0.55, 1);
-                    oLabel.position.set(-0.85, 0.15, 0.2);
+                    oLabel.position.set(-0.75, 0.25, 0.3);
                     cutGroup.add(oLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(1.8, 0.55, 1);
-                    pLabel.position.set(pLocal.x + 0.35, pLocal.y + 0.35, pLocal.z);
+                    pLabel.position.set(pLocal.x + 0.45, pLocal.y + 0.25, pLocal.z);
                     cutGroup.add(pLabel);
 
                     scene.add(cutGroup);
