@@ -744,7 +744,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // ========================================================
                 // CLICK 4 (State >= 11): Broadcast CAD Cutaway
                 // ========================================================
-                if (currentState >= 11 && ballGroup) {
+                if (currentState >= 11 && ballGroup) {{
                     // Hide the solid Click 3 ball
                     ballGroup.visible = false;
 
@@ -758,12 +758,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const hBore = Math.sqrt(R * R - rBore * rBore); // Exact sphere cap height ~1.332
 
                     // 1. Solid Outer White Leather Shell (7 of 8 Octants Solid)
-                    const ballMat = new THREE.MeshStandardMaterial({
+                    const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10,
                         side: THREE.DoubleSide
-                    });
+                    }});
 
                     // Bottom Hemisphere (All 4 octants)
                     const botGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
@@ -782,35 +782,35 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
                         [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
                     ];
-                    const icoVerts = rawVerts.map(v => {
+                    const icoVerts = rawVerts.map(v => {{
                         const len = Math.hypot(v[0], v[1], v[2]);
                         return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
-                    });
+                    }});
 
-                    const pentagonMat = new THREE.MeshStandardMaterial({
+                    const pentagonMat = new THREE.MeshStandardMaterial({{
                         color: 0x0f172a,
                         roughness: 0.25,
                         side: THREE.DoubleSide
-                    });
+                    }});
 
-                    icoVerts.forEach(v => {
+                    icoVerts.forEach(v => {{
                         // Exclude pentagons that fall inside the removed 1st octant
-                        if (!(v.x > 0.1 && v.y > 0.1 && v.z > 0.1)) {
+                        if (!(v.x > 0.1 && v.y > 0.1 && v.z > 0.1)) {{
                             const pentGeo = new THREE.CircleGeometry(0.39, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
                             pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
                             cutGroup.add(pentMesh);
-                        }
-                    });
+                        }}
+                    }});
 
                     // 3. Matte Charcoal Interior Cut Faces (3 Closed Walls)
-                    const cutFaceMat = new THREE.MeshStandardMaterial({
+                    const cutFaceMat = new THREE.MeshStandardMaterial({{
                         color: 0x1e2532,
                         roughness: 0.65,
                         metalness: 0.15,
                         side: THREE.DoubleSide
-                    });
+                    }});
 
                     // Wall A: Horizontal Floor (y = 0, XZ-plane)
                     const floorGeo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
@@ -823,7 +823,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const wall1Mesh = new THREE.Mesh(wall1Geo, cutFaceMat);
                     cutGroup.add(wall1Mesh);
 
-                    // Wall C: Vertical Wall 2 (x = 0, YZ-plane) - Fixed missing wall
+                    // Wall C: Vertical Wall 2 (x = 0, YZ-plane)
                     const wall2Geo = new THREE.RingGeometry(rBore, R * 0.998, 32, 1, 0, Math.PI / 2);
                     const wall2Mesh = new THREE.Mesh(wall2Geo, cutFaceMat);
                     wall2Mesh.rotation.y = -Math.PI / 2;
@@ -831,24 +831,24 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // 4. Smooth Vertical Cylindrical Bore Stage along Y-axis
                     const boreGeo = new THREE.CylinderGeometry(rBore, rBore, hBore, 32, 1, true, 0, Math.PI / 2);
-                    const boreMat = new THREE.MeshStandardMaterial({
+                    const boreMat = new THREE.MeshStandardMaterial({{
                         color: 0x0f172a,
                         roughness: 0.4,
                         metalness: 0.4,
                         side: THREE.BackSide
-                    });
+                    }});
                     const boreMesh = new THREE.Mesh(boreGeo, boreMat);
                     boreMesh.position.set(0, hBore / 2, 0);
                     cutGroup.add(boreMesh);
 
                     // 5. Origin O(0,0,0) - Suspended Glowing Amber Sphere
                     const oGeo = new THREE.SphereGeometry(0.08, 32, 32);
-                    const oMat = new THREE.MeshStandardMaterial({
+                    const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xd97706,
                         emissiveIntensity: 1.8,
                         roughness: 0.1
-                    });
+                    }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.position.set(0, 0, 0);
                     cutGroup.add(oSphere);
@@ -856,12 +856,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // 6. Surface Point P(x,y,z) - Sits on the outer spherical shell
                     const pLocal = new THREE.Vector3(0.675, 0.955, 0.675); // Norm = 1.35 = R
                     const pGeo = new THREE.SphereGeometry(0.085, 32, 32);
-                    const pMat = new THREE.MeshStandardMaterial({
+                    const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
                         emissive: 0x0891b2,
                         emissiveIntensity: 1.8,
                         roughness: 0.1
-                    });
+                    }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     cutGroup.add(pSphere);
@@ -878,7 +878,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     cutGroup.add(pLabel);
 
                     scene.add(cutGroup);
-                }
+                }}
                 // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
