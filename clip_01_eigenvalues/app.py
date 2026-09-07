@@ -719,19 +719,28 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 }}
 
                 // ========================================================
-                // CLICK 4 (State >= 11): Point P (45°) and Visual Top Apex C' (90°)
+                // CLICK 4 (State >= 11): C'(0,R,0) in Middle of Visible Surface
                 // ========================================================
-                let cTopLocal = null;
+                let pWorld = null;
+                let cWorld = null;
 
                 if (currentState >= 11 && ballGroup) {{
                     const R = ballRadius;
+                    const oWorld = oPos.clone(); // (0, 1.35, 0)
 
-                    // 1. Viewport Basis Vectors (Camera Perspective)
-                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0);
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
+                    // 1. True 3D Top Pole C'(0, R, 0) - Upper-Middle of Visible Surface
+                    cWorld = oWorld.clone().add(new THREE.Vector3(0, R, 0));
+                    const cTopLocal = ballGroup.worldToLocal(cWorld.clone());
 
-                    ballGroup.updateMatrixWorld(true);
+                    const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    const cTopMat = new THREE.MeshStandardMaterial({{
+                        color: 0xe11d48,
+                        emissive: 0xe11d48,
+                        emissiveIntensity: 2.0
+                    }});
+                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
+                    cTopSphere.position.copy(cTopLocal);
+                    ballGroup.add(cTopSphere);
 
                     // 2. Center Origin O(0,0,0)
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
@@ -745,28 +754,10 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     oSphere.position.set(0, 0, 0);
                     ballGroup.add(oSphere);
 
-                    // 3. True Visual Top Apex C' (alpha = 90 degrees / 12 o'clock)
-                    const cWorldOffset = camUp.clone().multiplyScalar(R);
-                    const cWorld = new THREE.Vector3().addVectors(oPos, cWorldOffset);
-                    cTopLocal = ballGroup.worldToLocal(cWorld.clone());
-
-                    const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
-                    const cTopMat = new THREE.MeshStandardMaterial({{
-                        color: 0xe11d48,
-                        emissive: 0xe11d48,
-                        emissiveIntensity: 2.0
-                    }});
-                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    cTopSphere.position.copy(cTopLocal);
-                    ballGroup.add(cTopSphere);
-
-                    // 4. Exact Point P on Silhouette (alpha = 45 degrees / 2 o'clock)
-                    const alpha = 45 * (Math.PI / 180);
-                    const pWorldOffset = new THREE.Vector3()
-                        .addScaledVector(camRight, R * Math.cos(alpha))
-                        .addScaledVector(camUp, R * Math.sin(alpha));
-
-                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
+                    // 3. Point P in visible 1st Octant (Front-Right Quadrant)
+                    pWorld = oWorld.clone().add(
+                        new THREE.Vector3(R * 0.72, R * 0.45, R * 0.52)
+                    );
                     pLocal = ballGroup.worldToLocal(pWorld.clone());
 
                     const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
@@ -779,7 +770,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
-                    // 5. Vertical Reference Axis Line (O -> C')
+                    // 4. Vertical Reference Axis Line (O -> C')
                     const axisMat = new THREE.LineDashedMaterial({{
                         color: 0xe11d48,
                         dashSize: 0.1,
@@ -794,7 +785,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     axisLine.renderOrder = 99;
                     ballGroup.add(axisLine);
 
-                    // 6. Badges
+                    // 5. Badges
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
                     oLabel.position.set(-1.35, 0.2, 0.2);
@@ -810,43 +801,32 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
                     ballGroup.add(pLabel);
                 }}
+
                 // ============================================================
-                // CLICK 5 (State >= 12): Precision Wedge Cut Centered on P
+                // CLICK 5 (State >= 12): Wedge Slice Cut Hinged on Axis OC'
                 // ============================================================
-                if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pLocal) {{
-                    ballGroup.updateMatrixWorld(true);
+                if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pWorld && cWorld) {{
+                    const R = ballRadius;
+                    const oWorld = oPos.clone();
+                    const vOP = new THREE.Vector3().subVectors(pWorld, oWorld);
 
-                    // 1. Azimuth angle of Point P in Ball's Coordinate System
-                    const phiP = Math.atan2(pLocal.x, pLocal.z);
-                    const halfAngle = 26 * (Math.PI / 180); // 26 degrees on each side of P
+                    // 1. Two boundary points P1 and P2 opening 55 degrees around P
+                    const halfWedge = 28 * (Math.PI / 180);
+                    const yAxis = new THREE.Vector3(0, 1, 0);
 
-                    // 2. Boundary Planes in Local Space -> Transformed to World Space
-                    const a1 = phiP - halfAngle;
-                    const n1Local = new THREE.Vector3(Math.cos(a1), 0, -Math.sin(a1));
-                    const plane1 = new THREE.Plane(n1Local, 0).applyMatrix4(ballGroup.matrixWorld);
+                    const p1World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, -halfWedge));
+                    const p2World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, halfWedge));
 
-                    const a2 = phiP + halfAngle;
-                    const n2Local = new THREE.Vector3(-Math.cos(a2), 0, Math.sin(a2));
-                    const plane2 = new THREE.Plane(n2Local, 0).applyMatrix4(ballGroup.matrixWorld);
+                    // 2. Define cutting planes passing through the hinge axis OC'
+                    const plane1 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p1World);
+                    const plane2 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p2World);
 
-                    // 3. Absolute Mathematical Guarantee: Both planes must point towards P
-                    const pWorldPos = new THREE.Vector3();
-                    // Get exact world coordinate of Point P
-                    ballGroup.children.forEach(child => {{
-                        if (child.geometry && child.geometry.type === 'SphereGeometry' && child.material.color && child.material.color.getHex() === 0x06b6d4) {{
-                            child.getWorldPosition(pWorldPos);
-                        }}
-                    }});
-                    if (pWorldPos.lengthSq() === 0) {{
-                        pWorldPos.copy(pLocal).applyMatrix4(ballGroup.matrixWorld);
-                    }}
-
-                    if (plane1.distanceToPoint(pWorldPos) > 0) plane1.negate();
-                    if (plane2.distanceToPoint(pWorldPos) > 0) plane2.negate();
+                    if (plane1.distanceToPoint(pWorld) > 0) plane1.negate();
+                    if (plane2.distanceToPoint(pWorld) > 0) plane2.negate();
 
                     const cutPlanes = [plane1, plane2];
 
-                    // 4. Apply to Ball, Pentagons, and Seams
+                    // 3. Apply clipping to leather, pentagons, and seams
                     ballMat.clippingPlanes = cutPlanes;
                     ballMat.clipIntersection = true;
                     ballMat.needsUpdate = true;
