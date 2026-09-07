@@ -641,9 +641,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     return sprite;
                 }}
                 // ============================================================
-                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
+                // SHARED SCOPED VARIABLES FOR 3D SCENE
                 // ============================================================
                 let ballGroup = null;
+                let ballMat = null;
+                let pentagonMat = null;
+                let lineMat = null;
+
                 const ballRadius = 1.35; // Proportioned to sit cleanly inside center circle
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
@@ -662,6 +666,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     return new THREE.CanvasTexture(sCanvas);
                 }}
 
+                // ============================================================
+                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
+                // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Ground Contact Shadow at turf level
                     const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
@@ -675,12 +682,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. White Leather Sphere with Glossy 3D Highlights
+                    // 2. White Leather Sphere
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
-                    const ballMat = new THREE.MeshStandardMaterial({{
+                    ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10,
@@ -703,7 +710,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
                     }});
 
-                    const pentagonMat = new THREE.MeshStandardMaterial({{
+                    pentagonMat = new THREE.MeshStandardMaterial({{
                         color: 0x0f172a, // Deep Classic Black
                         roughness: 0.25,
                         metalness: 0.08,
@@ -711,6 +718,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         clippingPlanes: [],
                         clipIntersection: true
                     }});
+
                     lineMat = new THREE.LineBasicMaterial({{
                         color: 0x64748b,
                         linewidth: 2,
@@ -730,7 +738,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     // 4. 3D Seam Lines Connecting Neighbors (20 Hexagons)
-                    const lineMat = new THREE.LineBasicMaterial({{ color: 0x64748b, linewidth: 2 }});
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
@@ -744,13 +751,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }}
 
                     // Angle the ball naturally toward the 3D TV camera
-                    ballGroup.rotation.x = 0.28;
-                    ballGroup.rotation.y = 0.48;
-                    ballGroup.rotation.z = -0.15;
                     ballGroup.rotation.set(0.38, -0.75, 0.0);
-
                     scene.add(ballGroup);
-               
                 }}
                 // ========================================================
                 // CLICK 4 (State >= 11): Surface Points C' and P
