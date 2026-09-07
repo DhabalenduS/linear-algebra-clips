@@ -643,179 +643,22 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // ============================================================
                 // SHARED SCOPED VARIABLES FOR 3D SCENE
                 // ============================================================
+                // ============================================================
+                // CLICK 3, 4, 5: GEOMETRY & WEDGE CUT PIPELINE
+                // ============================================================
                 let ballGroup = null;
                 let ballMat = null;
                 let pentagonMat = null;
                 let lineMat = null;
 
-                const ballRadius = 1.35; // Proportioned to sit cleanly inside center circle
+                const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
-                // Helper: Soft Ground Contact Shadow Texture
-                function createContactShadowTexture() {{
-                    const sCanvas = document.createElement('canvas');
-                    sCanvas.width = 256;
-                    sCanvas.height = 256;
-                    const sCtx = sCanvas.getContext('2d');
-                    const grad = sCtx.createRadialGradient(128, 128, 15, 128, 128, 120);
-                    grad.addColorStop(0, 'rgba(10, 25, 10, 0.75)');
-                    grad.addColorStop(0.5, 'rgba(15, 35, 15, 0.35)');
-                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-                    sCtx.fillStyle = grad;
-                    sCtx.fillRect(0, 0, 256, 256);
-                    return new THREE.CanvasTexture(sCanvas);
-                }}
-
-                // ============================================================
-                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
-                // ============================================================
-                if (currentState >= 10) {{
-                    // 1. Soft Ground Contact Shadow at turf level
-                    const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
-                    const shadowMat = new THREE.MeshBasicMaterial({{
-                        map: createContactShadowTexture(),
-                        transparent: true,
-                        depthWrite: false
-                    }});
-                    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
-                    shadowMesh.rotation.x = -Math.PI / 2;
-                    shadowMesh.position.set(0, 0.02, 0);
-                    scene.add(shadowMesh);
-
-                    // 2. White Leather Sphere
-                    ballGroup = new THREE.Group();
-                    ballGroup.position.copy(oPos);
-
-                    const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
-                    ballMat = new THREE.MeshStandardMaterial({{
-                        color: 0xf8fafc,
-                        roughness: 0.18,
-                        metalness: 0.10,
-                        clippingPlanes: [],
-                        clipIntersection: true
-                    }});
-                    const whiteBall = new THREE.Mesh(ballGeo, ballMat);
-                    ballGroup.add(whiteBall);
-
-                    // 3. Exact 12 Icosahedral 3D Pentagon Coordinates
-                    const phi = (1 + Math.sqrt(5)) / 2;
-                    const rawVerts = [
-                        [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
-                        [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
-                        [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
-                    ];
-
-                    const icoVerts = rawVerts.map(v => {{
-                        const len = Math.hypot(v[0], v[1], v[2]);
-                        return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
-                    }});
-
-                    pentagonMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a, // Deep Classic Black
-                        roughness: 0.25,
-                        metalness: 0.08,
-                        side: THREE.DoubleSide,
-                        clippingPlanes: [],
-                        clipIntersection: true
-                    }});
-
-                    lineMat = new THREE.LineBasicMaterial({{
-                        color: 0x64748b,
-                        linewidth: 2,
-                        clippingPlanes: [],
-                        clipIntersection: true
-                    }});
-
-                    const pentagonRadius = 0.39; // Proportioned to 1.35 radius
-
-                    // Place 12 Real 3D Pentagons on the Sphere Surface
-                    icoVerts.forEach(v => {{
-                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
-                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                        pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
-                        pentMesh.lookAt(v.clone().multiplyScalar(ballRadius * 2));
-                        ballGroup.add(pentMesh);
-                    }});
-
-                    // 4. 3D Seam Lines Connecting Neighbors (20 Hexagons)
-                    for (let i = 0; i < icoVerts.length; i++) {{
-                        for (let j = i + 1; j < icoVerts.length; j++) {{
-                            if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
-                                const p1 = icoVerts[i].clone().multiplyScalar(ballRadius * 1.001);
-                                const p2 = icoVerts[j].clone().multiplyScalar(ballRadius * 1.001);
-                                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-                                const seam = new THREE.Line(lineGeo, lineMat);
-                                ballGroup.add(seam);
-                            }}
-                        }}
-                    }}
-
-                    // Angle the ball naturally toward the 3D TV camera
-                    ballGroup.rotation.set(0.38, -0.75, 0.0);
-                    scene.add(ballGroup);
-                }}
-                // ========================================================
-                // CLICK 4 (State >= 11): Surface Points C' and P
-                // ========================================================
-                if (currentState >= 11 && ballGroup) {{
-                    const R = ballRadius; // 1.35
-                    ballGroup.updateMatrixWorld(true);
-
-                    // 1. Camera Direction Vectors
-                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0);
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
-
-                    // 2. Point C'(0, R, 0) - Dead-Center of Visible Front Face
-                    const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
-                    const cTopMat = new THREE.MeshStandardMaterial({{
-                        color: 0xe11d48,
-                        emissive: 0xe11d48,
-                        emissiveIntensity: 2.0
-                    }});
-                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    const cWorld = new THREE.Vector3().addVectors(oPos, camDir.clone().multiplyScalar(R));
-                    const cTopLocal = ballGroup.worldToLocal(cWorld.clone());
-                    cTopSphere.position.copy(cTopLocal);
-                    ballGroup.add(cTopSphere);
-
-                    // 3. Point P on the Silhouette Horizon
-                    const alpha = 45 * (Math.PI / 180);
-                    const pWorldOffset = new THREE.Vector3()
-                        .addScaledVector(camRight, R * Math.cos(alpha))
-                        .addScaledVector(camUp, R * Math.sin(alpha));
-
-                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
-                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
-
-                    const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
-                    const pMat = new THREE.MeshStandardMaterial({{
-                        color: 0x06b6d4,
-                        emissive: 0x06b6d4,
-                        emissiveIntensity: 2.5
-                    }});
-                    const pSphere = new THREE.Mesh(pGeo, pMat);
-                    pSphere.position.copy(pLocal);
-                    ballGroup.add(pSphere);
-
-                    // 4. Badges for Surface Points
-                    const cLabel = makeMathTextSprite("C' (0, R, 0)", "#e11d48");
-                    cLabel.scale.set(1.4, 0.44, 1);
-                    cLabel.position.copy(cTopLocal).add(new THREE.Vector3(0.0, 0.35, 0.0));
-                    ballGroup.add(cLabel);
-
-                    const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
-                    pLabel.scale.set(1.4, 0.44, 1);
-                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
-                    ballGroup.add(pLabel);
-                }}
-                // ============================================================
-                // CLICK 5 (State >= 12): 3-Point Wedge Cut & Origin O Reveal
-                // ============================================================
-                if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
+                // 1. Pre-calculate 3-Point Wedge Cut Planes for Click 5
+                let cutPlanes = null;
+                if (currentState >= 12) {{
                     const R = ballRadius;
                     const oWorld = oPos.clone();
-
                     const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
                     const camRight = new THREE.Vector3(1, 0, 0);
                     const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
@@ -840,21 +683,168 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     if (plane1.distanceToPoint(pWorld) > 0) plane1.negate();
                     if (plane2.distanceToPoint(pWorld) > 0) plane2.negate();
 
-                    const cutPlanes = [plane1, plane2];
+                    cutPlanes = [plane1, plane2];
+                }}
 
-                    // Force GPU Shader to activate the 2 clipping planes
-                    ballMat.clippingPlanes = cutPlanes;
-                    ballMat.needsUpdate = true;
+                // Helper: Soft Contact Shadow
+                function createContactShadowTexture() {{
+                    const sCanvas = document.createElement('canvas');
+                    sCanvas.width = 256;
+                    sCanvas.height = 256;
+                    const sCtx = sCanvas.getContext('2d');
+                    const grad = sCtx.createRadialGradient(128, 128, 15, 128, 128, 120);
+                    grad.addColorStop(0, 'rgba(10, 25, 10, 0.75)');
+                    grad.addColorStop(0.5, 'rgba(15, 35, 15, 0.35)');
+                    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+                    sCtx.fillStyle = grad;
+                    sCtx.fillRect(0, 0, 256, 256);
+                    return new THREE.CanvasTexture(sCanvas);
+                }}
 
-                    pentagonMat.clippingPlanes = cutPlanes;
-                    pentagonMat.needsUpdate = true;
+                // ============================================================
+                // CLICK 3 (State >= 10): 3D Soccer Ball
+                // ============================================================
+                if (currentState >= 10) {{
+                    const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
+                    const shadowMat = new THREE.MeshBasicMaterial({{
+                        map: createContactShadowTexture(),
+                        transparent: true,
+                        depthWrite: false
+                    }});
+                    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+                    shadowMesh.rotation.x = -Math.PI / 2;
+                    shadowMesh.position.set(0, 0.02, 0);
+                    scene.add(shadowMesh);
 
-                    if (lineMat) {{
-                        lineMat.clippingPlanes = cutPlanes;
-                        lineMat.needsUpdate = true;
+                    ballGroup = new THREE.Group();
+                    ballGroup.position.copy(oPos);
+
+                    const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
+                    ballMat = new THREE.MeshStandardMaterial({{
+                        color: 0xf8fafc,
+                        roughness: 0.18,
+                        metalness: 0.10,
+                        clippingPlanes: cutPlanes,
+                        clipIntersection: true,
+                        side: THREE.DoubleSide
+                    }});
+                    const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                    ballGroup.add(whiteBall);
+
+                    // 12 Pentagons
+                    const phi = (1 + Math.sqrt(5)) / 2;
+                    const rawVerts = [
+                        [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
+                        [0, -1, phi], [0, 1, phi], [0, -1, -phi], [0, 1, -phi],
+                        [phi, 0, -1], [phi, 0, 1], [-phi, 0, -1], [-phi, 0, 1]
+                    ];
+
+                    const icoVerts = rawVerts.map(v => {{
+                        const len = Math.hypot(v[0], v[1], v[2]);
+                        return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
+                    }});
+
+                    pentagonMat = new THREE.MeshStandardMaterial({{
+                        color: 0x0f172a,
+                        roughness: 0.25,
+                        metalness: 0.08,
+                        side: THREE.DoubleSide,
+                        clippingPlanes: cutPlanes,
+                        clipIntersection: true
+                    }});
+
+                    lineMat = new THREE.LineBasicMaterial({{
+                        color: 0x64748b,
+                        linewidth: 2,
+                        clippingPlanes: cutPlanes,
+                        clipIntersection: true
+                    }});
+
+                    const pentagonRadius = 0.39;
+                    icoVerts.forEach(v => {{
+                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                        pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
+                        pentMesh.lookAt(v.clone().multiplyScalar(ballRadius * 2));
+                        ballGroup.add(pentMesh);
+                    }});
+
+                    // Seams
+                    for (let i = 0; i < icoVerts.length; i++) {{
+                        for (let j = i + 1; j < icoVerts.length; j++) {{
+                            if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
+                                const p1 = icoVerts[i].clone().multiplyScalar(ballRadius * 1.001);
+                                const p2 = icoVerts[j].clone().multiplyScalar(ballRadius * 1.001);
+                                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+                                const seam = new THREE.Line(lineGeo, lineMat);
+                                ballGroup.add(seam);
+                            }}
+                        }}
                     }}
 
-                    // Reveal Center Origin O(0,0,0)
+                    ballGroup.rotation.set(0.38, -0.75, 0.0);
+                    scene.add(ballGroup);
+                }}
+
+                // ========================================================
+                // CLICK 4 (State >= 11): Surface Points C' and P
+                // ========================================================
+                if (currentState >= 11 && ballGroup) {{
+                    const R = ballRadius;
+                    ballGroup.updateMatrixWorld(true);
+
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
+
+                    // Point C'(0, R, 0) - Dead-Center of Visible Front Face
+                    const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    const cTopMat = new THREE.MeshStandardMaterial({{
+                        color: 0xe11d48,
+                        emissive: 0xe11d48,
+                        emissiveIntensity: 2.0
+                    }});
+                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
+                    const cWorld = new THREE.Vector3().addVectors(oPos, camDir.clone().multiplyScalar(R));
+                    const cTopLocal = ballGroup.worldToLocal(cWorld.clone());
+                    cTopSphere.position.copy(cTopLocal);
+                    ballGroup.add(cTopSphere);
+
+                    // Point P on Silhouette Horizon
+                    const alpha = 45 * (Math.PI / 180);
+                    const pWorldOffset = new THREE.Vector3()
+                        .addScaledVector(camRight, R * Math.cos(alpha))
+                        .addScaledVector(camUp, R * Math.sin(alpha));
+
+                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
+                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
+
+                    const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
+                    const pMat = new THREE.MeshStandardMaterial({{
+                        color: 0x06b6d4,
+                        emissive: 0x06b6d4,
+                        emissiveIntensity: 2.5
+                    }});
+                    const pSphere = new THREE.Mesh(pGeo, pMat);
+                    pSphere.position.copy(pLocal);
+                    ballGroup.add(pSphere);
+
+                    // Badges
+                    const cLabel = makeMathTextSprite("C' (0, R, 0)", "#e11d48");
+                    cLabel.scale.set(1.4, 0.44, 1);
+                    cLabel.position.copy(cTopLocal).add(new THREE.Vector3(0.0, 0.35, 0.0));
+                    ballGroup.add(cLabel);
+
+                    const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
+                    pLabel.scale.set(1.4, 0.44, 1);
+                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
+                    ballGroup.add(pLabel);
+                }}
+
+                // ============================================================
+                // CLICK 5 (State >= 12): Reveal Origin O(0,0,0) in Cut Core
+                // ============================================================
+                if (currentState >= 12 && ballGroup) {{
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
