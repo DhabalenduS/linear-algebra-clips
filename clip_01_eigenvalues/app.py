@@ -859,6 +859,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oLabel.scale.set(1.4, 0.44, 1);
                     oLabel.position.set(-1.35, 0.2, 0.2);
                     ballGroup.add(oLabel);
+
+                    // ===== TEMPORARY TEST DISPLAY =====
+                    const helloBadge = makeMathTextSprite("Hello World (Click 5)", "#16a34a");
+                    helloBadge.scale.set(2.2, 0.5, 1);
+                    helloBadge.position.set(0.0, 1.6, 0.5);
+                    ballGroup.add(helloBadge);
+                    // ==================================
                 }}
                 // Render Loop
                 function animate() {{
