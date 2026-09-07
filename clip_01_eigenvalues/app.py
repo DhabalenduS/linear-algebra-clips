@@ -835,51 +835,42 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 5 (State >= 12): Wedge Slice Cutout & Charcoal Interior Walls
+                // CLICK 5 (State >= 12): Pure Wedge Cutout Centered on P(x,y,z)
                 // ============================================================
-                if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
+                if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pLocal) {{
                     ballGroup.updateMatrixWorld(true);
 
-                    // Plane 1: Front vertical slice
-                    const plane1Local = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+                    // 1. Find azimuth angle of Point P
+                    const phiP = Math.atan2(pLocal.x, pLocal.z);
+                    const halfWedge = 25 * (Math.PI / 180); // 25 degrees on each side of P
+
+                    // 2. Plane 1 (Left edge of wedge, passing through origin)
+                    const a1 = phiP - halfWedge;
+                    const n1Local = new THREE.Vector3(-Math.cos(a1), 0, Math.sin(a1));
+                    const plane1Local = new THREE.Plane(n1Local, 0);
                     const clipPlane1 = plane1Local.clone().applyMatrix4(ballGroup.matrixWorld);
 
-                    // Plane 2: 45-degree angle slice
-                    const angle = Math.PI / 4; // 45 degrees
-                    const plane2Local = new THREE.Plane(
-                        new THREE.Vector3(Math.cos(angle), 0, -Math.sin(angle)),
-                        0
-                    );
+                    // 3. Plane 2 (Right edge of wedge, passing through origin)
+                    const a2 = phiP + halfWedge;
+                    const n2Local = new THREE.Vector3(Math.cos(a2), 0, -Math.sin(a2));
+                    const plane2Local = new THREE.Plane(n2Local, 0);
                     const clipPlane2 = plane2Local.clone().applyMatrix4(ballGroup.matrixWorld);
 
-                    // Apply to Materials safely
-                    ballMat.clippingPlanes = [clipPlane1, clipPlane2];
-                    ballMat.clipIntersection = true;
+                    // 4. Apply clipping planes to Ball, Pentagons, and Seams
+                    const planes = [clipPlane1, clipPlane2];
+                    renderer.localClippingEnabled = true;
+
+                    ballMat.clippingPlanes = planes;
+                    ballMat.clipIntersection = false;
                     ballMat.needsUpdate = true;
 
-                    pentagonMat.clippingPlanes = [clipPlane1, clipPlane2];
-                    pentagonMat.clipIntersection = true;
+                    pentagonMat.clippingPlanes = planes;
+                    pentagonMat.clipIntersection = false;
                     pentagonMat.needsUpdate = true;
 
-                    // Matte Charcoal Cut Walls capping the exposed interior
-                    const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1e293b,
-                        roughness: 0.85,
-                        metalness: 0.1,
-                        side: THREE.DoubleSide
-                    }});
-
-                    // Wall 1
-                    const wall1Geo = new THREE.CircleGeometry(ballRadius, 64, 0, Math.PI);
-                    const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
-                    wall1Mesh.rotation.y = Math.PI / 2;
-                    ballGroup.add(wall1Mesh);
-
-                    // Wall 2
-                    const wall2Geo = new THREE.CircleGeometry(ballRadius, 64, 0, Math.PI);
-                    const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
-                    wall2Mesh.rotation.y = Math.PI / 2 + angle;
-                    ballGroup.add(wall2Mesh);
+                    lineMat.clippingPlanes = planes;
+                    lineMat.clipIntersection = false;
+                    lineMat.needsUpdate = true;
                 }}
                 
                 // Render Loop
