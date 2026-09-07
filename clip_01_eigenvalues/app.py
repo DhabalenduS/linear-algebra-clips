@@ -645,12 +645,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
                 // ============================================================
                 // ============================================================
-                // SCOPED GLOBALS FOR 3D OBJECTS
+                // SHARED SCOPED VARIABLES
                 // ============================================================
                 let ballGroup = null;
                 let ballMat = null;
                 let pentagonMat = null;
-                const ballRadius = 1.35; // Proportioned to sit cleanly inside center circle
+                let lineMat = null;
+                let pLocal = null;
+
+                const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
                 // Helper: Soft Ground Contact Shadow Texture
@@ -669,10 +672,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
+                // CLICK 3 (State >= 10): 3D Soccer Ball
                 // ============================================================
                 if (currentState >= 10) {{
-                    // 1. Soft Ground Contact Shadow at turf level
                     const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
                     const shadowMat = new THREE.MeshBasicMaterial({{
                         map: createContactShadowTexture(),
@@ -684,7 +686,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. White Leather Sphere
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
@@ -697,7 +698,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                     ballGroup.add(whiteBall);
 
-                    // 3. Exact 12 Icosahedral 3D Pentagon Coordinates
+                    // 12 Pentagons
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -711,15 +712,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     pentagonMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a, // Deep Classic Black
+                        color: 0x0f172a,
                         roughness: 0.25,
                         metalness: 0.08,
                         side: THREE.DoubleSide
                     }});
 
-                    const pentagonRadius = 0.39; // Proportioned to 1.35 radius
-
-                    // Place 12 Real 3D Pentagons on the Sphere Surface
+                    const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
                         const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
                         const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
@@ -728,8 +727,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(pentMesh);
                     }});
 
-                    // 4. 3D Seam Lines Connecting Neighbors (20 Hexagons)
-                    const lineMat = new THREE.LineBasicMaterial({{ color: 0x64748b, linewidth: 2 }});
+                    // Seam Lines
+                    lineMat = new THREE.LineBasicMaterial({{ color: 0x64748b, linewidth: 2 }});
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
@@ -742,19 +741,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
                     }}
 
-                    // Angle the ball naturally toward the 3D TV camera
                     ballGroup.rotation.set(0.38, -0.75, 0.0);
                     scene.add(ballGroup);
                 }}
 
                 // ========================================================
-                // CLICK 4 (State >= 11): Point P on Exact Silhouette Horizon
+                // CLICK 4 (State >= 11): Point P, Origin O, Badges
                 // ========================================================
-                let pLocal = null;
                 if (currentState >= 11 && ballGroup) {{
-                    const R = ballRadius; // 1.35
+                    const R = ballRadius;
 
-                    // 1. Center O(0,0,0) - Amber Sphere at Origin
+                    // Origin O(0,0,0)
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -766,7 +763,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oSphere.position.set(0, 0, 0);
                     ballGroup.add(oSphere);
 
-                    // 2. Vertical Top Point C'(0, R, 0) - Locked at True Apex
+                    // Apex C'(0, R, 0)
                     const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const cTopMat = new THREE.MeshStandardMaterial({{
                         color: 0xe11d48,
@@ -777,7 +774,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     cTopSphere.position.set(0, R, 0);
                     ballGroup.add(cTopSphere);
 
-                    // 3. Exact Point P on the True Visual Silhouette Horizon
+                    // Point P on Silhouette
                     const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
                     const camRight = new THREE.Vector3(1, 0, 0);
                     const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
@@ -802,7 +799,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
-                    // 4. Vertical Reference Axis Line (O -> C')
+                    // Vertical Axis
                     const axisMat = new THREE.LineDashedMaterial({{
                         color: 0xe11d48,
                         dashSize: 0.1,
@@ -817,7 +814,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     axisLine.renderOrder = 99;
                     ballGroup.add(axisLine);
 
-                    // 5. Clean Badges in Empty Space Outside the Ball
+                    // Badges
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
                     oLabel.position.set(-1.35, 0.2, 0.2);
@@ -840,37 +837,36 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pLocal) {{
                     ballGroup.updateMatrixWorld(true);
 
-                    // 1. Find azimuth angle of Point P
+                    // 1. Azimuth angle of Point P
                     const phiP = Math.atan2(pLocal.x, pLocal.z);
-                    const halfWedge = 25 * (Math.PI / 180); // 25 degrees on each side of P
+                    const halfAngle = 28 * (Math.PI / 180); // 28 degrees on each side of P
 
-                    // 2. Plane 1 (Left edge of wedge, passing through origin)
-                    const a1 = phiP - halfWedge;
-                    const n1Local = new THREE.Vector3(-Math.cos(a1), 0, Math.sin(a1));
-                    const plane1Local = new THREE.Plane(n1Local, 0);
-                    const clipPlane1 = plane1Local.clone().applyMatrix4(ballGroup.matrixWorld);
+                    // Plane 1: Normal pointing INTO the cut wedge
+                    const a1 = phiP - halfAngle;
+                    const n1 = new THREE.Vector3(Math.cos(a1), 0, -Math.sin(a1));
+                    const plane1 = new THREE.Plane(n1, 0).applyMatrix4(ballGroup.matrixWorld);
 
-                    // 3. Plane 2 (Right edge of wedge, passing through origin)
-                    const a2 = phiP + halfWedge;
-                    const n2Local = new THREE.Vector3(Math.cos(a2), 0, -Math.sin(a2));
-                    const plane2Local = new THREE.Plane(n2Local, 0);
-                    const clipPlane2 = plane2Local.clone().applyMatrix4(ballGroup.matrixWorld);
+                    // Plane 2: Normal pointing INTO the cut wedge
+                    const a2 = phiP + halfAngle;
+                    const n2 = new THREE.Vector3(-Math.cos(a2), 0, Math.sin(a2));
+                    const plane2 = new THREE.Plane(n2, 0).applyMatrix4(ballGroup.matrixWorld);
 
-                    // 4. Apply clipping planes to Ball, Pentagons, and Seams
-                    const planes = [clipPlane1, clipPlane2];
-                    renderer.localClippingEnabled = true;
+                    const cutPlanes = [plane1, plane2];
 
-                    ballMat.clippingPlanes = planes;
-                    ballMat.clipIntersection = false;
+                    // 2. Apply clip intersection (carves out only points inside the wedge)
+                    ballMat.clippingPlanes = cutPlanes;
+                    ballMat.clipIntersection = true;
                     ballMat.needsUpdate = true;
 
-                    pentagonMat.clippingPlanes = planes;
-                    pentagonMat.clipIntersection = false;
+                    pentagonMat.clippingPlanes = cutPlanes;
+                    pentagonMat.clipIntersection = true;
                     pentagonMat.needsUpdate = true;
 
-                    lineMat.clippingPlanes = planes;
-                    lineMat.clipIntersection = false;
-                    lineMat.needsUpdate = true;
+                    if (lineMat) {{
+                        lineMat.clippingPlanes = cutPlanes;
+                        lineMat.clipIntersection = true;
+                        lineMat.needsUpdate = true;
+                    }}
                 }}
                 
                 // Render Loop
