@@ -797,6 +797,80 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
                     ballGroup.add(pLabel);
                 }}
+                // ============================================================
+                // CLICK 5 (State >= 12): 3-Point Wedge Cut (O, C', P') & (O, C', P'')
+                // ============================================================
+                if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
+                    const R = ballRadius;
+                    const oWorld = oPos.clone(); // Origin O (0, 1.35, 0)
+
+                    // 1. Reconstruct Camera & Point Vectors in World Space
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
+
+                    // Point C' on Front Face
+                    const cWorld = oWorld.clone().add(camDir.clone().multiplyScalar(R));
+
+                    // Point P on Silhouette Horizon
+                    const alpha = 45 * (Math.PI / 180);
+                    const vOP = new THREE.Vector3()
+                        .addScaledVector(camRight, R * Math.cos(alpha))
+                        .addScaledVector(camUp, R * Math.sin(alpha));
+                    const pWorld = oWorld.clone().add(vOP);
+
+                    // 2. Compute Flanking Points P' and P'' rotated around the Axis OC' (camDir)
+                    const axisOC = camDir.clone().normalize();
+                    const halfWedge = 26 * (Math.PI / 180); // 26 degrees on each side of P
+
+                    const vOP_prime = vOP.clone().applyAxisAngle(axisOC, -halfWedge);
+                    const vOP_doublePrime = vOP.clone().applyAxisAngle(axisOC, halfWedge);
+
+                    const pPrimeWorld = oWorld.clone().add(vOP_prime);
+                    const pDoublePrimeWorld = oWorld.clone().add(vOP_doublePrime);
+
+                    // 3. Define the Two Planes: (O, C', P') and (O, C', P'')
+                    const plane1 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, pPrimeWorld);
+                    const plane2 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, pDoublePrimeWorld);
+
+                    // Ensure both planes face into the wedge sector containing P
+                    if (plane1.distanceToPoint(pWorld) > 0) plane1.negate();
+                    if (plane2.distanceToPoint(pWorld) > 0) plane2.negate();
+
+                    const cutPlanes = [plane1, plane2];
+
+                    // 4. Apply Clipping to Ball Leather, Pentagons, and Seams
+                    ballMat.clippingPlanes = cutPlanes;
+                    ballMat.clipIntersection = true;
+                    ballMat.needsUpdate = true;
+
+                    pentagonMat.clippingPlanes = cutPlanes;
+                    pentagonMat.clipIntersection = true;
+                    pentagonMat.needsUpdate = true;
+
+                    if (lineMat) {{
+                        lineMat.clippingPlanes = cutPlanes;
+                        lineMat.clipIntersection = true;
+                        lineMat.needsUpdate = true;
+                    }}
+
+                    // 5. The Structural Reveal: Center Origin O(0,0,0) Appears Inside Core
+                    const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    const oMat = new THREE.MeshStandardMaterial({{
+                        color: 0xf59e0b,
+                        emissive: 0xf59e0b,
+                        emissiveIntensity: 2.0
+                    }});
+                    const oSphere = new THREE.Mesh(oGeo, oMat);
+                    oSphere.renderOrder = 100;
+                    oSphere.position.set(0, 0, 0);
+                    ballGroup.add(oSphere);
+
+                    const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
+                    oLabel.scale.set(1.4, 0.44, 1);
+                    oLabel.position.set(-1.35, 0.2, 0.2);
+                    ballGroup.add(oLabel);
+                }}
                 // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
