@@ -846,9 +846,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // ============================================================
                 if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
                     const R = ballRadius;
-                    const oWorld = oPos.clone(); // (0, 1.35, 0)
+                    const oWorld = oPos.clone();
 
-                    // 1. Camera & Point P in World Space
                     const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
                     const camRight = new THREE.Vector3(1, 0, 0);
                     const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
@@ -859,31 +858,38 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         .addScaledVector(camUp, R * Math.sin(alpha));
                     const pWorld = oWorld.clone().add(vOP);
 
-                    // 2. The Two Clipping Planes Pinned Through Center O and Front Face C'
-                    // Plane 1 (Left boundary, angled -25° from P)
+                    // Plane 1 & Plane 2
                     const n1 = new THREE.Vector3()
                         .addScaledVector(camRight, Math.sin(alpha - 25 * Math.PI / 180))
                         .addScaledVector(camUp, -Math.cos(alpha - 25 * Math.PI / 180));
                     const plane1 = new THREE.Plane(n1, -n1.dot(oWorld));
 
-                    // Plane 2 (Right boundary, angled +25° from P)
                     const n2 = new THREE.Vector3()
                         .addScaledVector(camRight, -Math.sin(alpha + 25 * Math.PI / 180))
                         .addScaledVector(camUp, Math.cos(alpha + 25 * Math.PI / 180));
                     const plane2 = new THREE.Plane(n2, -n2.dot(oWorld));
 
-                    // Guarantee both planes cut the wedge around P
                     if (plane1.distanceToPoint(pWorld) > 0) plane1.negate();
                     if (plane2.distanceToPoint(pWorld) > 0) plane2.negate();
 
                     const cutPlanes = [plane1, plane2];
 
-                    // 3. Apply to materials
+                    // Tell GPU to recompile shaders with the 2 planes
                     ballMat.clippingPlanes = cutPlanes;
-                    pentagonMat.clippingPlanes = cutPlanes;
-                    if (lineMat) lineMat.clippingPlanes = cutPlanes;
+                    ballMat.clipIntersection = true;
+                    ballMat.needsUpdate = true;
 
-                    // 4. Reveal Center Origin O(0,0,0) inside the cavity
+                    pentagonMat.clippingPlanes = cutPlanes;
+                    pentagonMat.clipIntersection = true;
+                    pentagonMat.needsUpdate = true;
+
+                    if (lineMat) {{
+                        lineMat.clippingPlanes = cutPlanes;
+                        lineMat.clipIntersection = true;
+                        lineMat.needsUpdate = true;
+                    }}
+
+                    // Reveal Center Origin O(0,0,0)
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
