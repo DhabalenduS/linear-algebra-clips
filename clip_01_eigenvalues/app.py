@@ -719,12 +719,21 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 }}
 
                 // ========================================================
-                // CLICK 4 (State >= 11): 100% LOCKED ORIGINAL (UNTOUCHED)
+                // CLICK 4 (State >= 11): Point P (45°) and Visual Top Apex C' (90°)
                 // ========================================================
-                if (currentState >= 11 && ballGroup) {{
-                    const R = ballRadius; // 1.35
+                let cTopLocal = null;
 
-                    // 1. Center O(0,0,0) - Amber Sphere at Origin
+                if (currentState >= 11 && ballGroup) {{
+                    const R = ballRadius;
+
+                    // 1. Viewport Basis Vectors (Camera Perspective)
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
+
+                    ballGroup.updateMatrixWorld(true);
+
+                    // 2. Center Origin O(0,0,0)
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -736,7 +745,11 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     oSphere.position.set(0, 0, 0);
                     ballGroup.add(oSphere);
 
-                    // 2. Vertical Top Point C'(0, R, 0)
+                    // 3. True Visual Top Apex C' (alpha = 90 degrees / 12 o'clock)
+                    const cWorldOffset = camUp.clone().multiplyScalar(R);
+                    const cWorld = new THREE.Vector3().addVectors(oPos, cWorldOffset);
+                    cTopLocal = ballGroup.worldToLocal(cWorld.clone());
+
                     const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const cTopMat = new THREE.MeshStandardMaterial({{
                         color: 0xe11d48,
@@ -744,22 +757,16 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         emissiveIntensity: 2.0
                     }});
                     const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    cTopSphere.position.set(0, R, 0);
+                    cTopSphere.position.copy(cTopLocal);
                     ballGroup.add(cTopSphere);
 
-                    // 3. Exact Point P on the Silhouette Horizon
-                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0);
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
-
+                    // 4. Exact Point P on Silhouette (alpha = 45 degrees / 2 o'clock)
                     const alpha = 45 * (Math.PI / 180);
                     const pWorldOffset = new THREE.Vector3()
                         .addScaledVector(camRight, R * Math.cos(alpha))
                         .addScaledVector(camUp, R * Math.sin(alpha));
 
                     const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
-                    
-                    ballGroup.updateMatrixWorld(true);
                     pLocal = ballGroup.worldToLocal(pWorld.clone());
 
                     const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
@@ -772,7 +779,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
-                    // 4. Vertical Reference Axis Line (O -> C')
+                    // 5. Vertical Reference Axis Line (O -> C')
                     const axisMat = new THREE.LineDashedMaterial({{
                         color: 0xe11d48,
                         dashSize: 0.1,
@@ -780,14 +787,14 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     }});
                     const axisGeo = new THREE.BufferGeometry().setFromPoints([
                         new THREE.Vector3(0, 0, 0),
-                        new THREE.Vector3(0, R * 1.15, 0)
+                        cTopLocal.clone().multiplyScalar(1.15)
                     ]);
                     const axisLine = new THREE.Line(axisGeo, axisMat);
                     axisLine.computeLineDistances();
                     axisLine.renderOrder = 99;
                     ballGroup.add(axisLine);
 
-                    // 5. Badges
+                    // 6. Badges
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
                     oLabel.position.set(-1.35, 0.2, 0.2);
@@ -795,7 +802,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
 
                     const cLabel = makeMathTextSprite("C' (0, R, 0)", "#e11d48");
                     cLabel.scale.set(1.4, 0.44, 1);
-                    cLabel.position.set(0.0, R + 0.35, 0.0);
+                    cLabel.position.copy(cTopLocal).add(new THREE.Vector3(0.0, 0.35, 0.0));
                     ballGroup.add(cLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
@@ -803,7 +810,6 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
                     ballGroup.add(pLabel);
                 }}
-
                 // ============================================================
                 // CLICK 5 (State >= 12): Precision Wedge Cut Centered on P
                 // ============================================================
