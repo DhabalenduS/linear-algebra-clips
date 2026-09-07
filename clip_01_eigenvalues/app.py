@@ -842,9 +842,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 5 (State >= 12): Wedge Slice Cut & Origin O Reveal
+                // CLICK 5 (State >= 12): Global GPU Wedge Cut & Origin O Reveal
                 // ============================================================
-                if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
+                if (currentState >= 12 && ballGroup) {{
                     const R = ballRadius;
                     const oWorld = oPos.clone();
 
@@ -858,7 +858,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         .addScaledVector(camUp, R * Math.sin(alpha));
                     const pWorld = oWorld.clone().add(vOP);
 
-                    // Plane 1 & Plane 2
+                    // Plane 1 & Plane 2 defining the 50-degree wedge around P
                     const n1 = new THREE.Vector3()
                         .addScaledVector(camRight, Math.sin(alpha - 25 * Math.PI / 180))
                         .addScaledVector(camUp, -Math.cos(alpha - 25 * Math.PI / 180));
@@ -874,22 +874,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutPlanes = [plane1, plane2];
 
-                    // Tell GPU to recompile shaders with the 2 planes
-                    ballMat.clippingPlanes = cutPlanes;
-                    ballMat.clipIntersection = true;
-                    ballMat.needsUpdate = true;
+                    // 1. Activate Global GPU Clipping across entire scene
+                    renderer.clippingPlanes = cutPlanes;
+                    renderer.clipIntersection = true;
 
-                    pentagonMat.clippingPlanes = cutPlanes;
-                    pentagonMat.clipIntersection = true;
-                    pentagonMat.needsUpdate = true;
-
-                    if (lineMat) {{
-                        lineMat.clippingPlanes = cutPlanes;
-                        lineMat.clipIntersection = true;
-                        lineMat.needsUpdate = true;
-                    }}
-
-                    // Reveal Center Origin O(0,0,0)
+                    // 2. Reveal Center Origin O(0,0,0) inside the cleared core
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
