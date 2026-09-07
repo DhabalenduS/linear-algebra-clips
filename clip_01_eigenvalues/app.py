@@ -644,7 +644,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // ============================================================
                 // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
                 // ============================================================
+                // ============================================================
+                // SCOPED GLOBALS FOR 3D OBJECTS
+                // ============================================================
                 let ballGroup = null;
+                let ballMat = null;
+                let pentagonMat = null;
                 const ballRadius = 1.35; // Proportioned to sit cleanly inside center circle
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
@@ -663,6 +668,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     return new THREE.CanvasTexture(sCanvas);
                 }}
 
+                // ============================================================
+                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
+                // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Ground Contact Shadow at turf level
                     const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
@@ -676,12 +684,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. White Leather Sphere with Glossy 3D Highlights
+                    // 2. White Leather Sphere
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
-                    const ballMat = new THREE.MeshStandardMaterial({{
+                    ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10
@@ -702,7 +710,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
                     }});
 
-                    const pentagonMat = new THREE.MeshStandardMaterial({{
+                    pentagonMat = new THREE.MeshStandardMaterial({{
                         color: 0x0f172a, // Deep Classic Black
                         roughness: 0.25,
                         metalness: 0.08,
@@ -735,17 +743,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }}
 
                     // Angle the ball naturally toward the 3D TV camera
-                    ballGroup.rotation.x = 0.28;
-                    ballGroup.rotation.y = 0.48;
-                    ballGroup.rotation.z = -0.15;
                     ballGroup.rotation.set(0.38, -0.75, 0.0);
-
                     scene.add(ballGroup);
-               
                 }}
+
                 // ========================================================
                 // CLICK 4 (State >= 11): Point P on Exact Silhouette Horizon
                 // ========================================================
+                let pLocal = null;
                 if (currentState >= 11 && ballGroup) {{
                     const R = ballRadius; // 1.35
 
@@ -754,8 +759,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
                         emissive: 0xf59e0b,
-                        emissiveIntensity: 2.0,
-                        depthTest: false
+                        emissiveIntensity: 2.0
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
                     oSphere.renderOrder = 100;
@@ -774,12 +778,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.add(cTopSphere);
 
                     // 3. Exact Point P on the True Visual Silhouette Horizon
-                    // Vector towards camera
                     const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0); // Viewport Right
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize(); // Viewport Up tangent
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
 
-                    // Elevated at 58 degrees towards vertical Y-axis
                     const alpha = 45 * (Math.PI / 180);
                     const pWorldOffset = new THREE.Vector3()
                         .addScaledVector(camRight, R * Math.cos(alpha))
@@ -787,9 +789,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
                     
-                    // Transform to Ball's Local Coordinates
                     ballGroup.updateMatrixWorld(true);
-                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
+                    pLocal = ballGroup.worldToLocal(pWorld.clone());
 
                     const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
@@ -805,8 +806,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const axisMat = new THREE.LineDashedMaterial({{
                         color: 0xe11d48,
                         dashSize: 0.1,
-                        gapSize: 0.05,
-                        depthTest: false
+                        gapSize: 0.05
                     }});
                     const axisGeo = new THREE.BufferGeometry().setFromPoints([
                         new THREE.Vector3(0, 0, 0),
@@ -833,12 +833,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
                     ballGroup.add(pLabel);
                 }}
-                // ============================================================
+
                 // ============================================================
                 // CLICK 5 (State >= 12): Wedge Slice Cutout & Charcoal Interior Walls
                 // ============================================================
-                if (currentState >= 12 && ballGroup) {{
-                    // 1. Transform clipping planes to Football's exact center and orientation
+                if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
                     ballGroup.updateMatrixWorld(true);
 
                     // Plane 1: Front vertical slice
@@ -853,9 +852,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     );
                     const clipPlane2 = plane2Local.clone().applyMatrix4(ballGroup.matrixWorld);
 
-                    // 2. Apply to Materials and force shader update
-                    renderer.localClippingEnabled = true;
-
+                    // Apply to Materials safely
                     ballMat.clippingPlanes = [clipPlane1, clipPlane2];
                     ballMat.clipIntersection = true;
                     ballMat.needsUpdate = true;
@@ -864,7 +861,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pentagonMat.clipIntersection = true;
                     pentagonMat.needsUpdate = true;
 
-                    // 3. Matte Charcoal Cut Walls capping the exposed interior
+                    // Matte Charcoal Cut Walls capping the exposed interior
                     const wallMat = new THREE.MeshStandardMaterial({{
                         color: 0x1e293b,
                         roughness: 0.85,
