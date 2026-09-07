@@ -834,28 +834,37 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.add(pLabel);
                 }}
                 // ============================================================
+                // ============================================================
                 // CLICK 5 (State >= 12): Wedge Slice Cutout & Charcoal Interior Walls
                 // ============================================================
                 if (currentState >= 12 && ballGroup) {{
-                    // 1. Enable local clipping on renderer
-                    renderer.localClippingEnabled = true;
+                    // 1. Transform clipping planes to Football's exact center and orientation
+                    ballGroup.updateMatrixWorld(true);
 
-                    // 2. Define two clipping planes creating a wedge opening
-                    const clipPlane1 = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+                    // Plane 1: Front vertical slice
+                    const plane1Local = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+                    const clipPlane1 = plane1Local.clone().applyMatrix4(ballGroup.matrixWorld);
+
+                    // Plane 2: 45-degree angle slice
                     const angle = Math.PI / 4; // 45 degrees
-                    const clipPlane2 = new THREE.Plane(
+                    const plane2Local = new THREE.Plane(
                         new THREE.Vector3(Math.cos(angle), 0, -Math.sin(angle)),
                         0
                     );
+                    const clipPlane2 = plane2Local.clone().applyMatrix4(ballGroup.matrixWorld);
 
-                    // 3. Apply clipping planes to the ball leather and pentagons
+                    // 2. Apply to Materials and force shader update
+                    renderer.localClippingEnabled = true;
+
                     ballMat.clippingPlanes = [clipPlane1, clipPlane2];
                     ballMat.clipIntersection = true;
+                    ballMat.needsUpdate = true;
 
                     pentagonMat.clippingPlanes = [clipPlane1, clipPlane2];
                     pentagonMat.clipIntersection = true;
+                    pentagonMat.needsUpdate = true;
 
-                    // 4. Matte Charcoal Cut Walls to cap the interior
+                    // 3. Matte Charcoal Cut Walls capping the exposed interior
                     const wallMat = new THREE.MeshStandardMaterial({{
                         color: 0x1e293b,
                         roughness: 0.85,
