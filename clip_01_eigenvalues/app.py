@@ -834,26 +834,41 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // ============================================================
                 // CLICK 5 (State >= 12): Pure Wedge Cutout Centered on P(x,y,z)
                 // ============================================================
-                if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pLocal) {{
-                    ballGroup.updateMatrixWorld(true);
+                if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
+                    // 1. Exact World Direction of P relative to Origin O
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
 
-                    // 1. Azimuth angle of Point P
-                    const phiP = Math.atan2(pLocal.x, pLocal.z);
-                    const halfAngle = 28 * (Math.PI / 180); // 28 degrees on each side of P
+                    const alpha = 45 * (Math.PI / 180);
+                    const R = ballRadius;
+                    const pWorldOffset = new THREE.Vector3()
+                        .addScaledVector(camRight, R * Math.cos(alpha))
+                        .addScaledVector(camUp, R * Math.sin(alpha));
 
-                    // Plane 1: Normal pointing INTO the cut wedge
-                    const a1 = phiP - halfAngle;
+                    console.log("Point P World Coordinates:", {
+                        x: pWorldOffset.x.toFixed(3),
+                        y: (oPos.y + pWorldOffset.y).toFixed(3),
+                        z: pWorldOffset.z.toFixed(3)
+                    });
+
+                    // 2. Azimuth angle of P in World Space
+                    const thetaP = Math.atan2(pWorldOffset.x, pWorldOffset.z);
+                    const halfWedge = 28 * (Math.PI / 180); // 28 degrees on each side of P
+
+                    // Plane 1 in World Space (passes through oPos)
+                    const a1 = thetaP - halfWedge;
                     const n1 = new THREE.Vector3(Math.cos(a1), 0, -Math.sin(a1));
-                    const plane1 = new THREE.Plane(n1, 0).applyMatrix4(ballGroup.matrixWorld);
+                    const plane1 = new THREE.Plane(n1, -n1.dot(oPos));
 
-                    // Plane 2: Normal pointing INTO the cut wedge
-                    const a2 = phiP + halfAngle;
+                    // Plane 2 in World Space (passes through oPos)
+                    const a2 = thetaP + halfWedge;
                     const n2 = new THREE.Vector3(-Math.cos(a2), 0, Math.sin(a2));
-                    const plane2 = new THREE.Plane(n2, 0).applyMatrix4(ballGroup.matrixWorld);
+                    const plane2 = new THREE.Plane(n2, -n2.dot(oPos));
 
                     const cutPlanes = [plane1, plane2];
 
-                    // 2. Apply clip intersection (carves out only points inside the wedge)
+                    // 3. Apply to Ball Leather, Pentagons, and Seams
                     ballMat.clippingPlanes = cutPlanes;
                     ballMat.clipIntersection = true;
                     ballMat.needsUpdate = true;
