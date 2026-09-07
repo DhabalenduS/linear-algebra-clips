@@ -800,33 +800,31 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 }}
 
                 // ============================================================
-                // CLICK 5 (State >= 12): 3-Point Robust Coplanar Wedge Cut
+                // CLICK 5 (State >= 12): Front-Facing Wedge Cut Centered on P
                 // ============================================================
                 if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
                     const R = ballRadius;
-                    const oWorld = oPos.clone(); // (0, 1.35, 0)
-                    const cWorld = oWorld.clone().add(new THREE.Vector3(0, R, 0)); // Top Apex
+                    const oWorld = oPos.clone(); // Origin (0, 1.35, 0)
+                    const cWorld = oWorld.clone().add(new THREE.Vector3(0, R, 0)); // Top Apex C'
 
-                    // 1. Vector from O to P in World Space
-                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0);
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
+                    // 1. Point P in visible front-right quadrant (facing camera at +Z)
+                    // The camera is at (0, 7.5, 18), looking toward (0, 0.6, 0)
+                    // P is in the 1st octant: +X (Right), +Y (Up), +Z (Front)
+                    const pWorld = oWorld.clone().add(
+                        new THREE.Vector3(R * 0.68, R * 0.50, R * 0.53)
+                    );
 
-                    const alpha = 45 * (Math.PI / 180);
-                    const vOP = new THREE.Vector3()
-                        .addScaledVector(camRight, R * Math.cos(alpha))
-                        .addScaledVector(camUp, R * Math.sin(alpha));
+                    // 2. Vector OP
+                    const vOP = new THREE.Vector3().subVectors(pWorld, oWorld);
 
-                    const pWorld = oWorld.clone().add(vOP);
-
-                    // 2. Flanking Points P1 (left of P) and P2 (right of P)
-                    const halfAngle = 25 * (Math.PI / 180);
+                    // 3. Flanking boundary points P1 and P2 (opening 60 degrees around P)
+                    const halfWedge = 30 * (Math.PI / 180);
                     const yAxis = new THREE.Vector3(0, 1, 0);
 
-                    const p1World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, -halfAngle));
-                    const p2World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, halfAngle));
+                    const p1World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, -halfWedge));
+                    const p2World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, halfWedge));
 
-                    // 3. Define Planes directly from 3 points: (O, C', P1) and (O, C', P2)
+                    // 4. Two Planes passing through the vertical hinge line OC' and flanking points
                     const plane1 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p1World);
                     const plane2 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p2World);
 
@@ -836,7 +834,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
 
                     const cutPlanes = [plane1, plane2];
 
-                    // 4. Apply to Ball Leather, Pentagons, and Seams
+                    // 5. Apply to Leather, Pentagons, and Seam lines
                     ballMat.clippingPlanes = cutPlanes;
                     ballMat.clipIntersection = true;
                     ballMat.needsUpdate = true;
