@@ -800,27 +800,43 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 }}
 
                 // ============================================================
-                // CLICK 5 (State >= 12): Pure Wedge Cutout Centered on P(x,y,z)
+                // CLICK 5 (State >= 12): 3-Point Robust Coplanar Wedge Cut
                 // ============================================================
-                if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pLocal) {{
-                    ballGroup.updateMatrixWorld(true);
+                if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
+                    const R = ballRadius;
+                    const oWorld = oPos.clone(); // (0, 1.35, 0)
+                    const cWorld = oWorld.clone().add(new THREE.Vector3(0, R, 0)); // Top Apex
 
-                    // Azimuth angle of P in Ball's Local System
-                    const phiP = Math.atan2(pLocal.x, pLocal.z);
-                    const halfAngle = 28 * (Math.PI / 180);
+                    // 1. Vector from O to P in World Space
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
 
-                    // Plane 1 in local space -> converted to world
-                    const a1 = phiP - halfAngle;
-                    const n1Local = new THREE.Vector3(Math.cos(a1), 0, -Math.sin(a1));
-                    const plane1 = new THREE.Plane(n1Local, 0).applyMatrix4(ballGroup.matrixWorld);
+                    const alpha = 45 * (Math.PI / 180);
+                    const vOP = new THREE.Vector3()
+                        .addScaledVector(camRight, R * Math.cos(alpha))
+                        .addScaledVector(camUp, R * Math.sin(alpha));
 
-                    // Plane 2 in local space -> converted to world
-                    const a2 = phiP + halfAngle;
-                    const n2Local = new THREE.Vector3(-Math.cos(a2), 0, Math.sin(a2));
-                    const plane2 = new THREE.Plane(n2Local, 0).applyMatrix4(ballGroup.matrixWorld);
+                    const pWorld = oWorld.clone().add(vOP);
+
+                    // 2. Flanking Points P1 (left of P) and P2 (right of P)
+                    const halfAngle = 25 * (Math.PI / 180);
+                    const yAxis = new THREE.Vector3(0, 1, 0);
+
+                    const p1World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, -halfAngle));
+                    const p2World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, halfAngle));
+
+                    // 3. Define Planes directly from 3 points: (O, C', P1) and (O, C', P2)
+                    const plane1 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p1World);
+                    const plane2 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p2World);
+
+                    // Ensure both planes point into the wedge containing P
+                    if (plane1.distanceToPoint(pWorld) > 0) plane1.negate();
+                    if (plane2.distanceToPoint(pWorld) > 0) plane2.negate();
 
                     const cutPlanes = [plane1, plane2];
 
+                    // 4. Apply to Ball Leather, Pentagons, and Seams
                     ballMat.clippingPlanes = cutPlanes;
                     ballMat.clipIntersection = true;
                     ballMat.needsUpdate = true;
@@ -835,7 +851,6 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         lineMat.needsUpdate = true;
                     }}
                 }}
-
                 function animate() {{
                     requestAnimationFrame(animate);
                     renderer.render(scene, camera);
