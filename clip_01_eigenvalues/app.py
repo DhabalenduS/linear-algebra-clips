@@ -805,28 +805,42 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 }}
 
                 // ============================================================
-                // CLICK 5 (State >= 12): Precision Wedge Cut & Charcoal Cut Walls
+                // CLICK 5 (State >= 12): Precision Wedge Cut Centered on P
                 // ============================================================
                 if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pLocal) {{
                     ballGroup.updateMatrixWorld(true);
 
-                    // 1. Azimuth angle of P around local axis OC'
+                    // 1. Azimuth angle of Point P in Ball's Coordinate System
                     const phiP = Math.atan2(pLocal.x, pLocal.z);
                     const halfAngle = 26 * (Math.PI / 180); // 26 degrees on each side of P
 
-                    // Plane 1 in local space (Left boundary)
+                    // 2. Boundary Planes in Local Space -> Transformed to World Space
                     const a1 = phiP - halfAngle;
                     const n1Local = new THREE.Vector3(Math.cos(a1), 0, -Math.sin(a1));
                     const plane1 = new THREE.Plane(n1Local, 0).applyMatrix4(ballGroup.matrixWorld);
 
-                    // Plane 2 in local space (Right boundary)
                     const a2 = phiP + halfAngle;
                     const n2Local = new THREE.Vector3(-Math.cos(a2), 0, Math.sin(a2));
                     const plane2 = new THREE.Plane(n2Local, 0).applyMatrix4(ballGroup.matrixWorld);
 
+                    // 3. Absolute Mathematical Guarantee: Both planes must point towards P
+                    const pWorldPos = new THREE.Vector3();
+                    // Get exact world coordinate of Point P
+                    ballGroup.children.forEach(child => {{
+                        if (child.geometry && child.geometry.type === 'SphereGeometry' && child.material.color && child.material.color.getHex() === 0x06b6d4) {{
+                            child.getWorldPosition(pWorldPos);
+                        }}
+                    }});
+                    if (pWorldPos.lengthSq() === 0) {{
+                        pWorldPos.copy(pLocal).applyMatrix4(ballGroup.matrixWorld);
+                    }}
+
+                    if (plane1.distanceToPoint(pWorldPos) > 0) plane1.negate();
+                    if (plane2.distanceToPoint(pWorldPos) > 0) plane2.negate();
+
                     const cutPlanes = [plane1, plane2];
 
-                    // 2. Apply Clipping to Outer Sphere, Pentagons, and Seams
+                    // 4. Apply to Ball, Pentagons, and Seams
                     ballMat.clippingPlanes = cutPlanes;
                     ballMat.clipIntersection = true;
                     ballMat.needsUpdate = true;
@@ -840,26 +854,6 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         lineMat.clipIntersection = true;
                         lineMat.needsUpdate = true;
                     }}
-
-                    // 3. Matte Charcoal Interior Walls (Capping the Left and Right Cut Faces)
-                    const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1e293b,
-                        roughness: 0.85,
-                        metalness: 0.1,
-                        side: THREE.DoubleSide
-                    }});
-
-                    // Wall 1 (along angle a1)
-                    const wall1Geo = new THREE.CircleGeometry(ballRadius, 48, 0, Math.PI);
-                    const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
-                    wall1Mesh.rotation.y = a1 + Math.PI / 2;
-                    ballGroup.add(wall1Mesh);
-
-                    // Wall 2 (along angle a2)
-                    const wall2Geo = new THREE.CircleGeometry(ballRadius, 48, 0, Math.PI);
-                    const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
-                    wall2Mesh.rotation.y = a2 + Math.PI / 2;
-                    ballGroup.add(wall2Mesh);
                 }}
                 function animate() {{
                     requestAnimationFrame(animate);
