@@ -719,11 +719,30 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 }}
 
                 // ========================================================
-                // CLICK 4 (State >= 11): Point P, Origin O, Badges
+                // CLICK 4 (State >= 11): Point P, True Center-Top Apex C', Origin O
                 // ========================================================
+                let pWorld = null;
+                let cWorld = null;
+
                 if (currentState >= 11 && ballGroup) {{
                     const R = ballRadius;
+                    const oWorld = oPos.clone(); // (0, 1.35, 0)
 
+                    // 1. True Center-Top Apex C' (Locked at True Vertical Apex)
+                    cWorld = oWorld.clone().add(new THREE.Vector3(0, R, 0));
+                    const cTopLocal = ballGroup.worldToLocal(cWorld.clone());
+
+                    const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    const cTopMat = new THREE.MeshStandardMaterial({{
+                        color: 0xe11d48,
+                        emissive: 0xe11d48,
+                        emissiveIntensity: 2.0
+                    }});
+                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
+                    cTopSphere.position.copy(cTopLocal);
+                    ballGroup.add(cTopSphere);
+
+                    // 2. Center Origin O(0,0,0)
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -735,28 +754,10 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     oSphere.position.set(0, 0, 0);
                     ballGroup.add(oSphere);
 
-                    const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
-                    const cTopMat = new THREE.MeshStandardMaterial({{
-                        color: 0xe11d48,
-                        emissive: 0xe11d48,
-                        emissiveIntensity: 2.0
-                    }});
-                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    cTopSphere.position.set(0, R, 0);
-                    ballGroup.add(cTopSphere);
-
-                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0);
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
-
-                    const alpha = 45 * (Math.PI / 180);
-                    const pWorldOffset = new THREE.Vector3()
-                        .addScaledVector(camRight, R * Math.cos(alpha))
-                        .addScaledVector(camUp, R * Math.sin(alpha));
-
-                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
-                    
-                    ballGroup.updateMatrixWorld(true);
+                    // 3. Point P in visible 1st Octant (Front-Right Quadrant)
+                    pWorld = oWorld.clone().add(
+                        new THREE.Vector3(R * 0.68, R * 0.50, R * 0.53)
+                    );
                     pLocal = ballGroup.worldToLocal(pWorld.clone());
 
                     const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
@@ -769,6 +770,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
+                    // 4. Vertical Reference Axis Line (O -> C')
                     const axisMat = new THREE.LineDashedMaterial({{
                         color: 0xe11d48,
                         dashSize: 0.1,
@@ -776,13 +778,14 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     }});
                     const axisGeo = new THREE.BufferGeometry().setFromPoints([
                         new THREE.Vector3(0, 0, 0),
-                        new THREE.Vector3(0, R * 1.15, 0)
+                        cTopLocal.clone().multiplyScalar(1.15)
                     ]);
                     const axisLine = new THREE.Line(axisGeo, axisMat);
                     axisLine.computeLineDistances();
                     axisLine.renderOrder = 99;
                     ballGroup.add(axisLine);
 
+                    // 5. Badges
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
                     oLabel.position.set(-1.35, 0.2, 0.2);
@@ -790,7 +793,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
 
                     const cLabel = makeMathTextSprite("C' (0, R, 0)", "#e11d48");
                     cLabel.scale.set(1.4, 0.44, 1);
-                    cLabel.position.set(0.0, R + 0.35, 0.0);
+                    cLabel.position.copy(cTopLocal).add(new THREE.Vector3(0.0, 0.35, 0.0));
                     ballGroup.add(cLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
@@ -800,41 +803,30 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 }}
 
                 // ============================================================
-                // CLICK 5 (State >= 12): Front-Facing Wedge Cut Centered on P
+                // CLICK 5 (State >= 12): Precision Wedge Cut & Matte Charcoal Walls
                 // ============================================================
-                if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
+                if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pWorld && cWorld) {{
                     const R = ballRadius;
-                    const oWorld = oPos.clone(); // Origin (0, 1.35, 0)
-                    const cWorld = oWorld.clone().add(new THREE.Vector3(0, R, 0)); // Top Apex C'
-
-                    // 1. Point P in visible front-right quadrant (facing camera at +Z)
-                    // The camera is at (0, 7.5, 18), looking toward (0, 0.6, 0)
-                    // P is in the 1st octant: +X (Right), +Y (Up), +Z (Front)
-                    const pWorld = oWorld.clone().add(
-                        new THREE.Vector3(R * 0.68, R * 0.50, R * 0.53)
-                    );
-
-                    // 2. Vector OP
+                    const oWorld = oPos.clone();
                     const vOP = new THREE.Vector3().subVectors(pWorld, oWorld);
 
-                    // 3. Flanking boundary points P1 and P2 (opening 60 degrees around P)
-                    const halfWedge = 30 * (Math.PI / 180);
+                    // 1. Flanking boundary points P1 and P2 (opening 55 degrees around P)
+                    const halfWedge = 28 * (Math.PI / 180);
                     const yAxis = new THREE.Vector3(0, 1, 0);
 
                     const p1World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, -halfWedge));
                     const p2World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, halfWedge));
 
-                    // 4. Two Planes passing through the vertical hinge line OC' and flanking points
+                    // 2. Clipping Planes pinned through vertical spine OC'
                     const plane1 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p1World);
                     const plane2 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p2World);
 
-                    // Ensure both planes point into the wedge containing P
                     if (plane1.distanceToPoint(pWorld) > 0) plane1.negate();
                     if (plane2.distanceToPoint(pWorld) > 0) plane2.negate();
 
                     const cutPlanes = [plane1, plane2];
 
-                    // 5. Apply to Leather, Pentagons, and Seam lines
+                    // 3. Clip Leather, Pentagons, and Seam lines cleanly
                     ballMat.clippingPlanes = cutPlanes;
                     ballMat.clipIntersection = true;
                     ballMat.needsUpdate = true;
@@ -848,6 +840,40 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         lineMat.clipIntersection = true;
                         lineMat.needsUpdate = true;
                     }}
+
+                    // 4. Matte Charcoal Cut Walls (Solid Cross-Section)
+                    const wallMat = new THREE.MeshStandardMaterial({{
+                        color: 0x1e293b,
+                        roughness: 0.85,
+                        metalness: 0.1,
+                        side: THREE.DoubleSide
+                    }});
+
+                    // Wall 1: Semicircular pie slice along Plane 1
+                    const wall1LocalP1 = ballGroup.worldToLocal(p1World.clone()).normalize();
+                    const wall1Geo = new THREE.BufferGeometry();
+                    const wall1Verts = [
+                        0, 0, 0,
+                        0, R, 0,
+                        wall1LocalP1.x * R, wall1LocalP1.y * R, wall1LocalP1.z * R
+                    ];
+                    wall1Geo.setAttribute('position', new THREE.Float32BufferAttribute(wall1Verts, 3));
+                    wall1Geo.computeVertexNormals();
+                    const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
+                    ballGroup.add(wall1Mesh);
+
+                    // Wall 2: Semicircular pie slice along Plane 2
+                    const wall2LocalP2 = ballGroup.worldToLocal(p2World.clone()).normalize();
+                    const wall2Geo = new THREE.BufferGeometry();
+                    const wall2Verts = [
+                        0, 0, 0,
+                        0, R, 0,
+                        wall2LocalP2.x * R, wall2LocalP2.y * R, wall2LocalP2.z * R
+                    ];
+                    wall2Geo.setAttribute('position', new THREE.Float32BufferAttribute(wall2Verts, 3));
+                    wall2Geo.computeVertexNormals();
+                    const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
+                    ballGroup.add(wall2Mesh);
                 }}
                 function animate() {{
                     requestAnimationFrame(animate);
