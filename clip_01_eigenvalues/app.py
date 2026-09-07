@@ -842,9 +842,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cutPlanes = [plane1, plane2];
 
+                    // Force GPU Shader to activate the 2 clipping planes
                     ballMat.clippingPlanes = cutPlanes;
+                    ballMat.needsUpdate = true;
+
                     pentagonMat.clippingPlanes = cutPlanes;
-                    if (lineMat) lineMat.clippingPlanes = cutPlanes;
+                    pentagonMat.needsUpdate = true;
+
+                    if (lineMat) {{
+                        lineMat.clippingPlanes = cutPlanes;
+                        lineMat.needsUpdate = true;
+                    }}
 
                     // Reveal Center Origin O(0,0,0)
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
