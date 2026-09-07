@@ -683,7 +683,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
-                        metalness: 0.10
+                        metalness: 0.10,
+                        clippingPlanes: [],
+                        clipIntersection: true
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                     ballGroup.add(whiteBall);
@@ -705,7 +707,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         color: 0x0f172a, // Deep Classic Black
                         roughness: 0.25,
                         metalness: 0.08,
-                        side: THREE.DoubleSide
+                        side: THREE.DoubleSide,
+                        clippingPlanes: [],
+                        clipIntersection: true
+                    }});
+                    lineMat = new THREE.LineBasicMaterial({{
+                        color: 0x64748b,
+                        linewidth: 2,
+                        clippingPlanes: [],
+                        clipIntersection: true
                     }});
 
                     const pentagonRadius = 0.39; // Proportioned to 1.35 radius
@@ -798,63 +808,43 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.add(pLabel);
                 }}
                 // ============================================================
-                // CLICK 5 (State >= 12): 3-Point Wedge Cut (O, C', P') & (O, C', P'')
+                // CLICK 5 (State >= 12): 3-Point Wedge Cut & Origin O Reveal
                 // ============================================================
                 if (currentState >= 12 && ballGroup && ballMat && pentagonMat) {{
                     const R = ballRadius;
-                    const oWorld = oPos.clone(); // Origin O (0, 1.35, 0)
+                    const oWorld = oPos.clone();
 
-                    // 1. Reconstruct Camera & Point Vectors in World Space
                     const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
                     const camRight = new THREE.Vector3(1, 0, 0);
                     const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
 
-                    // Point C' on Front Face
                     const cWorld = oWorld.clone().add(camDir.clone().multiplyScalar(R));
 
-                    // Point P on Silhouette Horizon
                     const alpha = 45 * (Math.PI / 180);
                     const vOP = new THREE.Vector3()
                         .addScaledVector(camRight, R * Math.cos(alpha))
                         .addScaledVector(camUp, R * Math.sin(alpha));
                     const pWorld = oWorld.clone().add(vOP);
 
-                    // 2. Compute Flanking Points P' and P'' rotated around the Axis OC' (camDir)
                     const axisOC = camDir.clone().normalize();
-                    const halfWedge = 26 * (Math.PI / 180); // 26 degrees on each side of P
+                    const halfWedge = 26 * (Math.PI / 180);
 
-                    const vOP_prime = vOP.clone().applyAxisAngle(axisOC, -halfWedge);
-                    const vOP_doublePrime = vOP.clone().applyAxisAngle(axisOC, halfWedge);
+                    const pPrimeWorld = oWorld.clone().add(vOP.clone().applyAxisAngle(axisOC, -halfWedge));
+                    const pDoublePrimeWorld = oWorld.clone().add(vOP.clone().applyAxisAngle(axisOC, halfWedge));
 
-                    const pPrimeWorld = oWorld.clone().add(vOP_prime);
-                    const pDoublePrimeWorld = oWorld.clone().add(vOP_doublePrime);
-
-                    // 3. Define the Two Planes: (O, C', P') and (O, C', P'')
                     const plane1 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, pPrimeWorld);
                     const plane2 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, pDoublePrimeWorld);
 
-                    // Ensure both planes face into the wedge sector containing P
                     if (plane1.distanceToPoint(pWorld) > 0) plane1.negate();
                     if (plane2.distanceToPoint(pWorld) > 0) plane2.negate();
 
                     const cutPlanes = [plane1, plane2];
 
-                    // 4. Apply Clipping to Ball Leather, Pentagons, and Seams
                     ballMat.clippingPlanes = cutPlanes;
-                    ballMat.clipIntersection = true;
-                    ballMat.needsUpdate = true;
-
                     pentagonMat.clippingPlanes = cutPlanes;
-                    pentagonMat.clipIntersection = true;
-                    pentagonMat.needsUpdate = true;
+                    if (lineMat) lineMat.clippingPlanes = cutPlanes;
 
-                    if (lineMat) {{
-                        lineMat.clippingPlanes = cutPlanes;
-                        lineMat.clipIntersection = true;
-                        lineMat.needsUpdate = true;
-                    }}
-
-                    // 5. The Structural Reveal: Center Origin O(0,0,0) Appears Inside Core
+                    // Reveal Center Origin O(0,0,0)
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -862,7 +852,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         emissiveIntensity: 2.0
                     }});
                     const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.renderOrder = 100;
                     oSphere.position.set(0, 0, 0);
                     ballGroup.add(oSphere);
 
