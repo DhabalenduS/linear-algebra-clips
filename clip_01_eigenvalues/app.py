@@ -573,6 +573,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.15;
+                renderer.localClippingEnabled = true;
 
                 // 3D Stadium Lighting Rig
                 const ambient = new THREE.AmbientLight(0xffffff, 0.55);
@@ -832,6 +833,49 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
                     ballGroup.add(pLabel);
                 }}
+                // ============================================================
+                // CLICK 5 (State >= 12): Wedge Slice Cutout & Charcoal Interior Walls
+                // ============================================================
+                if (currentState >= 12 && ballGroup) {{
+                    // 1. Enable local clipping on renderer
+                    renderer.localClippingEnabled = true;
+
+                    // 2. Define two clipping planes creating a wedge opening
+                    const clipPlane1 = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+                    const angle = Math.PI / 4; // 45 degrees
+                    const clipPlane2 = new THREE.Plane(
+                        new THREE.Vector3(Math.cos(angle), 0, -Math.sin(angle)),
+                        0
+                    );
+
+                    // 3. Apply clipping planes to the ball leather and pentagons
+                    ballMat.clippingPlanes = [clipPlane1, clipPlane2];
+                    ballMat.clipIntersection = true;
+
+                    pentagonMat.clippingPlanes = [clipPlane1, clipPlane2];
+                    pentagonMat.clipIntersection = true;
+
+                    // 4. Matte Charcoal Cut Walls to cap the interior
+                    const wallMat = new THREE.MeshStandardMaterial({{
+                        color: 0x1e293b,
+                        roughness: 0.85,
+                        metalness: 0.1,
+                        side: THREE.DoubleSide
+                    }});
+
+                    // Wall 1
+                    const wall1Geo = new THREE.CircleGeometry(ballRadius, 64, 0, Math.PI);
+                    const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
+                    wall1Mesh.rotation.y = Math.PI / 2;
+                    ballGroup.add(wall1Mesh);
+
+                    // Wall 2
+                    const wall2Geo = new THREE.CircleGeometry(ballRadius, 64, 0, Math.PI);
+                    const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
+                    wall2Mesh.rotation.y = Math.PI / 2 + angle;
+                    ballGroup.add(wall2Mesh);
+                }}
+                
                 // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
