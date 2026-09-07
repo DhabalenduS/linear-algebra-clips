@@ -769,7 +769,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         emissiveIntensity: 2.0
                     }});
                     const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    cTopSphere.position.set(0, R, 0);
+                    const cWorld = new THREE.Vector3().addVectors(oPos, camDir.clone().multiplyScalar(R));
+                    const cTopLocal = ballGroup.worldToLocal(cWorld.clone());
+                    cTopSphere.position.copy(cTopLocal);
                     ballGroup.add(cTopSphere);
 
                     // 3. Exact Point P on the True Visual Silhouette Horizon
@@ -809,7 +811,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
                     const axisGeo = new THREE.BufferGeometry().setFromPoints([
                         new THREE.Vector3(0, 0, 0),
-                        new THREE.Vector3(0, R * 1.15, 0)
+                        cTopLocal.clone().multiplyScalar(1.1)
                     ]);
                     const axisLine = new THREE.Line(axisGeo, axisMat);
                     axisLine.computeLineDistances();
@@ -824,7 +826,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const cLabel = makeMathTextSprite("C' (0, R, 0)", "#e11d48");
                     cLabel.scale.set(1.4, 0.44, 1);
-                    cLabel.position.set(0.0, R + 0.35, 0.0);
+                    cLabel.position.copy(cTopLocal).add(new THREE.Vector3(0.0, 0.35, 0.0));
                     ballGroup.add(cLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
