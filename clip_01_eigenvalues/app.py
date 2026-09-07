@@ -743,12 +743,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
                
                 }}
                 // ========================================================
-                // CLICK 4 (State >= 11): Point P on Exact Silhouette Horizon
+                // CLICK 4 (State >= 11): Point P on Horizon & C' at Center Face
                 // ========================================================
                 if (currentState >= 11 && ballGroup) {{
                     const R = ballRadius; // 1.35
+                    ballGroup.updateMatrixWorld(true);
 
-                    // 1. Center O(0,0,0) - Amber Sphere at Origin
+                    // 1. Camera Direction Vectors (Defined at top)
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
+
+                    // 2. Center O(0,0,0) - Amber Sphere at Origin
                     const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const oMat = new THREE.MeshStandardMaterial({{
                         color: 0xf59e0b,
@@ -761,7 +767,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     oSphere.position.set(0, 0, 0);
                     ballGroup.add(oSphere);
 
-                    // 2. Vertical Top Point C'(0, R, 0) - Locked at True Apex
+                    // 3. Point C'(0, R, 0) - Dead-Center of Visible Front Face
                     const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const cTopMat = new THREE.MeshStandardMaterial({{
                         color: 0xe11d48,
@@ -774,22 +780,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     cTopSphere.position.copy(cTopLocal);
                     ballGroup.add(cTopSphere);
 
-                    // 3. Exact Point P on the True Visual Silhouette Horizon
-                    // Vector towards camera
-                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0); // Viewport Right
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize(); // Viewport Up tangent
-
-                    // Elevated at 58 degrees towards vertical Y-axis
+                    // 4. Exact Point P on the True Visual Silhouette Horizon
                     const alpha = 45 * (Math.PI / 180);
                     const pWorldOffset = new THREE.Vector3()
                         .addScaledVector(camRight, R * Math.cos(alpha))
                         .addScaledVector(camUp, R * Math.sin(alpha));
 
                     const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
-                    
-                    // Transform to Ball's Local Coordinates
-                    ballGroup.updateMatrixWorld(true);
                     const pLocal = ballGroup.worldToLocal(pWorld.clone());
 
                     const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
@@ -802,7 +799,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
-                    // 4. Vertical Reference Axis Line (O -> C')
+                    // 5. Reference Axis Line (O -> C')
                     const axisMat = new THREE.LineDashedMaterial({{
                         color: 0xe11d48,
                         dashSize: 0.1,
@@ -818,7 +815,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     axisLine.renderOrder = 99;
                     ballGroup.add(axisLine);
 
-                    // 5. Clean Badges in Empty Space Outside the Ball
+                    // 6. Badges
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
                     oLabel.position.set(-1.35, 0.2, 0.2);
