@@ -1,5 +1,7 @@
 # Clip 01 - Eigenvalues and Eigenvectors
 # Slides 1-3 Complete Implementation (True TV-Grade WebGL 3D Visualization)
+# Click 4 Added: Origin O(0,0,0) and Surface Point P(x,y,z)
+# Try to separate Click 3 and Click 4
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -242,10 +244,10 @@ st.markdown(
 )
 
 # ============================================================
-# ADVANCE PRESENTATION (Clicks state 0 through 19)
+# ADVANCE PRESENTATION (Clicks state 0 through 18)
 # ============================================================
 
-if st.session_state.presentation_state < 19:
+if st.session_state.presentation_state < 18:
     if st.button("advance", key="advance_button"):
         st.session_state.presentation_state += 1
         st.rerun()
@@ -358,17 +360,17 @@ elif 2 <= st.session_state.presentation_state <= 7:
     st.html(content)
 
 # ============================================================
-# STATES 8-19 - SLIDE 3 (VISUALIZATION, OBSERVATION & CONCLUSION)
+# STATES 8-18 - SLIDE 3 (VISUALIZATION, OBSERVATION & CONCLUSION)
 # ============================================================
 
-elif 8 <= st.session_state.presentation_state <= 19:
+elif 8 <= st.session_state.presentation_state <= 18:
     state = st.session_state.presentation_state
 
     # Construct Left Panel step-by-step
     left_panel_html = '<div class="slide3-left-panel">'
 
-    # Observation Header & Points (States 15-17)
-    if state >= 15:
+    # Observation Header & Points (Clicks 7-9 -> States 14-16)
+    if state >= 14:
         left_panel_html += '<div class="panel-section-title">Observation:</div>'
         left_panel_html += """
         <div class="panel-bullet">
@@ -377,7 +379,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
         </div>
         """
 
-    if state >= 16:
+    if state >= 15:
         left_panel_html += """
         <div class="panel-bullet">
             <span class="panel-bullet-icon">&#9679;</span>
@@ -385,7 +387,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
         </div>
         """
 
-    if state >= 17:
+    if state >= 16:
         left_panel_html += """
         <div class="panel-bullet">
             <span class="panel-bullet-icon">&#9679;</span>
@@ -393,8 +395,8 @@ elif 8 <= st.session_state.presentation_state <= 19:
         </div>
         """
 
-    # Conclusion Header & Points (States 18-19)
-    if state >= 18:
+    # Conclusion Header & Points (Clicks 10-11 -> States 17-18)
+    if state >= 17:
         left_panel_html += '<div class="panel-section-title" style="margin-top: 2.2vh; color: #991b1b; border-bottom: 2px solid #fecaca;">Conclusion:</div>'
         left_panel_html += """
         <div class="panel-bullet">
@@ -403,7 +405,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
         </div>
         """
 
-    if state >= 19:
+    if state >= 18:
         left_panel_html += """
         <div class="panel-bullet">
             <span class="panel-bullet-icon" style="color: #dc2626;">&#9679;</span>
@@ -446,6 +448,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     background: transparent;
                     position: relative;
                 }}
+                /* LAYER 1: Permanent 10/10 2D Pitch Background */
                 #pitch2d {{
                     position: absolute;
                     inset: 0;
@@ -454,6 +457,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     z-index: 1;
                     display: block;
                 }}
+                /* LAYER 2: Transparent 3D Foreground */
                 #canvas3d {{
                     position: absolute;
                     inset: 0;
@@ -473,7 +477,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 const currentState = {state};
 
                 // ============================================================
-                // LAYER 1: Locked 2D Football Pitch
+                // LAYER 1 (State >= 9): Locked 10/10 2D Football Pitch
                 // ============================================================
                 function draw2DPitch() {{
                     const pCanvas = document.getElementById('pitch2d');
@@ -481,6 +485,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     pCanvas.height = 1536;
                     const ctx = pCanvas.getContext('2d');
 
+                    // 1. Rich Stadium Turf Stripes
                     const stripes = 10;
                     const sh = 1536 / stripes;
                     for (let i = 0; i < stripes; i++) {{
@@ -488,10 +493,11 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
+                    // 2. Locked Uniform Outer Margins (10/10)
                     const mx = 110;
                     const my = 140;
-                    const pw = 2048 - (2 * mx);
-                    const ph = 1536 - (2 * my);
+                    const pw = 2048 - (2 * mx); // 1828
+                    const ph = 1536 - (2 * my); // 1256
                     const cx = 2048 / 2;
                     const cy = 1536 / 2;
 
@@ -499,13 +505,16 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     ctx.lineWidth = 15;
                     ctx.lineCap = 'round';
 
+                    // Full Outer Boundary Line
                     ctx.strokeRect(mx, my, pw, ph);
 
+                    // Halfway Line
                     ctx.beginPath();
                     ctx.moveTo(cx, my);
                     ctx.lineTo(cx, my + ph);
                     ctx.stroke();
 
+                    // Center Circle & Center Spot
                     ctx.beginPath();
                     ctx.arc(cx, cy, 185, 0, Math.PI * 2);
                     ctx.stroke();
@@ -515,18 +524,21 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     ctx.arc(cx, cy, 15, 0, Math.PI * 2);
                     ctx.fill();
 
+                    // Left Penalty Box & Goal Box
                     ctx.strokeRect(mx, cy - 275, 270, 550);
                     ctx.strokeRect(mx, cy - 110, 100, 220);
                     ctx.beginPath();
                     ctx.arc(mx + 200, cy, 105, -Math.PI * 0.32, Math.PI * 0.32);
                     ctx.stroke();
 
+                    // Right Penalty Box & Goal Box
                     ctx.strokeRect(mx + pw - 270, cy - 275, 270, 550);
                     ctx.strokeRect(mx + pw - 100, cy - 110, 100, 220);
                     ctx.beginPath();
                     ctx.arc(mx + pw - 200, cy, 105, Math.PI * 0.68, Math.PI * 1.32);
                     ctx.stroke();
 
+                    // Corner Arcs
                     const r = 35;
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
@@ -536,7 +548,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 draw2DPitch();
 
                 // ============================================================
-                // LAYER 2: 3D Football Broadcast Stage
+                // LAYER 2 (State >= 10): 3D Football Broadcast Stage
                 // ============================================================
                 const canvas3d = document.getElementById('canvas3d');
                 const scene = new THREE.Scene();
@@ -544,6 +556,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 const w = window.innerWidth;
                 const h = window.innerHeight;
 
+                // Stadium-level 3D Perspective Camera (True depth & spherical roundness)
                 const camera = new THREE.PerspectiveCamera(36, w / h, 0.1, 1000);
                 camera.position.set(0, 7.5, 18);
                 camera.lookAt(0, 0.6, 0);
@@ -551,7 +564,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 const renderer = new THREE.WebGLRenderer({{
                     canvas: canvas3d,
                     antialias: true,
-                    alpha: true,
+                    alpha: true, // Transparent to seamlessly overlay on the 2D Pitch
                     powerPreference: "high-performance"
                 }});
                 renderer.setSize(w, h);
@@ -560,14 +573,15 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.15;
-                renderer.localClippingEnabled = true;
 
+                // 3D Stadium Lighting Rig
                 const ambient = new THREE.AmbientLight(0xffffff, 0.55);
                 scene.add(ambient);
 
                 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.40);
                 scene.add(hemiLight);
 
+                // Angled Key Light for rich 3D specular shine on the sphere
                 const keyLight = new THREE.DirectionalLight(0xffffff, 1.65);
                 keyLight.position.set(-10, 20, 16);
                 scene.add(keyLight);
@@ -576,6 +590,9 @@ elif 8 <= st.session_state.presentation_state <= 19:
                 rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
 
+                
+
+// Helper: Compact TV-Grade Math Pill Badge
                 function makeMathTextSprite(text, dotColor) {{
                     const canvas = document.createElement('canvas');
                     canvas.width = 640;
@@ -584,6 +601,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
 
                     const x = 30, y = 25, w = 580, h = 150, r = 75;
 
+                    // 1. Crisp White Pill Badge
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
                     ctx.beginPath();
                     ctx.moveTo(x + r, y);
@@ -594,19 +612,22 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     ctx.closePath();
                     ctx.fill();
 
+                    // 2. High-Contrast Slate Border
                     ctx.strokeStyle = '#64748b';
                     ctx.lineWidth = 6;
                     ctx.stroke();
 
+                    // 3. Vibrant Indicator Dot
                     ctx.fillStyle = dotColor || '#2563eb';
                     ctx.beginPath();
                     ctx.arc(x + 65, y + r, 24, 0, Math.PI * 2);
                     ctx.fill();
 
+                    // 4. Ultra-Bold Dark Typography (High Visibility)
                     ctx.font = "bold italic 60px Georgia, serif";
                     ctx.textAlign = "left";
                     ctx.textBaseline = "middle";
-                    ctx.fillStyle = "#0f172a";
+                    ctx.fillStyle = "#0f172a"; // Deep pitch black
                     ctx.fillText(text, x + 115, y + r + 2);
 
                     const texture = new THREE.CanvasTexture(canvas);
@@ -619,19 +640,14 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     sprite.renderOrder = 999;
                     return sprite;
                 }}
-
                 // ============================================================
-                // SHARED SCOPED VARIABLES
+                // CLICK 3 (State >= 10): True 3D Proportional Geometric Soccer Ball
                 // ============================================================
                 let ballGroup = null;
-                let ballMat = null;
-                let pentagonMat = null;
-                let lineMat = null;
-                let pLocal = null;
-
-                const ballRadius = 1.35;
+                const ballRadius = 1.35; // Proportioned to sit cleanly inside center circle
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
 
+                // Helper: Soft Ground Contact Shadow Texture
                 function createContactShadowTexture() {{
                     const sCanvas = document.createElement('canvas');
                     sCanvas.width = 256;
@@ -646,10 +662,8 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     return new THREE.CanvasTexture(sCanvas);
                 }}
 
-                // ============================================================
-                // CLICK 3 (State >= 10): 3D Soccer Ball
-                // ============================================================
                 if (currentState >= 10) {{
+                    // 1. Soft Ground Contact Shadow at turf level
                     const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
                     const shadowMat = new THREE.MeshBasicMaterial({{
                         map: createContactShadowTexture(),
@@ -661,11 +675,12 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
+                    // 2. White Leather Sphere with Glossy 3D Highlights
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
 
                     const ballGeo = new THREE.SphereGeometry(ballRadius, 64, 64);
-                    ballMat = new THREE.MeshStandardMaterial({{
+                    const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10
@@ -673,6 +688,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                     ballGroup.add(whiteBall);
 
+                    // 3. Exact 12 Icosahedral 3D Pentagon Coordinates
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -685,14 +701,16 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         return new THREE.Vector3(v[0] / len, v[1] / len, v[2] / len);
                     }});
 
-                    pentagonMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a,
+                    const pentagonMat = new THREE.MeshStandardMaterial({{
+                        color: 0x0f172a, // Deep Classic Black
                         roughness: 0.25,
                         metalness: 0.08,
                         side: THREE.DoubleSide
                     }});
 
-                    const pentagonRadius = 0.39;
+                    const pentagonRadius = 0.39; // Proportioned to 1.35 radius
+
+                    // Place 12 Real 3D Pentagons on the Sphere Surface
                     icoVerts.forEach(v => {{
                         const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
                         const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
@@ -701,7 +719,8 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         ballGroup.add(pentMesh);
                     }});
 
-                    lineMat = new THREE.LineBasicMaterial({{ color: 0x64748b, linewidth: 2 }});
+                    // 4. 3D Seam Lines Connecting Neighbors (20 Hexagons)
+                    const lineMat = new THREE.LineBasicMaterial({{ color: 0x64748b, linewidth: 2 }});
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
@@ -714,24 +733,35 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         }}
                     }}
 
+                    // Angle the ball naturally toward the 3D TV camera
+                    ballGroup.rotation.x = 0.28;
+                    ballGroup.rotation.y = 0.48;
+                    ballGroup.rotation.z = -0.15;
                     ballGroup.rotation.set(0.38, -0.75, 0.0);
+
                     scene.add(ballGroup);
+               
                 }}
-
                 // ========================================================
-                // CLICK 4 (State >= 11): C'(0,R,0) in Middle of Visible Surface
+                // CLICK 4 (State >= 11): Point P on Exact Silhouette Horizon
                 // ========================================================
-                let pWorld = null;
-                let cWorld = null;
-
                 if (currentState >= 11 && ballGroup) {{
-                    const R = ballRadius;
-                    const oWorld = oPos.clone(); // (0, 1.35, 0)
+                    const R = ballRadius; // 1.35
 
-                    // 1. True 3D Top Pole C'(0, R, 0) - Upper-Middle of Visible Surface
-                    cWorld = oWorld.clone().add(new THREE.Vector3(0, R, 0));
-                    const cTopLocal = ballGroup.worldToLocal(cWorld.clone());
+                    // 1. Center O(0,0,0) - Amber Sphere at Origin
+                    const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    const oMat = new THREE.MeshStandardMaterial({{
+                        color: 0xf59e0b,
+                        emissive: 0xf59e0b,
+                        emissiveIntensity: 2.0,
+                        depthTest: false
+                    }});
+                    const oSphere = new THREE.Mesh(oGeo, oMat);
+                    oSphere.renderOrder = 100;
+                    oSphere.position.set(0, 0, 0);
+                    ballGroup.add(oSphere);
 
+                    // 2. Vertical Top Point C'(0, R, 0) - Locked at True Apex
                     const cTopGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const cTopMat = new THREE.MeshStandardMaterial({{
                         color: 0xe11d48,
@@ -739,26 +769,26 @@ elif 8 <= st.session_state.presentation_state <= 19:
                         emissiveIntensity: 2.0
                     }});
                     const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    cTopSphere.position.copy(cTopLocal);
+                    cTopSphere.position.set(0, R, 0);
                     ballGroup.add(cTopSphere);
 
-                    // 2. Center Origin O(0,0,0)
-                    const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
-                    const oMat = new THREE.MeshStandardMaterial({{
-                        color: 0xf59e0b,
-                        emissive: 0xf59e0b,
-                        emissiveIntensity: 2.0
-                    }});
-                    const oSphere = new THREE.Mesh(oGeo, oMat);
-                    oSphere.renderOrder = 100;
-                    oSphere.position.set(0, 0, 0);
-                    ballGroup.add(oSphere);
+                    // 3. Exact Point P on the True Visual Silhouette Horizon
+                    // Vector towards camera
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0); // Viewport Right
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize(); // Viewport Up tangent
 
-                    // 3. Point P in visible 1st Octant (Front-Right Quadrant)
-                    pWorld = oWorld.clone().add(
-                        new THREE.Vector3(R * 0.72, R * 0.45, R * 0.52)
-                    );
-                    pLocal = ballGroup.worldToLocal(pWorld.clone());
+                    // Elevated at 58 degrees towards vertical Y-axis
+                    const alpha = 45 * (Math.PI / 180);
+                    const pWorldOffset = new THREE.Vector3()
+                        .addScaledVector(camRight, R * Math.cos(alpha))
+                        .addScaledVector(camUp, R * Math.sin(alpha));
+
+                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
+                    
+                    // Transform to Ball's Local Coordinates
+                    ballGroup.updateMatrixWorld(true);
+                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
 
                     const pGeo = new THREE.SphereGeometry(0.11, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
@@ -774,18 +804,19 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     const axisMat = new THREE.LineDashedMaterial({{
                         color: 0xe11d48,
                         dashSize: 0.1,
-                        gapSize: 0.05
+                        gapSize: 0.05,
+                        depthTest: false
                     }});
                     const axisGeo = new THREE.BufferGeometry().setFromPoints([
                         new THREE.Vector3(0, 0, 0),
-                        cTopLocal.clone().multiplyScalar(1.15)
+                        new THREE.Vector3(0, R * 1.15, 0)
                     ]);
                     const axisLine = new THREE.Line(axisGeo, axisMat);
                     axisLine.computeLineDistances();
                     axisLine.renderOrder = 99;
                     ballGroup.add(axisLine);
 
-                    // 5. Badges
+                    // 5. Clean Badges in Empty Space Outside the Ball
                     const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                     oLabel.scale.set(1.4, 0.44, 1);
                     oLabel.position.set(-1.35, 0.2, 0.2);
@@ -793,7 +824,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
 
                     const cLabel = makeMathTextSprite("C' (0, R, 0)", "#e11d48");
                     cLabel.scale.set(1.4, 0.44, 1);
-                    cLabel.position.copy(cTopLocal).add(new THREE.Vector3(0.0, 0.35, 0.0));
+                    cLabel.position.set(0.0, R + 0.35, 0.0);
                     ballGroup.add(cLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
@@ -801,46 +832,7 @@ elif 8 <= st.session_state.presentation_state <= 19:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.75, 0.35, 0.0));
                     ballGroup.add(pLabel);
                 }}
-
-                // ============================================================
-                // CLICK 5 (State >= 12): Wedge Slice Cut Hinged on Axis OC'
-                // ============================================================
-                if (currentState >= 12 && ballGroup && ballMat && pentagonMat && pWorld && cWorld) {{
-                    const R = ballRadius;
-                    const oWorld = oPos.clone();
-                    const vOP = new THREE.Vector3().subVectors(pWorld, oWorld);
-
-                    // 1. Two boundary points P1 and P2 opening 55 degrees around P
-                    const halfWedge = 28 * (Math.PI / 180);
-                    const yAxis = new THREE.Vector3(0, 1, 0);
-
-                    const p1World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, -halfWedge));
-                    const p2World = oWorld.clone().add(vOP.clone().applyAxisAngle(yAxis, halfWedge));
-
-                    // 2. Define cutting planes passing through the hinge axis OC'
-                    const plane1 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p1World);
-                    const plane2 = new THREE.Plane().setFromCoplanarPoints(oWorld, cWorld, p2World);
-
-                    if (plane1.distanceToPoint(pWorld) > 0) plane1.negate();
-                    if (plane2.distanceToPoint(pWorld) > 0) plane2.negate();
-
-                    const cutPlanes = [plane1, plane2];
-
-                    // 3. Apply clipping to leather, pentagons, and seams
-                    ballMat.clippingPlanes = cutPlanes;
-                    ballMat.clipIntersection = true;
-                    ballMat.needsUpdate = true;
-
-                    pentagonMat.clippingPlanes = cutPlanes;
-                    pentagonMat.clipIntersection = true;
-                    pentagonMat.needsUpdate = true;
-
-                    if (lineMat) {{
-                        lineMat.clippingPlanes = cutPlanes;
-                        lineMat.clipIntersection = true;
-                        lineMat.needsUpdate = true;
-                    }}
-                }}
+                // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
                     renderer.render(scene, camera);
