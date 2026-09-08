@@ -615,12 +615,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Math
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
                     const pAngle = 38 * (Math.PI / 180);
-                    const sphereStart = pAngle + (wedgeSpan / 2);
+                    const sphereStart = pAngle - (wedgeSpan / 2) + Math.PI;
 
                     // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
@@ -652,12 +651,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.z = -sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.z = -(sphereStart + sphereArc);
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
                     }}
