@@ -654,20 +654,26 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Math
+                    // Complete Hemispherical Surface Cut (Click 5 / State >= 12)
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
                     const pAngle = 38 * (Math.PI / 180);
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
 
-                    // 3. White Ball Base
+                    // Hemispherical Surface Cut: thetaStart = PI/2 removes the entire front dome
+                    const thetaStart = isWedgeCut ? (Math.PI / 2) : 0;
+                    const thetaLength = isWedgeCut ? (Math.PI / 2) : Math.PI;
+
+                    // 3. White Ball Shell (Back bowl only in Click 5)
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
                         64, 
                         sphereStart, 
-                        sphereArc
+                        sphereArc,
+                        thetaStart,
+                        thetaLength
                     );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -679,7 +685,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: True Bored Center Cylinder + Dark Cut-Walls + Origin O
+                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls & Center Origin O
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1e293b, // Deep Charcoal Matte
@@ -688,38 +694,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
-                        const boreRadius = 0.22; // Physical radius of bored hole
+                        // Circular rim cap for the cut equatorial boundary
+                        const rimGeo = new THREE.RingGeometry(0, R, 64, 1, sphereStart, sphereArc);
+                        const rimMesh = new THREE.Mesh(rimGeo, wallMat);
+                        ballGroup.add(rimMesh);
 
-                        // 1. Cut Walls with Center Cutout Hole (RingGeometry)
-                        const wallGeo = new THREE.RingGeometry(boreRadius, R, 48, 1, 0, Math.PI);
-
-                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = sphereStart;
-                        wall1.rotation.y = Math.PI / 2;
-                        ballGroup.add(wall1);
-
-                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = sphereStart + sphereArc;
-                        wall2.rotation.y = Math.PI / 2;
-                        ballGroup.add(wall2);
-
-                        // 2. Bored Cylindrical Inner Lining
-                        const boreGeo = new THREE.CylinderGeometry(
-                            boreRadius, 
-                            boreRadius, 
-                            R * 2.0, 
-                            32, 
-                            1, 
-                            true
-                        );
-                        const boreMesh = new THREE.Mesh(boreGeo, wallMat);
-                        boreMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(boreMesh);
-
-                        // 3. Origin O(0, 0, 0) Node & Math Badge inside the hollow cylinder
+                        // 5. Origin O(0, 0, 0) Node & Math Badge in the open center
                         const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Amber Gold
+                            color: 0xf59e0b, // Glowing Amber Gold
                             emissive: 0xf59e0b,
                             emissiveIntensity: 3.0
                         }});
@@ -729,7 +712,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.75, -0.28, 0.30);
+                        oLabel.position.set(-0.75, -0.28, 0.15);
                         ballGroup.add(oLabel);
                     }}
                     // 6. Pentagons and Seams (Filtered so nothing bleeds into cut space)
