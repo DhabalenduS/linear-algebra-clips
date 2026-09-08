@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 (Click 3: Full 3D Soccer Ball on Pitch)
+# Slides 1-3 Complete Implementation (Aligned Click 5 Wedge Cut)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -538,6 +538,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     sCtx.fillRect(0, 0, 256, 256);
                     return new THREE.CanvasTexture(sCanvas);
                 }}
+
                 // Helper: Compact TV-Grade Math Pill Badge
                 function makeMathTextSprite(text, dotColor) {{
                     const canvas = document.createElement('canvas');
@@ -589,14 +590,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                 const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
-                let ballGroup = null;
-
-                // ============================================================
-                // CLICK 3, 4, 5: Unified Geometric Construction (Aligned to View)
-                // ============================================================
                 const R = ballRadius;
                 let ballGroup = null;
 
+                // ============================================================
+                // CLICK 3, 4, 5: Unified Geometric Construction
+                // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow on Pitch
                     const shadowGeo = new THREE.PlaneGeometry(R * 2.2, R * 2.2);
@@ -610,21 +609,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. Ball Root Group (Positioned at O)
+                    // 2. Ball Root Group
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
-                    // Orient ball group directly facing camera
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Math: 0 deg (Click 3-4), 50 deg (Click 5+)
+                    // Wedge Cut Math
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
-                    const pAngle = 38 * (Math.PI / 180); // Point P angle in front view
+                    const pAngle = 38 * (Math.PI / 180);
                     const sphereStart = pAngle + (wedgeSpan / 2);
 
-                    // 3. White Ball Base (Full in Click 3-4, 310-deg sector in Click 5)
+                    // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
@@ -639,7 +637,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
-                    // Rotate so polar axis is aligned with the view normal
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
@@ -654,20 +651,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
-                        // Wall 1
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // Wall 2
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
                     }}
 
-                    // 5. Pentagons and Seams (Sub-group with realistic tilt)
+                    // 5. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
@@ -722,7 +717,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Point C'(0, R, 0) - Dead-Center of Visible Front Face
                     const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
                     const cTopMat = new THREE.MeshStandardMaterial({{
                         color: 0xe11d48,
@@ -730,11 +724,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         emissiveIntensity: 2.0
                     }});
                     const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    // In camera-facing group, (0, 0, R) is directly facing the camera
                     cTopSphere.position.set(0, 0, R);
                     ballGroup.add(cTopSphere);
 
-                    // Point P(x, y, z) on Upper-Right Horizon
                     const pAngle = 38 * (Math.PI / 180);
                     const pLocal = new THREE.Vector3(
                         R * Math.cos(pAngle),
@@ -752,7 +744,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
-                    // Math Badges
                     const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
                     cLabel.scale.set(1.4, 0.44, 1);
                     cLabel.position.set(-0.55, 0.32, R);
@@ -763,6 +754,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
                 }}
+
                 // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
