@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Aligned Click 5 Wedge Cut)
+# Slides 1-3 Complete Implementation (Click 5: Clean Wedge Cut + Center Origin O)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -354,14 +354,53 @@ elif 2 <= st.session_state.presentation_state <= 7:
 elif 8 <= st.session_state.presentation_state <= 18:
     state = st.session_state.presentation_state
 
+    # Construct Left Panel step-by-step
+    left_panel_html = '<div class="slide3-left-panel">'
+
+    if state >= 15:
+        left_panel_html += '<div class="panel-section-title">Observation:</div>'
+        left_panel_html += """
+        <div class="panel-bullet">
+            <span class="panel-bullet-icon">&#9679;</span>
+            <span>Throughout the pumping process, the point <span class="math-term">P</span> is moving in the direction <span class="math-term">OP&#8407;</span> and finally reaches a point <span class="math-term">P'</span>.</span>
+        </div>
+        """
+
+    if state >= 16:
+        left_panel_html += """
+        <div class="panel-bullet">
+            <span class="panel-bullet-icon">&#9679;</span>
+            <span>The point <span class="math-term">P</span> is scaled by a factor of <span class="math-term">&lambda; = OP' / OP</span>.</span>
+        </div>
+        """
+
+    if state >= 17:
+        left_panel_html += """
+        <div class="panel-bullet">
+            <span class="panel-bullet-icon">&#9679;</span>
+            <span>The point <span class="math-term">P</span> is <strong>non-zero</strong> (<span class="math-term">P &ne; O</span>).</span>
+        </div>
+        """
+
+    if state >= 18:
+        left_panel_html += '<div class="panel-section-title" style="margin-top: 2.2vh; color: #991b1b; border-bottom: 2px solid #fecaca;">Conclusion:</div>'
+        left_panel_html += """
+        <div class="panel-bullet">
+            <span class="panel-bullet-icon" style="color: #dc2626;">&#9679;</span>
+            <span>The non-zero point <span class="math-term">P</span> does not change its direction while moving towards <span class="math-term">P'</span>, and is therefore defined as an <span class="highlight-keyword">eigenvector</span> corresponding to the <span class="highlight-keyword">eigenvalue &lambda;</span>.</span>
+        </div>
+        """
+
+    left_panel_html += '</div>'
+
     # Render Slide 3 Base
     st.html(
-        """
+        f"""
         <div class="slide3">
             <div class="slide3-title">
                 Visualization of Soccer Match
             </div>
-            <div class="slide3-left-panel"></div>
+            {left_panel_html}
         </div>
         """
     )
@@ -737,6 +776,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             }}
                         }}
                     }}
+                }}
+
                 // ============================================================
                 // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
                 // ============================================================
