@@ -591,10 +591,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
                 let ballGroup = null;
 
-                // Build Ball in Click 3 (State >= 10) & Apply Option A Wedge Cut in Click 5 (State >= 12)
+                // ============================================================
+                // CLICK 3, 4, 5: Unified Geometric Construction (Aligned to View)
+                // ============================================================
+                const R = ballRadius;
+                let ballGroup = null;
+
                 if (currentState >= 10) {{
-                    // Contact Shadow
-                    const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
+                    // 1. Soft Contact Shadow on Pitch
+                    const shadowGeo = new THREE.PlaneGeometry(R * 2.2, R * 2.2);
                     const shadowMat = new THREE.MeshBasicMaterial({{
                         map: createContactShadowTexture(),
                         transparent: true,
@@ -605,36 +610,23 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
+                    // 2. Ball Root Group (Positioned at O)
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
-                    ballGroup.rotation.set(0.38, -0.75, 0.0);
+                    // Orient ball group directly facing camera
+                    ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Option A: Calculate Local Azimuth of Point P
-                    const R = ballRadius;
-                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0);
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
-
-                    const alpha = 45 * (Math.PI / 180);
-                    const pWorldOffset = new THREE.Vector3()
-                        .addScaledVector(camRight, R * Math.cos(alpha))
-                        .addScaledVector(camUp, R * Math.sin(alpha));
-                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
-
-                    ballGroup.updateMatrixWorld(true);
-                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
-
-                    // Azimuth angle of P in ball's local coordinate system
-                    const phiP = Math.atan2(pLocal.z, pLocal.x);
+                    // Wedge Cut Math: 0 deg (Click 3-4), 50 deg (Click 5+)
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
-                    const sphereStart = phiP + (wedgeSpan / 2);
+                    const pAngle = 38 * (Math.PI / 180); // Point P angle in front view
+                    const sphereStart = pAngle + (wedgeSpan / 2);
 
-                    // 1. White Ball Base (Full in Click 3-4, 310-deg sector facing P in Click 5)
+                    // 3. White Ball Base (Full in Click 3-4, 310-deg sector in Click 5)
                     const ballGeo = new THREE.SphereGeometry(
-                        ballRadius, 
+                        R, 
                         64, 
                         64, 
                         sphereStart, 
@@ -647,33 +639,39 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                    // Rotate so polar axis is aligned with the view normal
+                    whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 2. Click 5: Dark Charcoal Matte Interior Cut-Walls
+                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1e293b, // Deep Charcoal Gray
+                            color: 0x1e293b,
                             roughness: 0.6,
                             metalness: 0.1,
                             side: THREE.DoubleSide
                         }});
 
-                        const wallGeo = new THREE.CircleGeometry(ballRadius, 64, 0, Math.PI);
+                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
-                        // Wall 1 (Left cut face)
+                        // Wall 1
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.y = -(sphereStart) + Math.PI / 2;
-                        wall1.rotation.x = Math.PI / 2;
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // Wall 2 (Right cut face)
+                        // Wall 2
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.y = -(sphereStart + sphereArc) + Math.PI / 2;
-                        wall2.rotation.x = Math.PI / 2;
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
                     }}
 
-                    // 3. 12 Pentagons
+                    // 5. Pentagons and Seams (Sub-group with realistic tilt)
+                    const decoGroup = new THREE.Group();
+                    decoGroup.rotation.set(0.35, -0.65, 0.2);
+                    ballGroup.add(decoGroup);
+
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
                         [-1, phi, 0], [1, phi, 0], [-1, -phi, 0], [1, -phi, 0],
@@ -700,44 +698,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
-                        const azim = Math.atan2(v.z, v.x);
-                        // Normalize angle relative to sphereStart
-                        let diff = (azim - sphereStart) % (Math.PI * 2);
-                        if (diff < 0) diff += Math.PI * 2;
-
-                        if (!isWedgeCut || diff <= sphereArc) {{
-                            const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
-                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                            pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
-                            pentMesh.lookAt(v.clone().multiplyScalar(ballRadius * 2));
-                            ballGroup.add(pentMesh);
-                        }}
+                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                        pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
+                        pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
+                        decoGroup.add(pentMesh);
                     }});
 
-                    // 4. Seams
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
-                                const p1 = icoVerts[i].clone().multiplyScalar(ballRadius * 1.001);
-                                const p2 = icoVerts[j].clone().multiplyScalar(ballRadius * 1.001);
+                                const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
+                                const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
                                 const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
                                 const seam = new THREE.Line(lineGeo, lineMat);
-                                ballGroup.add(seam);
+                                decoGroup.add(seam);
                             }}
                         }}
                     }}
                 }}
+
                 // ============================================================
                 // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    const R = ballRadius;
-                    ballGroup.updateMatrixWorld(true);
-
-                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
-                    const camRight = new THREE.Vector3(1, 0, 0);
-                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
-
                     // Point C'(0, R, 0) - Dead-Center of Visible Front Face
                     const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
                     const cTopMat = new THREE.MeshStandardMaterial({{
@@ -746,19 +730,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         emissiveIntensity: 2.0
                     }});
                     const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    const cWorld = new THREE.Vector3().addVectors(oPos, camDir.clone().multiplyScalar(R));
-                    const cTopLocal = ballGroup.worldToLocal(cWorld.clone());
-                    cTopSphere.position.copy(cTopLocal);
+                    // In camera-facing group, (0, 0, R) is directly facing the camera
+                    cTopSphere.position.set(0, 0, R);
                     ballGroup.add(cTopSphere);
 
-                    // Point P(x, y, z) on Silhouette Horizon
-                    const alpha = 45 * (Math.PI / 180);
-                    const pWorldOffset = new THREE.Vector3()
-                        .addScaledVector(camRight, R * Math.cos(alpha))
-                        .addScaledVector(camUp, R * Math.sin(alpha));
-
-                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
-                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
+                    // Point P(x, y, z) on Upper-Right Horizon
+                    const pAngle = 38 * (Math.PI / 180);
+                    const pLocal = new THREE.Vector3(
+                        R * Math.cos(pAngle),
+                        R * Math.sin(pAngle),
+                        0.15 * R
+                    );
 
                     const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
@@ -773,7 +755,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // Math Badges
                     const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
                     cLabel.scale.set(1.4, 0.44, 1);
-                    cLabel.position.copy(cTopLocal).add(new THREE.Vector3(0.0, 0.32, 0.0));
+                    cLabel.position.set(-0.55, 0.32, R);
                     ballGroup.add(cLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
@@ -781,7 +763,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
                 }}
-
                 // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
