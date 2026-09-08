@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Click 5: Correct Upper-Right Wedge Cut + Center Origin O)
+# Slides 1-3 Complete Implementation (Aligned Click 5 Wedge Cut)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -354,53 +354,14 @@ elif 2 <= st.session_state.presentation_state <= 7:
 elif 8 <= st.session_state.presentation_state <= 18:
     state = st.session_state.presentation_state
 
-    # Construct Left Panel step-by-step
-    left_panel_html = '<div class="slide3-left-panel">'
-
-    if state >= 15:
-        left_panel_html += '<div class="panel-section-title">Observation:</div>'
-        left_panel_html += """
-        <div class="panel-bullet">
-            <span class="panel-bullet-icon">&#9679;</span>
-            <span>Throughout the pumping process, the point <span class="math-term">P</span> is moving in the direction <span class="math-term">OP&#8407;</span> and finally reaches a point <span class="math-term">P'</span>.</span>
-        </div>
-        """
-
-    if state >= 16:
-        left_panel_html += """
-        <div class="panel-bullet">
-            <span class="panel-bullet-icon">&#9679;</span>
-            <span>The point <span class="math-term">P</span> is scaled by a factor of <span class="math-term">&lambda; = OP' / OP</span>.</span>
-        </div>
-        """
-
-    if state >= 17:
-        left_panel_html += """
-        <div class="panel-bullet">
-            <span class="panel-bullet-icon">&#9679;</span>
-            <span>The point <span class="math-term">P</span> is <strong>non-zero</strong> (<span class="math-term">P &ne; O</span>).</span>
-        </div>
-        """
-
-    if state >= 18:
-        left_panel_html += '<div class="panel-section-title" style="margin-top: 2.2vh; color: #991b1b; border-bottom: 2px solid #fecaca;">Conclusion:</div>'
-        left_panel_html += """
-        <div class="panel-bullet">
-            <span class="panel-bullet-icon" style="color: #dc2626;">&#9679;</span>
-            <span>The non-zero point <span class="math-term">P</span> does not change its direction while moving towards <span class="math-term">P'</span>, and is therefore defined as an <span class="highlight-keyword">eigenvector</span> corresponding to the <span class="highlight-keyword">eigenvalue &lambda;</span>.</span>
-        </div>
-        """
-
-    left_panel_html += '</div>'
-
     # Render Slide 3 Base
     st.html(
-        f"""
+        """
         <div class="slide3">
             <div class="slide3-title">
                 Visualization of Soccer Match
             </div>
-            {left_panel_html}
+            <div class="slide3-left-panel"></div>
         </div>
         """
     )
@@ -633,7 +594,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 let ballGroup = null;
 
                 // ============================================================
-                // CLICK 3, 4, 5: Geometrically Aligned Construction
+                // CLICK 3, 4, 5: Unified Geometric Construction
                 // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow on Pitch
@@ -654,19 +615,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Angle definition for Point P in Screen XY Plane
-                    const pAngle = 38 * (Math.PI / 180); // 38 degrees in first quadrant
+                    // Wedge Cut Math
                     const isWedgeCut = currentState >= 12;
-                    const wedgeSpan = isWedgeCut ? (48 * Math.PI / 180) : 0;
+                    const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
-                    
-                    // In Three.js SphereGeometry:
-                    // theta is from Top Pole (+Y) to Bottom Pole (-Y)
-                    // phi is around Y axis: 0 is +Z (towards camera)
-                    // To cut around upper-right in screen view, we orient the sphere cut cleanly:
-                    const sphereStart = wedgeSpan / 2;
+                    const pAngle = 38 * (Math.PI / 180);
+                    const sphereStart = pAngle + (wedgeSpan / 2);
 
-                    // 3. White Ball Base Shell
+                    // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
@@ -681,12 +637,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
-                    // Rotate the shell so the cut aligns with Point P (pAngle)
-                    whiteBall.rotation.z = pAngle;
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls & Center Stage
+                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1e293b,
@@ -695,45 +649,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
-                        // Two clean semi-circular planar cut walls
                         const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = pAngle - (wedgeSpan / 2);
+                        wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = pAngle + (wedgeSpan / 2);
+                        wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
-
-                        // Bored Center Recessed Cylinder (Negative Space Stage)
-                        const coreRadius = 0.15;
-                        const coreHeight = R * 1.8;
-                        const coreGeo = new THREE.CylinderGeometry(coreRadius, coreRadius, coreHeight, 32, 1, true);
-                        const coreMesh = new THREE.Mesh(coreGeo, wallMat);
-                        coreMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(coreMesh);
-
-                        // 5. Origin O(0, 0, 0) Reveal inside Center Stage
-                        const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
-                        const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Amber Gold
-                            emissive: 0xf59e0b,
-                            emissiveIntensity: 2.2
-                        }});
-                        const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0);
-                        ballGroup.add(oSphere);
-
-                        const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
-                        oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.75, -0.25, 0.2);
-                        ballGroup.add(oLabel);
                     }}
 
-                    // 6. Pentagons and Seams (Hidden inside cut window in Click 5)
+                    // 5. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
@@ -764,20 +693,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
-                        // Calculate vertex angle relative to screen plane
-                        const vRot = v.clone().applyEuler(decoGroup.rotation);
-                        const vAngle = Math.atan2(vRot.y, vRot.x);
-                        let diff = Math.abs(vAngle - pAngle);
-                        if (diff > Math.PI) diff = 2 * Math.PI - diff;
-
-                        // Only render pentagons outside the wedge cut opening
-                        if (!isWedgeCut || diff > (wedgeSpan / 2)) {{
-                            const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
-                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                            pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
-                            pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
-                            decoGroup.add(pentMesh);
-                        }}
+                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                        pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
+                        pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
+                        decoGroup.add(pentMesh);
                     }});
 
                     for (let i = 0; i < icoVerts.length; i++) {{
