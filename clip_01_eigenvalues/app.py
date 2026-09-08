@@ -591,7 +591,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
                 let ballGroup = null;
 
-                // Build Ball in Click 3 (State >= 10) & Apply Wedge Cut in Click 5 (State >= 12)
+                // Build Ball in Click 3 (State >= 10) & Apply Option A Wedge Cut in Click 5 (State >= 12)
                 if (currentState >= 10) {{
                     // Contact Shadow
                     const shadowGeo = new THREE.PlaneGeometry(ballRadius * 2.2, ballRadius * 2.2);
@@ -607,14 +607,32 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
+                    ballGroup.rotation.set(0.38, -0.75, 0.0);
+                    scene.add(ballGroup);
 
-                    // Wedge Angle Math: 0 deg (Click 3-4), 45 deg (Click 5+)
+                    // Option A: Calculate Local Azimuth of Point P
+                    const R = ballRadius;
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
+
+                    const alpha = 45 * (Math.PI / 180);
+                    const pWorldOffset = new THREE.Vector3()
+                        .addScaledVector(camRight, R * Math.cos(alpha))
+                        .addScaledVector(camUp, R * Math.sin(alpha));
+                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
+
+                    ballGroup.updateMatrixWorld(true);
+                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
+
+                    // Azimuth angle of P in ball's local coordinate system
+                    const phiP = Math.atan2(pLocal.z, pLocal.x);
                     const isWedgeCut = currentState >= 12;
-                    const wedgeAngle = isWedgeCut ? (45 * Math.PI / 180) : 0;
-                    const sphereArc = Math.PI * 2 - wedgeAngle;
-                    const sphereStart = isWedgeCut ? (wedgeAngle / 2) : 0;
+                    const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
+                    const sphereArc = Math.PI * 2 - wedgeSpan;
+                    const sphereStart = phiP + (wedgeSpan / 2);
 
-                    // 1. White Ball Base (Full sphere in Click 3-4, 315-deg sector in Click 5+)
+                    // 1. White Ball Base (Full in Click 3-4, 310-deg sector facing P in Click 5)
                     const ballGeo = new THREE.SphereGeometry(
                         ballRadius, 
                         64, 
@@ -631,10 +649,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                     ballGroup.add(whiteBall);
 
-                    // 2. Click 5: Dark Charcoal Matte Interior Cut-Walls (Caps)
+                    // 2. Click 5: Dark Charcoal Matte Interior Cut-Walls
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1e293b,
+                            color: 0x1e293b, // Deep Charcoal Gray
                             roughness: 0.6,
                             metalness: 0.1,
                             side: THREE.DoubleSide
@@ -642,15 +660,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         const wallGeo = new THREE.CircleGeometry(ballRadius, 64, 0, Math.PI);
 
-                        // Wall 1
+                        // Wall 1 (Left cut face)
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.y = sphereStart;
+                        wall1.rotation.y = -(sphereStart) + Math.PI / 2;
                         wall1.rotation.x = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // Wall 2
+                        // Wall 2 (Right cut face)
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.y = sphereStart + sphereArc;
+                        wall2.rotation.y = -(sphereStart + sphereArc) + Math.PI / 2;
                         wall2.rotation.x = Math.PI / 2;
                         ballGroup.add(wall2);
                     }}
@@ -683,8 +701,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
                         const azim = Math.atan2(v.z, v.x);
-                        const normAzim = (azim + Math.PI * 2) % (Math.PI * 2);
-                        if (!isWedgeCut || (normAzim >= sphereStart && normAzim <= sphereStart + sphereArc)) {{
+                        // Normalize angle relative to sphereStart
+                        let diff = (azim - sphereStart) % (Math.PI * 2);
+                        if (diff < 0) diff += Math.PI * 2;
+
+                        if (!isWedgeCut || diff <= sphereArc) {{
                             const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(ballRadius * 1.002));
@@ -705,9 +726,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             }}
                         }}
                     }}
-
-                    ballGroup.rotation.set(0.38, -0.75, 0.0);
-                    scene.add(ballGroup);
                 }}
                 // ============================================================
                 // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
