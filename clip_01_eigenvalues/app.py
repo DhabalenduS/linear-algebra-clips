@@ -620,7 +620,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
                     const pAngle = 38 * (Math.PI / 180);
-                    const sphereStart = pAngle + (wedgeSpan / 2);
+                    const sphereStart = pAngle + (wedgeSpan / 2)+Math.PI; // trying to make cut diagonally opposite
 
                     // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
