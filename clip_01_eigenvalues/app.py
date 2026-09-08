@@ -660,6 +660,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
+                        // Bored Center Recessed Cylinder (Negative Space Stage)
+                        const coreRadius = 0.14;
+                        const coreHeight = R * 1.8;
+                        const coreGeo = new THREE.CylinderGeometry(coreRadius, coreRadius, coreHeight, 32, 1, true);
+                        const coreMesh = new THREE.Mesh(coreGeo, wallMat);
+                        coreMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(coreMesh);
                     }}
 
                     // 5. Pentagons and Seams
