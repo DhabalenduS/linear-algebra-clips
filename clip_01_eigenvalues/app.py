@@ -538,6 +538,54 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     sCtx.fillRect(0, 0, 256, 256);
                     return new THREE.CanvasTexture(sCanvas);
                 }}
+                // Helper: Compact TV-Grade Math Pill Badge
+                function makeMathTextSprite(text, dotColor) {{
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 640;
+                    canvas.height = 200;
+                    const ctx = canvas.getContext('2d');
+
+                    const x = 30, y = 25, w = 580, h = 150, r = 75;
+
+                    // 1. Crisp White Pill Badge
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+                    ctx.beginPath();
+                    ctx.moveTo(x + r, y);
+                    ctx.lineTo(x + w - r, y);
+                    ctx.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2);
+                    ctx.lineTo(x + r, y + h);
+                    ctx.arc(x + r, y + r, r, Math.PI / 2, -Math.PI / 2);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // 2. Slate Border
+                    ctx.strokeStyle = '#64748b';
+                    ctx.lineWidth = 6;
+                    ctx.stroke();
+
+                    // 3. Vibrant Indicator Dot
+                    ctx.fillStyle = dotColor || '#2563eb';
+                    ctx.beginPath();
+                    ctx.arc(x + 65, y + r, 24, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // 4. Bold Typography
+                    ctx.font = "bold italic 60px Georgia, serif";
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = "#0f172a";
+                    ctx.fillText(text, x + 115, y + r + 2);
+
+                    const texture = new THREE.CanvasTexture(canvas);
+                    const spriteMat = new THREE.SpriteMaterial({{
+                        map: texture,
+                        depthTest: false,
+                        depthWrite: false
+                    }});
+                    const sprite = new THREE.Sprite(spriteMat);
+                    sprite.renderOrder = 999;
+                    return sprite;
+                }}
 
                 const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
@@ -618,6 +666,60 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     ballGroup.rotation.set(0.38, -0.75, 0.0);
                     scene.add(ballGroup);
+                }}
+                // ============================================================
+                // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
+                // ============================================================
+                if (currentState >= 11 && ballGroup) {{
+                    const R = ballRadius;
+                    ballGroup.updateMatrixWorld(true);
+
+                    const camDir = new THREE.Vector3().subVectors(camera.position, oPos).normalize();
+                    const camRight = new THREE.Vector3(1, 0, 0);
+                    const camUp = new THREE.Vector3().crossVectors(camDir, camRight).normalize();
+
+                    // Point C'(0, R, 0) - Dead-Center of Visible Front Face
+                    const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    const cTopMat = new THREE.MeshStandardMaterial({{
+                        color: 0xe11d48,
+                        emissive: 0xe11d48,
+                        emissiveIntensity: 2.0
+                    }});
+                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
+                    const cWorld = new THREE.Vector3().addVectors(oPos, camDir.clone().multiplyScalar(R));
+                    const cTopLocal = ballGroup.worldToLocal(cWorld.clone());
+                    cTopSphere.position.copy(cTopLocal);
+                    ballGroup.add(cTopSphere);
+
+                    // Point P(x, y, z) on Silhouette Horizon
+                    const alpha = 45 * (Math.PI / 180);
+                    const pWorldOffset = new THREE.Vector3()
+                        .addScaledVector(camRight, R * Math.cos(alpha))
+                        .addScaledVector(camUp, R * Math.sin(alpha));
+
+                    const pWorld = new THREE.Vector3().addVectors(oPos, pWorldOffset);
+                    const pLocal = ballGroup.worldToLocal(pWorld.clone());
+
+                    const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                    const pMat = new THREE.MeshStandardMaterial({{
+                        color: 0x06b6d4,
+                        emissive: 0x06b6d4,
+                        emissiveIntensity: 2.5
+                    }});
+                    const pSphere = new THREE.Mesh(pGeo, pMat);
+                    pSphere.position.copy(pLocal);
+                    ballGroup.add(pSphere);
+
+                    // Math Badges
+                    const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
+                    cLabel.scale.set(1.4, 0.44, 1);
+                    cLabel.position.copy(cTopLocal).add(new THREE.Vector3(0.0, 0.32, 0.0));
+                    ballGroup.add(cLabel);
+
+                    const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
+                    pLabel.scale.set(1.4, 0.44, 1);
+                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
+                    ballGroup.add(pLabel);
                 }}
 
                 // Render Loop
