@@ -667,6 +667,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         const coreMesh = new THREE.Mesh(coreGeo, wallMat);
                         coreMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(coreMesh);
+                        // 5. Center Origin Point O(0,0,0) & Badge
+                        const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                        const oMat = new THREE.MeshStandardMaterial({{
+                            color: 0xf59e0b, // Amber Gold
+                            emissive: 0xf59e0b,
+                            emissiveIntensity: 2.5
+                        }});
+                        const oSphere = new THREE.Mesh(oGeo, oMat);
+                        oSphere.position.set(0, 0, 0);
+                        ballGroup.add(oSphere);
+
+                        const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
+                        oLabel.scale.set(1.4, 0.44, 1);
+                        oLabel.position.set(-0.75, -0.28, 0.2);
+                        ballGroup.add(oLabel);
                     }}
 
                     // 5. Pentagons and Seams
