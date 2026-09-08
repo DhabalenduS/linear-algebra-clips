@@ -594,7 +594,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 let ballGroup = null;
 
                 // ============================================================
-                // CLICK 3, 4, 5: Unified Geometric Construction
+                // CLICK 3, 4, 5: Corrected Screen-Space Geometry
                 // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow on Pitch
@@ -619,8 +619,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
-                    const pAngle = 38 * (Math.PI / 180);
-                    const sphereStart = -pAngle - (wedgeSpan / 2) + Math.PI / 2;
+                    const pAngle = 38 * (Math.PI / 180); // Point P is at +38 deg
+                    const sphereStart = pAngle + (wedgeSpan / 2);
 
                     // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
@@ -637,6 +637,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                    // Align sphere equator with the camera view plane
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
@@ -653,12 +654,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.z = pAngle - (wedgeSpan / 2);
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.z = pAngle + (wedgeSpan / 2);
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
