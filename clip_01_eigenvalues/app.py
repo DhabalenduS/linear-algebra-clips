@@ -640,39 +640,53 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls
+                    // 4. Click 5: Real Bored Center Clearing + Dark Cut-Walls + Origin O
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1e293b,
+                            color: 0x1e293b, // Deep Charcoal Matte
                             roughness: 0.6,
                             metalness: 0.1,
                             side: THREE.DoubleSide
                         }});
 
-                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
+                        const coreRadius = 0.30; // Noticeably bored center radius
 
+                        // Cut Walls with TRUE Center Hole (RingGeometry)
+                        const wallGeo = new THREE.RingGeometry(coreRadius, R, 48, 1, 0, Math.PI);
+
+                        // Left Wall
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
+                        // Right Wall
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
-                        // Bored Center Recessed Cylinder (Negative Space Stage)
-                        const coreRadius = 0.14;
-                        const coreHeight = R * 1.8;
-                        const coreGeo = new THREE.CylinderGeometry(coreRadius, coreRadius, coreHeight, 32, 1, true);
+
+                        // Smooth Cylindrical Bored Core Wall (Lining the inner hole)
+                        const coreGeo = new THREE.CylinderGeometry(
+                            coreRadius, 
+                            coreRadius, 
+                            R * 2.0, 
+                            32, 
+                            1, 
+                            true, 
+                            sphereStart, 
+                            sphereArc
+                        );
                         const coreMesh = new THREE.Mesh(coreGeo, wallMat);
                         coreMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(coreMesh);
-                        // 5. Center Origin Point O(0,0,0) & Badge
-                        const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
+
+                        // 5. Origin O(0, 0, 0) Node & Math Badge floating in open clearing
+                        const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Amber Gold
+                            color: 0xf59e0b, // Glowing Amber Gold
                             emissive: 0xf59e0b,
-                            emissiveIntensity: 2.5
+                            emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
                         oSphere.position.set(0, 0, 0);
@@ -680,7 +694,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.75, -0.28, 0.2);
+                        oLabel.position.set(-0.80, -0.32, 0.25);
                         ballGroup.add(oLabel);
                     }}
 
