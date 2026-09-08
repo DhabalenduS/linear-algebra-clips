@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Click 5: Clean Wedge Cut + Center Origin O)
+# Slides 1-3 Complete Implementation (Click 5: Pristine 3D Wedge Cut + Center Origin O)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -654,26 +654,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Complete Hemispherical Surface Cut (Click 5 / State >= 12)
+                    // Wedge Cut Math (Click 5 / State >= 12)
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
                     const pAngle = 38 * (Math.PI / 180);
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
 
-                    // Hemispherical Surface Cut: thetaStart = PI/2 removes the entire front dome
-                    const thetaStart = isWedgeCut ? (Math.PI / 2) : 0;
-                    const thetaLength = isWedgeCut ? (Math.PI / 2) : Math.PI;
-
-                    // 3. White Ball Shell (Back bowl only in Click 5)
+                    // 3. White Ball Base Shell (Full sphere in Click 3-4, 310-deg sector in Click 5)
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
                         64, 
                         sphereStart, 
-                        sphereArc,
-                        thetaStart,
-                        thetaLength
+                        sphereArc
                     );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -694,28 +688,37 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
-                        // Circular rim cap for the cut equatorial boundary
-                        const rimGeo = new THREE.RingGeometry(0, R, 64, 1, sphereStart, sphereArc);
-                        const rimMesh = new THREE.Mesh(rimGeo, wallMat);
-                        ballGroup.add(rimMesh);
+                        // Two clean semi-circular planar cut walls
+                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
-                        // 5. Origin O(0, 0, 0) Node & Math Badge in the open center
+                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall1);
+
+                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall2);
+
+                        // 5. Origin O(0, 0, 0) Node & Math Badge floating in open clearing
                         const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Glowing Amber Gold
+                            color: 0xf59e0b, // Amber Gold
                             emissive: 0xf59e0b,
                             emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0);
+                        oSphere.position.set(0, 0, 0.05);
                         ballGroup.add(oSphere);
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.75, -0.28, 0.15);
+                        oLabel.position.set(-0.75, -0.28, 0.25);
                         ballGroup.add(oLabel);
                     }}
-                    // 6. Pentagons and Seams (Filtered so nothing bleeds into cut space)
+
+                    // 6. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
@@ -746,20 +749,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
-                        const vWorld = v.clone().applyEuler(decoGroup.rotation);
-                        const vAngle = (Math.atan2(vWorld.y, vWorld.x) + 2 * Math.PI) % (2 * Math.PI);
-                        const normP = (pAngle + 2 * Math.PI) % (2 * Math.PI);
-                        let diff = Math.abs(vAngle - normP);
-                        if (diff > Math.PI) diff = 2 * Math.PI - diff;
-
-                        // Only render exterior pentagons outside the wedge cut
-                        if (!isWedgeCut || diff > (wedgeSpan / 2)) {{
-                            const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
-                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                            pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
-                            pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
-                            decoGroup.add(pentMesh);
-                        }}
+                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                        pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
+                        pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
+                        decoGroup.add(pentMesh);
                     }});
 
                     for (let i = 0; i < icoVerts.length; i++) {{
@@ -779,7 +773,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Show C' only before Click 5 (it is cut away in Click 5)
+                    // Show C' only in Click 4 (it is removed in Click 5)
                     if (currentState === 11) {{
                         const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
                         const cTopMat = new THREE.MeshStandardMaterial({{
@@ -797,7 +791,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(cLabel);
                     }}
 
-                    // Point P(x, y, z) - Always visible on surface edge
+                    // Point P(x, y, z) - Upper-right horizon edge
                     const pAngle = 38 * (Math.PI / 180);
                     const pLocal = new THREE.Vector3(
                         R * Math.cos(pAngle),
