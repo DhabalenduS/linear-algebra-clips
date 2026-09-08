@@ -615,20 +615,27 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Math
+                    // Wedge & Front Cap Math
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
                     const pAngle = 38 * (Math.PI / 180);
-                    const sphereStart = pAngle + (wedgeSpan / 2)+Math.PI; // trying to make cut diagonally opposite
+                    const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
 
-                    // 3. White Ball Base
+                    // Front Hemisphere Window Cut around C' (Click 5)
+                    const capAngle = isWedgeCut ? (28 * Math.PI / 180) : 0;
+                    const thetaStart = capAngle;
+                    const thetaLength = Math.PI - capAngle;
+
+                    // 3. White Ball Base with Front Cap Window & Wedge Cut
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
                         64, 
                         sphereStart, 
-                        sphereArc
+                        sphereArc,
+                        thetaStart,
+                        thetaLength
                     );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -640,7 +647,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Real Bored Center Clearing + Dark Cut-Walls + Origin O
+                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls & Center Origin O
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1e293b, // Deep Charcoal Matte
@@ -649,28 +656,26 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
-                        const coreRadius = 0.30; // Noticeably bored center radius
+                        const coreRadius = 0.28;
 
-                        // Cut Walls with TRUE Center Hole (RingGeometry)
+                        // Cut Walls with Center Recess
                         const wallGeo = new THREE.RingGeometry(coreRadius, R, 48, 1, 0, Math.PI);
 
-                        // Left Wall
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // Right Wall
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // Smooth Cylindrical Bored Core Wall (Lining the inner hole)
+                        // Smooth Cylindrical Inner Core Lining
                         const coreGeo = new THREE.CylinderGeometry(
                             coreRadius, 
                             coreRadius, 
-                            R * 2.0, 
+                            R * 1.8, 
                             32, 
                             1, 
                             true, 
@@ -681,10 +686,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         coreMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(coreMesh);
 
-                        // 5. Origin O(0, 0, 0) Node & Math Badge floating in open clearing
+                        // 5. Origin O(0, 0, 0) Node & Math Badge inside the open clearing
                         const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Glowing Amber Gold
+                            color: 0xf59e0b, // Amber Gold
                             emissive: 0xf59e0b,
                             emissiveIntensity: 3.0
                         }});
@@ -694,11 +699,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.80, -0.32, 0.25);
+                        oLabel.position.set(-0.80, -0.28, 0.25);
                         ballGroup.add(oLabel);
                     }}
 
-                    // 5. Pentagons and Seams
+                    // 6. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
@@ -753,16 +758,25 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
-                    const cTopMat = new THREE.MeshStandardMaterial({{
-                        color: 0xe11d48,
-                        emissive: 0xe11d48,
-                        emissiveIntensity: 2.0
-                    }});
-                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    cTopSphere.position.set(0, 0, R);
-                    ballGroup.add(cTopSphere);
+                    // Show C' only before Click 5 (it is cut away in Click 5)
+                    if (currentState === 11) {{
+                        const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                        const cTopMat = new THREE.MeshStandardMaterial({{
+                            color: 0xe11d48,
+                            emissive: 0xe11d48,
+                            emissiveIntensity: 2.0
+                        }});
+                        const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
+                        cTopSphere.position.set(0, 0, R);
+                        ballGroup.add(cTopSphere);
 
+                        const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
+                        cLabel.scale.set(1.4, 0.44, 1);
+                        cLabel.position.set(-0.55, 0.32, R);
+                        ballGroup.add(cLabel);
+                    }}
+
+                    // Point P(x, y, z) - Always visible on surface edge
                     const pAngle = 38 * (Math.PI / 180);
                     const pLocal = new THREE.Vector3(
                         R * Math.cos(pAngle),
@@ -779,11 +793,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
-
-                    const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
-                    cLabel.scale.set(1.4, 0.44, 1);
-                    cLabel.position.set(-0.55, 0.32, R);
-                    ballGroup.add(cLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(1.4, 0.44, 1);
