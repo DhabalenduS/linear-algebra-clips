@@ -615,11 +615,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
+                    // Wedge Cut Math (Click 5 / State >= 12)
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
                     const pAngle = 38 * (Math.PI / 180);
-                    const sphereStart = pAngle - (wedgeSpan / 2) + Math.PI;
+                    const sphereStart = -pAngle - (wedgeSpan / 2) + Math.PI / 2;
 
                     // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
@@ -639,7 +640,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls
+                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls & Bored Core
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1e293b,
@@ -648,20 +649,45 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
+                        // Two planar cut-face walls
                         const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = -sphereStart;
+                        wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = -(sphereStart + sphereArc);
+                        wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
+
+                        // Bored Center Recessed Cylinder (Negative Space Stage)
+                        const coreRadius = 0.15;
+                        const coreHeight = R * 1.8;
+                        const coreGeo = new THREE.CylinderGeometry(coreRadius, coreRadius, coreHeight, 32, 1, true);
+                        const coreMesh = new THREE.Mesh(coreGeo, wallMat);
+                        coreMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(coreMesh);
+
+                        // 5. Origin O(0, 0, 0) Reveal in Center Stage
+                        const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                        const oMat = new THREE.MeshStandardMaterial({{
+                            color: 0xf59e0b, // Amber Gold
+                            emissive: 0xf59e0b,
+                            emissiveIntensity: 2.2
+                        }});
+                        const oSphere = new THREE.Mesh(oGeo, oMat);
+                        oSphere.position.set(0, 0, 0);
+                        ballGroup.add(oSphere);
+
+                        const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
+                        oLabel.scale.set(1.4, 0.44, 1);
+                        oLabel.position.set(-0.75, -0.25, 0.2);
+                        ballGroup.add(oLabel);
                     }}
 
-                    // 5. Pentagons and Seams
+                    // 6. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
@@ -753,7 +779,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
                 }}
-
                 // Render Loop
                 function animate() {{
                     requestAnimationFrame(animate);
