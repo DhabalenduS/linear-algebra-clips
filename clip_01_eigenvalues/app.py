@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Click 5: Pristine 3D Wedge Cut + Center Origin O)
+# Slides 1-3 Complete Implementation (Click 5: True Hemispherical Surface Cut)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -633,7 +633,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 let ballGroup = null;
 
                 // ============================================================
-                // CLICK 3, 4, 5: Unified Geometric Construction
+                // CLICK 3, 4, 5: True Hemispherical Surface Cut Architecture
                 // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow on Pitch
@@ -654,20 +654,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Math (Click 5 / State >= 12)
-                    const isWedgeCut = currentState >= 12;
-                    const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
-                    const sphereArc = Math.PI * 2 - wedgeSpan;
-                    const pAngle = 38 * (Math.PI / 180);
-                    const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
+                    // Click 5: Remove the entire front dome facing camera
+                    const isCut = currentState >= 12;
+                    const thetaStart = isCut ? (Math.PI / 2) : 0;
+                    const thetaLength = isCut ? (Math.PI / 2) : Math.PI;
 
-                    // 3. White Ball Base Shell (Full sphere in Click 3-4, 310-deg sector in Click 5)
+                    // 3. White Ball Shell
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
                         64, 
-                        sphereStart, 
-                        sphereArc
+                        0, 
+                        Math.PI * 2,
+                        thetaStart,
+                        thetaLength
                     );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -679,50 +679,24 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls & Center Origin O
-                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls with Bored Center Channel
-                    if (isWedgeCut) {{
-                        const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1e293b, // Deep Charcoal Matte
-                            roughness: 0.6,
+                    // 4. Click 5: Interior Finishing & Center Origin Reveal
+                    if (isCut) {{
+                        const rimMat = new THREE.MeshStandardMaterial({{
+                            color: 0x0f172a, // Dark Navy/Charcoal
+                            roughness: 0.5,
                             metalness: 0.1,
                             side: THREE.DoubleSide
                         }});
 
-                        const boreRadius = 0.22; // Physical radius of the bored channel
+                        // Circular Outer Rim
+                        const rimGeo = new THREE.RingGeometry(R * 0.96, R * 1.01, 64);
+                        const rimMesh = new THREE.Mesh(rimGeo, rimMat);
+                        ballGroup.add(rimMesh);
 
-                        // 1. Cut Walls with Center Cutout Hole (RingGeometry)
-                        const wallGeo = new THREE.RingGeometry(boreRadius, R, 48, 1, 0, Math.PI);
-
-                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = sphereStart;
-                        wall1.rotation.y = Math.PI / 2;
-                        ballGroup.add(wall1);
-
-                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = sphereStart + sphereArc;
-                        wall2.rotation.y = Math.PI / 2;
-                        ballGroup.add(wall2);
-
-                        // 2. Bored Cylindrical Inner Lining (Connecting the walls smoothly)
-                        const boreGeo = new THREE.CylinderGeometry(
-                            boreRadius, 
-                            boreRadius, 
-                            R * 1.8, 
-                            32, 
-                            1, 
-                            true,
-                            sphereStart,
-                            sphereArc
-                        );
-                        const boreMesh = new THREE.Mesh(boreGeo, wallMat);
-                        boreMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(boreMesh);
-
-                        // 3. Origin O(0, 0, 0) Node & Math Badge floating in the open channel
-                        const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                        // 5. Origin O(0, 0, 0) Node & Math Badge floating in the open center
+                        const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Glowing Amber Gold
+                            color: 0xf59e0b, // Amber Gold
                             emissive: 0xf59e0b,
                             emissiveIntensity: 3.0
                         }});
@@ -735,6 +709,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oLabel.position.set(-0.75, -0.28, 0.25);
                         ballGroup.add(oLabel);
                     }}
+
                     // 6. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
@@ -766,21 +741,29 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
-                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
-                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                        pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
-                        pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
-                        decoGroup.add(pentMesh);
+                        const vRot = v.clone().applyEuler(decoGroup.rotation);
+                        // In Click 5, only render pentagons in the back bowl (z <= 0)
+                        if (!isCut || vRot.z <= 0.1) {{
+                            const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                            pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
+                            pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
+                            decoGroup.add(pentMesh);
+                        }}
                     }});
 
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
-                                const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
-                                const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
-                                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-                                const seam = new THREE.Line(lineGeo, lineMat);
-                                decoGroup.add(seam);
+                                const v1 = icoVerts[i].clone().applyEuler(decoGroup.rotation);
+                                const v2 = icoVerts[j].clone().applyEuler(decoGroup.rotation);
+                                if (!isCut || (v1.z <= 0.1 && v2.z <= 0.1)) {{
+                                    const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
+                                    const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
+                                    const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+                                    const seam = new THREE.Line(lineGeo, lineMat);
+                                    decoGroup.add(seam);
+                                }}
                             }}
                         }}
                     }}
@@ -808,12 +791,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(cLabel);
                     }}
 
-                    // Point P(x, y, z) - Upper-right horizon edge
+                    // Point P(x, y, z) - On the Upper-Right Rim
                     const pAngle = 38 * (Math.PI / 180);
                     const pLocal = new THREE.Vector3(
                         R * Math.cos(pAngle),
                         R * Math.sin(pAngle),
-                        0.15 * R
+                        0.0
                     );
 
                     const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
