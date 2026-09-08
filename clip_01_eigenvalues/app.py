@@ -680,6 +680,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.add(whiteBall);
 
                     // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls & Center Origin O
+                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls with Bored Center Channel
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1e293b, // Deep Charcoal Matte
@@ -688,8 +689,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
-                        // Two clean semi-circular planar cut walls
-                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
+                        const boreRadius = 0.22; // Physical radius of the bored channel
+
+                        // 1. Cut Walls with Center Cutout Hole (RingGeometry)
+                        const wallGeo = new THREE.RingGeometry(boreRadius, R, 48, 1, 0, Math.PI);
 
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
                         wall1.rotation.z = sphereStart;
@@ -701,15 +704,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // 5. Origin O(0, 0, 0) Node & Math Badge floating in open clearing
+                        // 2. Bored Cylindrical Inner Lining (Connecting the walls smoothly)
+                        const boreGeo = new THREE.CylinderGeometry(
+                            boreRadius, 
+                            boreRadius, 
+                            R * 1.8, 
+                            32, 
+                            1, 
+                            true,
+                            sphereStart,
+                            sphereArc
+                        );
+                        const boreMesh = new THREE.Mesh(boreGeo, wallMat);
+                        boreMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(boreMesh);
+
+                        // 3. Origin O(0, 0, 0) Node & Math Badge floating in the open channel
                         const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Amber Gold
+                            color: 0xf59e0b, // Glowing Amber Gold
                             emissive: 0xf59e0b,
                             emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0.05);
+                        oSphere.position.set(0, 0, 0);
                         ballGroup.add(oSphere);
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
@@ -717,7 +735,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oLabel.position.set(-0.75, -0.28, 0.25);
                         ballGroup.add(oLabel);
                     }}
-
                     // 6. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
