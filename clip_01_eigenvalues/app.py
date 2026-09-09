@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Aligned Click 5 Wedge Cut)
+# Slides 1-3 Complete Implementation (Restored Baseline)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -510,17 +510,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMappingExposure = 1.15;
 
                 // Lights
-                const ambient = new THREE.AmbientLight(0xffffff, 0.60);
+                const ambient = new THREE.AmbientLight(0xffffff, 0.55);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.45);
+                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.40);
                 scene.add(hemiLight);
 
-                const keyLight = new THREE.DirectionalLight(0xffffff, 1.75);
+                const keyLight = new THREE.DirectionalLight(0xffffff, 1.65);
                 keyLight.position.set(-10, 20, 16);
                 scene.add(keyLight);
 
-                const rimLight = new THREE.DirectionalLight(0xdbeafe, 0.80);
+                const rimLight = new THREE.DirectionalLight(0xdbeafe, 0.70);
                 rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
 
@@ -539,7 +539,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     return new THREE.CanvasTexture(sCanvas);
                 }}
 
-                // Helper: TV-Grade Pill Badge
+                // Helper: Compact TV-Grade Math Pill Badge
                 function makeMathTextSprite(text, dotColor) {{
                     const canvas = document.createElement('canvas');
                     canvas.width = 640;
@@ -564,7 +564,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.lineWidth = 6;
                     ctx.stroke();
 
-                    // 3. Vibrant Dot
+                    // 3. Vibrant Indicator Dot
                     ctx.fillStyle = dotColor || '#2563eb';
                     ctx.beginPath();
                     ctx.arc(x + 65, y + r, 24, 0, Math.PI * 2);
@@ -593,17 +593,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const R = ballRadius;
                 let ballGroup = null;
 
-                // Position of Point P on the surface
-                const pTheta = 0.65; // ~37 degrees azimuth
-                const pPhi = 1.15;   // ~66 degrees elevation
-                const pLocal = new THREE.Vector3(
-                    R * Math.sin(pPhi) * Math.cos(pTheta),
-                    R * Math.cos(pPhi),
-                    R * Math.sin(pPhi) * Math.sin(pTheta)
-                );
-
                 // ============================================================
-                // CLICK 3, 4, 5: Geometric Construction
+                // CLICK 3, 4, 5: Unified Geometric Construction
                 // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow on Pitch
@@ -621,91 +612,59 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // 2. Ball Root Group
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
+                    ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    const isWedgeCut = currentState >= 12; // Click 5+
+                    // Wedge Cut Math
+                    const isWedgeCut = currentState >= 12;
+                    const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
+                    const sphereArc = Math.PI * 2 - wedgeSpan;
+                    const pAngle = 38 * (Math.PI / 180);
+                    const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI; // trying to make cut diagonally opposite
 
-                    if (!isWedgeCut) {{
-                        // Intact Ball for Clicks 3 and 4
-                        const ballGeo = new THREE.SphereGeometry(R, 64, 64);
-                        const ballMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf8fafc,
-                            roughness: 0.18,
-                            metalness: 0.10
-                        }});
-                        const whiteBall = new THREE.Mesh(ballGeo, ballMat);
-                        ballGroup.add(whiteBall);
-                    }} else {{
-                        // CLICK 5+: Dual Hemisphere Top Cut + Longitudinal Wedge Opening
-                        const wedgeAngle = 60 * (Math.PI / 180); 
-                        const thetaStart = pTheta + (wedgeAngle / 2);
-                        const thetaLength = 2 * Math.PI - wedgeAngle;
+                    // 3. White Ball Base
+                    const ballGeo = new THREE.SphereGeometry(
+                        R, 
+                        64, 
+                        64, 
+                        sphereStart, 
+                        sphereArc
+                    );
+                    const ballMat = new THREE.MeshStandardMaterial({{
+                        color: 0xf8fafc,
+                        roughness: 0.18,
+                        metalness: 0.10,
+                        side: THREE.DoubleSide
+                    }});
+                    const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                    whiteBall.rotation.x = Math.PI / 2;
+                    ballGroup.add(whiteBall);
 
-                        // Top Bore cut removes area around C'
-                        const topBorePhi = 35 * (Math.PI / 180);
-                        const phiStart = topBorePhi;
-                        const phiLength = Math.PI - topBorePhi;
-
-                        // (a) Main Ball Shell omitting the wedge and the top C' area
-                        const cutBallGeo = new THREE.SphereGeometry(
-                            R, 64, 64,
-                            thetaStart, thetaLength,
-                            phiStart, phiLength
-                        );
-                        const ballMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf8fafc,
-                            roughness: 0.18,
-                            metalness: 0.10,
-                            side: THREE.DoubleSide
-                        }});
-                        const cutBall = new THREE.Mesh(cutBallGeo, ballMat);
-                        ballGroup.add(cutBall);
-
-                        // (b) Dark Charcoal Interior Cut-Walls
+                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls
+                    if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1e293b,
-                            roughness: 0.7,
-                            metalness: 0.05,
+                            roughness: 0.6,
+                            metalness: 0.1,
                             side: THREE.DoubleSide
                         }});
 
-                        // Planar Side Walls
-                        const wallShape = new THREE.Shape();
-                        wallShape.moveTo(0, 0);
-                        for (let a = topBorePhi; a <= Math.PI; a += 0.05) {{
-                            wallShape.lineTo(R * Math.sin(a), R * Math.cos(a));
-                        }}
-                        wallShape.lineTo(0, -R);
-                        wallShape.closePath();
-
-                        const wallGeo = new THREE.ShapeGeometry(wallShape, 32);
+                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.y = -thetaStart;
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.y = -(thetaStart + thetaLength);
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
-
-                        // (c) Inner Mirrored Curved Lip sealing the top bore
-                        const innerBowlGeo = new THREE.SphereGeometry(
-                            R * 0.96, 64, 16,
-                            thetaStart, thetaLength,
-                            0, topBorePhi
-                        );
-                        const innerBowlMat = new THREE.MeshStandardMaterial({{
-                            color: 0x0f172a,
-                            roughness: 0.8,
-                            side: THREE.BackSide
-                        }});
-                        const innerBowl = new THREE.Mesh(innerBowlGeo, innerBowlMat);
-                        ballGroup.add(innerBowl);
                     }}
 
                     // 5. Pentagons and Seams
                     const decoGroup = new THREE.Group();
-                    decoGroup.rotation.set(0.2, -0.4, 0.1);
+                    decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
 
                     const phi = (1 + Math.sqrt(5)) / 2;
@@ -732,7 +691,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         linewidth: 2
                     }});
 
-                    const pentagonRadius = 0.38;
+                    const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
                         const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
                         const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
@@ -755,60 +714,45 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 }}
 
                 // ============================================================
-                // CLICK 4 & 5: Points C', P(x, y, z) and Origin O(0,0,0)
+                // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Surface Point P(x, y, z) - Remains in both Click 4 & 5
-                    const pGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    const cTopMat = new THREE.MeshStandardMaterial({{
+                        color: 0xe11d48,
+                        emissive: 0xe11d48,
+                        emissiveIntensity: 2.0
+                    }});
+                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
+                    cTopSphere.position.set(0, 0, R);
+                    ballGroup.add(cTopSphere);
+
+                    const pAngle = 38 * (Math.PI / 180);
+                    const pLocal = new THREE.Vector3(
+                        R * Math.cos(pAngle),
+                        R * Math.sin(pAngle),
+                        0.15 * R
+                    );
+
+                    const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
-                        color: 0x06b6d4, // Cyan
+                        color: 0x06b6d4,
                         emissive: 0x06b6d4,
-                        emissiveIntensity: 2.2
+                        emissiveIntensity: 2.5
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
+                    const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
+                    cLabel.scale.set(1.4, 0.44, 1);
+                    cLabel.position.set(-0.55, 0.32, R);
+                    ballGroup.add(cLabel);
+
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(1.4, 0.44, 1);
-                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.65, 0.22, 0.1));
+                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
-
-                    // CLICK 4 ONLY: C'(0, R, 0) on the intact top surface
-                    if (currentState === 11) {{
-                        const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
-                        const cTopMat = new THREE.MeshStandardMaterial({{
-                            color: 0xe11d48,
-                            emissive: 0xe11d48,
-                            emissiveIntensity: 2.0
-                        }});
-                        const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                        cTopSphere.position.set(0, R, 0);
-                        ballGroup.add(cTopSphere);
-
-                        const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
-                        cLabel.scale.set(1.4, 0.44, 1);
-                        cLabel.position.set(-0.65, R + 0.35, 0);
-                        ballGroup.add(cLabel);
-                    }}
-
-                    // CLICK 5+: C' is removed by the cut, revealing Center Point O(0,0,0)
-                    if (currentState >= 12) {{
-                        const oGeo = new THREE.SphereGeometry(0.08, 32, 32);
-                        const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Amber Gold
-                            emissive: 0xf59e0b,
-                            emissiveIntensity: 2.2
-                        }});
-                        const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0);
-                        ballGroup.add(oSphere);
-
-                        const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
-                        oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.65, 0.28, 0);
-                        ballGroup.add(oLabel);
-                    }}
                 }}
 
                 // Render Loop
