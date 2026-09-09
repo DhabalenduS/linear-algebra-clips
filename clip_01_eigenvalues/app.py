@@ -630,7 +630,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // 3. White Ball Base Shell
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
-                        64, 
+                        60, 
                         64, 
                         sphereStart, 
                         sphereArc
