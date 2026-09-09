@@ -624,7 +624,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // Origin D offset puts opening directly in view of elevated camera
                     //const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
                     //const sphereStart = pAngle + (wedgeSpan / 2) //+ Math.PI;
-                    const sphereStart = pAngle - 0.8
+                    //const sphereStart = pAngle - 0.8
+                    const sphereStart = pAngle + 0.5
 
                     // 3. White Ball Base Shell
                     const ballGeo = new THREE.SphereGeometry(
