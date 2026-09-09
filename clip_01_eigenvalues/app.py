@@ -642,9 +642,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
-                    //whiteBall.rotation.x = Math.PI / 2;
+                    whiteBall.rotation.x = Math.PI / 2;
                     // To this (Tilts the apex D away from C' by 30 degrees):
-                    whiteBall.rotation.set(Math.PI / 2 - 0.5, 0.4, 0);
+                    //whiteBall.rotation.set(Math.PI / 2 - 0.5, 0.4, 0);
 
                     ballGroup.add(whiteBall);
 
@@ -660,15 +660,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        //wall1.rotation.z = sphereStart;
-                        //wall1.rotation.y = Math.PI / 2;
-                        wall1.rotation.set(Math.PI / 2 - 0.5, 0.4, sphereStart);
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
+                        //wall1.rotation.set(Math.PI / 2 - 0.5, 0.4, sphereStart);
                         ballGroup.add(wall1);
 
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        //wall2.rotation.z = sphereStart + sphereArc;
-                        //wall2.rotation.y = Math.PI / 2;
-                        wall2.rotation.set(Math.PI / 2 - 0.5, 0.4, sphereStart + sphereArc);
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
+                        //wall2.rotation.set(Math.PI / 2 - 0.5, 0.4, sphereStart + sphereArc);
                         ballGroup.add(wall2);
 
                         // Center Point O(0, 0, 0)
