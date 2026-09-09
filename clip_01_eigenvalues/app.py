@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Click 5: True Hemispherical Surface Cut)
+# Slides 1-3 Complete Implementation (Aligned Click 5 Wedge Cut)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -354,53 +354,14 @@ elif 2 <= st.session_state.presentation_state <= 7:
 elif 8 <= st.session_state.presentation_state <= 18:
     state = st.session_state.presentation_state
 
-    # Construct Left Panel step-by-step
-    left_panel_html = '<div class="slide3-left-panel">'
-
-    if state >= 15:
-        left_panel_html += '<div class="panel-section-title">Observation:</div>'
-        left_panel_html += """
-        <div class="panel-bullet">
-            <span class="panel-bullet-icon">&#9679;</span>
-            <span>Throughout the pumping process, the point <span class="math-term">P</span> is moving in the direction <span class="math-term">OP&#8407;</span> and finally reaches a point <span class="math-term">P'</span>.</span>
-        </div>
-        """
-
-    if state >= 16:
-        left_panel_html += """
-        <div class="panel-bullet">
-            <span class="panel-bullet-icon">&#9679;</span>
-            <span>The point <span class="math-term">P</span> is scaled by a factor of <span class="math-term">&lambda; = OP' / OP</span>.</span>
-        </div>
-        """
-
-    if state >= 17:
-        left_panel_html += """
-        <div class="panel-bullet">
-            <span class="panel-bullet-icon">&#9679;</span>
-            <span>The point <span class="math-term">P</span> is <strong>non-zero</strong> (<span class="math-term">P &ne; O</span>).</span>
-        </div>
-        """
-
-    if state >= 18:
-        left_panel_html += '<div class="panel-section-title" style="margin-top: 2.2vh; color: #991b1b; border-bottom: 2px solid #fecaca;">Conclusion:</div>'
-        left_panel_html += """
-        <div class="panel-bullet">
-            <span class="panel-bullet-icon" style="color: #dc2626;">&#9679;</span>
-            <span>The non-zero point <span class="math-term">P</span> does not change its direction while moving towards <span class="math-term">P'</span>, and is therefore defined as an <span class="highlight-keyword">eigenvector</span> corresponding to the <span class="highlight-keyword">eigenvalue &lambda;</span>.</span>
-        </div>
-        """
-
-    left_panel_html += '</div>'
-
     # Render Slide 3 Base
     st.html(
-        f"""
+        """
         <div class="slide3">
             <div class="slide3-title">
                 Visualization of Soccer Match
             </div>
-            {left_panel_html}
+            <div class="slide3-left-panel"></div>
         </div>
         """
     )
@@ -633,7 +594,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 let ballGroup = null;
 
                 // ============================================================
-                // CLICK 3, 4, 5: True Hemispherical Surface Cut Architecture
+                // CLICK 3, 4, 5: Unified Geometric Construction
                 // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow on Pitch
@@ -654,20 +615,20 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Click 5: Remove the entire front dome facing camera
-                    const isCut = currentState >= 12;
-                    const thetaStart = isCut ? (Math.PI / 2) : 0;
-                    const thetaLength = isCut ? (Math.PI / 2) : Math.PI;
+                    // Wedge Cut Math
+                    const isWedgeCut = currentState >= 12;
+                    const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
+                    const sphereArc = Math.PI * 2 - wedgeSpan;
+                    const pAngle = 38 * (Math.PI / 180);
+                    const sphereStart = pAngle + (wedgeSpan / 2)+Math.PI; // trying to make cut diagonally opposite
 
-                    // 3. White Ball Shell
+                    // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
                         64, 
-                        0, 
-                        Math.PI * 2,
-                        thetaStart,
-                        thetaLength
+                        sphereStart, 
+                        sphereArc
                     );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -679,38 +640,29 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Interior Finishing & Center Origin Reveal
-                    if (isCut) {{
-                        const rimMat = new THREE.MeshStandardMaterial({{
-                            color: 0x0f172a, // Dark Navy/Charcoal
-                            roughness: 0.5,
+                    // 4. Click 5: Dark Charcoal Matte Interior Cut-Walls
+                    if (isWedgeCut) {{
+                        const wallMat = new THREE.MeshStandardMaterial({{
+                            color: 0x1e293b,
+                            roughness: 0.6,
                             metalness: 0.1,
                             side: THREE.DoubleSide
                         }});
 
-                        // Circular Outer Rim
-                        const rimGeo = new THREE.RingGeometry(R * 0.96, R * 1.01, 64);
-                        const rimMesh = new THREE.Mesh(rimGeo, rimMat);
-                        ballGroup.add(rimMesh);
+                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
-                        // 5. Origin O(0, 0, 0) Node & Math Badge floating in the open center
-                        const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
-                        const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Amber Gold
-                            emissive: 0xf59e0b,
-                            emissiveIntensity: 3.0
-                        }});
-                        const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0);
-                        ballGroup.add(oSphere);
+                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall1);
 
-                        const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
-                        oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.75, -0.28, 0.25);
-                        ballGroup.add(oLabel);
+                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall2);
                     }}
 
-                    // 6. Pentagons and Seams
+                    // 5. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
@@ -741,29 +693,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
-                        const vRot = v.clone().applyEuler(decoGroup.rotation);
-                        // In Click 5, only render pentagons in the back bowl (z <= 0)
-                        if (!isCut || vRot.z <= 0.1) {{
-                            const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
-                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                            pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
-                            pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
-                            decoGroup.add(pentMesh);
-                        }}
+                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                        pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
+                        pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
+                        decoGroup.add(pentMesh);
                     }});
 
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
-                                const v1 = icoVerts[i].clone().applyEuler(decoGroup.rotation);
-                                const v2 = icoVerts[j].clone().applyEuler(decoGroup.rotation);
-                                if (!isCut || (v1.z <= 0.1 && v2.z <= 0.1)) {{
-                                    const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
-                                    const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
-                                    const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-                                    const seam = new THREE.Line(lineGeo, lineMat);
-                                    decoGroup.add(seam);
-                                }}
+                                const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
+                                const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
+                                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+                                const seam = new THREE.Line(lineGeo, lineMat);
+                                decoGroup.add(seam);
                             }}
                         }}
                     }}
@@ -773,30 +717,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 (State >= 11): Surface Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Show C' only in Click 4 (it is removed in Click 5)
-                    if (currentState === 11) {{
-                        const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
-                        const cTopMat = new THREE.MeshStandardMaterial({{
-                            color: 0xe11d48,
-                            emissive: 0xe11d48,
-                            emissiveIntensity: 2.0
-                        }});
-                        const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                        cTopSphere.position.set(0, 0, R);
-                        ballGroup.add(cTopSphere);
+                    const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    const cTopMat = new THREE.MeshStandardMaterial({{
+                        color: 0xe11d48,
+                        emissive: 0xe11d48,
+                        emissiveIntensity: 2.0
+                    }});
+                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
+                    cTopSphere.position.set(0, 0, R);
+                    ballGroup.add(cTopSphere);
 
-                        const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
-                        cLabel.scale.set(1.4, 0.44, 1);
-                        cLabel.position.set(-0.55, 0.32, R);
-                        ballGroup.add(cLabel);
-                    }}
-
-                    // Point P(x, y, z) - On the Upper-Right Rim
                     const pAngle = 38 * (Math.PI / 180);
                     const pLocal = new THREE.Vector3(
                         R * Math.cos(pAngle),
                         R * Math.sin(pAngle),
-                        0.0
+                        0.15 * R
                     );
 
                     const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
@@ -808,6 +743,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const pSphere = new THREE.Mesh(pGeo, pMat);
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
+
+                    const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
+                    cLabel.scale.set(1.4, 0.44, 1);
+                    cLabel.position.set(-0.55, 0.32, R);
+                    ballGroup.add(cLabel);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(1.4, 0.44, 1);
