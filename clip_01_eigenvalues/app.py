@@ -625,7 +625,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                     // Wedge Cut Math
-                    //const isWedgeCut = currentState >= 12;
+                    const isWedgeCut = currentState >= 12;
                     //const wedgeSpan = isWedgeCut ? (55 * Math.PI / 180) : 0;
                     //const sphereArc = Math.PI * 2 - wedgeSpan;
                     //const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
