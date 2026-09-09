@@ -627,7 +627,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // Wedge Cut Math
                     const isWedgeCut = currentState >= 12;
                     const pAngle = 38 * (Math.PI / 180); 
-                    const wedgeSpan = isWedgeCut ? (60 * Math.PI / 180) : 0;
+                    const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
                     const sphereStart = pAngle + (wedgeSpan / 2)+Math.PI;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
