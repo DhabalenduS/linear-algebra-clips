@@ -745,6 +745,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
+                                const mid = icoVerts[i].clone().add(icoVerts[j]).multiplyScalar(0.5);
+                                // If cut is active, skip seams located inside the wedge opening
+                                if (isWedgeCut && mid.x > 0.1 && mid.y > 0.1) continue;
+
                                 const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
                                 const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
                                 const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
@@ -753,7 +757,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             }}
                         }}
                     }}
-                }}
 
                 // ============================================================
                 // CLICK 4 & 5: Points C' and P(x, y, z)
