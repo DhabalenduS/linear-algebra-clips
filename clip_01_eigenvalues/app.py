@@ -509,18 +509,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.15;
 
-                // Lights
-                const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+                // Neutral Studio Lights
+                const ambient = new THREE.AmbientLight(0xffffff, 0.60);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x1e293b, 0.40);
+                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.40);
                 scene.add(hemiLight);
 
                 const keyLight = new THREE.DirectionalLight(0xffffff, 1.65);
                 keyLight.position.set(-10, 20, 16);
                 scene.add(keyLight);
 
-                const rimLight = new THREE.DirectionalLight(0xdbeafe, 0.70);
+                // Pure Neutral White Rim Light (No Blue Cast)
+                const rimLight = new THREE.DirectionalLight(0xffffff, 0.70);
                 rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
 
@@ -647,12 +648,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Dark Charcoal Matte Cut-Walls (Wedge + Bore Sleeve)
+                    // 4. Click 5: Pure Neutral Dark Charcoal Matte Interior Cut-Walls
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1e293b,
-                            roughness: 0.6,
-                            metalness: 0.1,
+                            color: 0x1c1917, // Pure Neutral Matte Charcoal (Zero Blue)
+                            roughness: 0.85,
+                            metalness: 0.0,
                             side: THREE.DoubleSide
                         }});
 
