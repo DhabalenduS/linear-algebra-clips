@@ -628,7 +628,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (55 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
-                    const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
+                    //const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
+                    const sphereStart = wedgeSpan / 2;
 
                     // 3. White Ball Base Shell
                     const ballGeo = new THREE.SphereGeometry(
