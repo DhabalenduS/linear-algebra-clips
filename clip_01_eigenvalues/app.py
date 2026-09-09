@@ -626,22 +626,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // Wedge Cut Math
                     const isWedgeCut = currentState >= 12;
-                    //const wedgeSpan = isWedgeCut ? (55 * Math.PI / 180) : 0;
-                    //const sphereArc = Math.PI * 2 - wedgeSpan;
-                    //const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
-                    //const sphereStart = wedgeSpan / 2;
-                    // 1. Unified Angle for Both P and the Cut:
-                    //const pAngle = 38 * (Math.PI / 180); // ~0.66 rad (Top-Right)
-                    // 1. Point P at Top-Right (2 o'clock):
                     const pAngle = 38 * (Math.PI / 180); 
-                    \\const wedgeSpan = isWedgeCut ? (60 * Math.PI / 180) : 0;
-                    // 2. Open a wide 90-degree quadrant cut:
                     const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
-
-                    // 2. Lock the Cut to start exactly at P's angle:
-                    //const sphereStart = pAngle;
-                    //const sphereArc = Math.PI * 2 - wedgeSpan;
-                    // 3. Center the cut directly at the top-right (2 o'clock):
                     const sphereStart = pAngle + Math.PI - (wedgeSpan / 2);
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
