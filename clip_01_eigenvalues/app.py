@@ -615,27 +615,22 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Math
+                    // Cut Math: Tilted forward toward camera line-of-sight
                     const isWedgeCut = currentState >= 12;
-                    const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
+                    const wedgeSpan = isWedgeCut ? (65 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
                     const pAngle = 38 * (Math.PI / 180);
+                    
+                    // Origin D offset puts opening directly in view of elevated camera
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
 
-                    // Bore Parameters (Clean Open Cut without Fillers)
-                    const topCutAngle = isWedgeCut ? 0.32 : 0; // Open bore aperture
-                    const phiStart = topCutAngle;
-                    const phiLength = Math.PI - topCutAngle;
-
-                    // 3. White Ball Base Shell (Cut opens directly to green grass)
+                    // 3. White Ball Base Shell
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
                         64, 
                         sphereStart, 
-                        sphereArc,
-                        phiStart,
-                        phiLength
+                        sphereArc
                     );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -647,11 +642,31 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Center Point O(0,0,0) Floating in Pure Open Space
+                    // 4. Click 5: Pure Matte Neutral Charcoal Cut-Walls
                     if (isWedgeCut) {{
-                        const oGeo = new THREE.SphereGeometry(0.08, 32, 32);
+                        const wallMat = new THREE.MeshStandardMaterial({{
+                            color: 0x1c1917, // Pure Neutral Dark Charcoal
+                            roughness: 0.85,
+                            metalness: 0.0,
+                            side: THREE.DoubleSide
+                        }});
+
+                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
+
+                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall1);
+
+                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall2);
+
+                        // Center Point O(0, 0, 0)
+                        const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Amber Gold
+                            color: 0xf59e0b, // Glowing Amber Gold
                             emissive: 0xf59e0b,
                             emissiveIntensity: 2.2
                         }});
@@ -743,23 +758,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
 
-                    // Point C'(0, R, 0) - ONLY in Click 4 (state == 11)
-                    if (currentState === 11) {{
-                        const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
-                        const cTopMat = new THREE.MeshStandardMaterial({{
-                            color: 0xe11d48,
-                            emissive: 0xe11d48,
-                            emissiveIntensity: 2.0
-                        }});
-                        const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                        cTopSphere.position.set(0, 0, R);
-                        ballGroup.add(cTopSphere);
+                    // Point C'(0, R, 0)
+                    const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
+                    const cTopMat = new THREE.MeshStandardMaterial({{
+                        color: 0xe11d48,
+                        emissive: 0xe11d48,
+                        emissiveIntensity: 2.0
+                    }});
+                    const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
+                    cTopSphere.position.set(0, 0, R);
+                    ballGroup.add(cTopSphere);
 
-                        const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
-                        cLabel.scale.set(1.4, 0.44, 1);
-                        cLabel.position.set(-0.55, 0.32, R);
-                        ballGroup.add(cLabel);
-                    }}
+                    const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
+                    cLabel.scale.set(1.4, 0.44, 1);
+                    cLabel.position.set(-0.55, 0.32, R);
+                    ballGroup.add(cLabel);
                 }}
 
                 // Render Loop
