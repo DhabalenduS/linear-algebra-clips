@@ -615,21 +615,27 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // ========================================================
-                    // MODULE 1: Pristine Baseline Wedge Cut
-                    // ========================================================
+                    // Wedge Cut Math
                     const isWedgeCut = currentState >= 12;
                     const wedgeSpan = isWedgeCut ? (50 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
                     const pAngle = 38 * (Math.PI / 180);
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
 
+                    // Bore Parameters (0.28 * R to preserve texture)
+                    const topCutAngle = isWedgeCut ? 0.28 : 0; // ~16 degrees
+                    const phiStart = topCutAngle;
+                    const phiLength = Math.PI - topCutAngle;
+
+                    // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
                         64, 
                         sphereStart, 
-                        sphereArc
+                        sphereArc,
+                        phiStart,
+                        phiLength
                     );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -641,7 +647,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // Lateral Cut-Walls
+                    // 4. Click 5: Dark Charcoal Matte Cut-Walls (Wedge + Bore Sleeve)
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1e293b,
@@ -650,7 +656,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
-                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
+                        // (a) Lateral Wedge Cut-Walls
+                        const wallGeo = new THREE.CircleGeometry(R, 64, topCutAngle, Math.PI - topCutAngle);
 
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
                         wall1.rotation.z = sphereStart;
@@ -662,31 +669,26 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // ====================================================
-                        // MODULE 2: Dual-Hemisphere Inward-Bore Model
-                        // ====================================================
-                        const boreRadius = R * 0.42; 
-                        const boreBowlGeo = new THREE.SphereGeometry(
-                            boreRadius, 
-                            32, 
-                            16, 
-                            0, 
-                            Math.PI * 2, 
-                            0, 
-                            Math.PI / 2
-                        );
-                        const boreBowlMat = new THREE.MeshStandardMaterial({{
-                            color: 0x0f172a, // Deep charcoal matte interior
-                            roughness: 0.75,
-                            metalness: 0.05,
-                            side: THREE.DoubleSide
-                        }});
-                        const boreBowl = new THREE.Mesh(boreBowlGeo, boreBowlMat);
-                        boreBowl.position.set(0, 0, R - (boreRadius * 0.55));
-                        boreBowl.rotation.x = -Math.PI / 2;
-                        ballGroup.add(boreBowl);
+                        // (b) Connecting Cut-Wall Sleeve ("Wall 3" of the Bore)
+                        const rimRadius = R * Math.sin(topCutAngle);
+                        const rimHeight = R * Math.cos(topCutAngle);
 
-                        // Center Point O(0, 0, 0)
+                        const sleeveGeo = new THREE.CylinderGeometry(
+                            rimRadius, 
+                            0.05, 
+                            rimHeight, 
+                            32, 
+                            1, 
+                            true,
+                            sphereStart,
+                            sphereArc
+                        );
+                        const sleeveMesh = new THREE.Mesh(sleeveGeo, wallMat);
+                        sleeveMesh.position.set(0, 0, rimHeight / 2);
+                        sleeveMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(sleeveMesh);
+
+                        // (c) Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.08, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xf59e0b, // Amber Gold
@@ -703,7 +705,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(oLabel);
                     }}
 
-                    // Pentagons and Seams (Untouched)
+                    // 5. Pentagons and Seams
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
