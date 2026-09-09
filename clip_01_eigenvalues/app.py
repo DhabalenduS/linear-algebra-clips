@@ -628,7 +628,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const isWedgeCut = currentState >= 12;
                     const pAngle = 38 * (Math.PI / 180); 
                     const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
-                    const sphereStart = pAngle + Math.PI - (wedgeSpan / 2);
+                    const sphereStart = pAngle + (wedgeSpan / 2);
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
                     // 3. White Ball Base Shell
