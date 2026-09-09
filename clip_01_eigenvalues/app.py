@@ -625,11 +625,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     scene.add(ballGroup);
 
                     // Wedge Cut Math
-                    const isWedgeCut = currentState >= 12;
-                    const wedgeSpan = isWedgeCut ? (55 * Math.PI / 180) : 0;
-                    const sphereArc = Math.PI * 2 - wedgeSpan;
+                    //const isWedgeCut = currentState >= 12;
+                    //const wedgeSpan = isWedgeCut ? (55 * Math.PI / 180) : 0;
+                    //const sphereArc = Math.PI * 2 - wedgeSpan;
                     //const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
-                    const sphereStart = wedgeSpan / 2;
+                    //const sphereStart = wedgeSpan / 2;
+                    // 1. Unified Angle for Both P and the Cut:
+                    const pAngle = 38 * (Math.PI / 180); // ~0.66 rad (Top-Right)
+                    const wedgeSpan = isWedgeCut ? (60 * Math.PI / 180) : 0;
+                    // 2. Lock the Cut to start exactly at P's angle:
+                    const sphereStart = pAngle;
+                    const sphereArc = Math.PI * 2 - wedgeSpan;
 
                     // 3. White Ball Base Shell
                     const ballGeo = new THREE.SphereGeometry(
