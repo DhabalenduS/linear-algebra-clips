@@ -671,18 +671,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(wall2);
 
                         // Center Point O(0, 0, 0)
+                        const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xfbbf24, // Bright Radiant Gold
+                            color: 0xfbbf24,
                             emissive: 0xf59e0b,
                             emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
                         oSphere.position.set(0, 0, 0);
                         ballGroup.add(oSphere);
-                        
+
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        //oLabel.position.set(-0.65, 0.28, 0);
                         oLabel.position.set(0.0, 0.45, 0.1);
                         ballGroup.add(oLabel);
                         
