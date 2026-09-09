@@ -520,7 +520,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 keyLight.position.set(-10, 20, 16);
                 scene.add(keyLight);
 
-                // Pure Neutral White Rim Light (No Blue Cast)
                 const rimLight = new THREE.DirectionalLight(0xffffff, 0.70);
                 rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
@@ -623,12 +622,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const pAngle = 38 * (Math.PI / 180);
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
 
-                    // Bore Parameters (0.28 * R to preserve texture)
-                    const topCutAngle = isWedgeCut ? 0.28 : 0; // ~16 degrees
+                    // Bore Parameters (Clean Open Cut without Fillers)
+                    const topCutAngle = isWedgeCut ? 0.32 : 0; // Open bore aperture
                     const phiStart = topCutAngle;
                     const phiLength = Math.PI - topCutAngle;
 
-                    // 3. White Ball Base
+                    // 3. White Ball Base Shell (Cut opens directly to green grass)
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
@@ -648,48 +647,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Pure Neutral Dark Charcoal Matte Interior Cut-Walls
+                    // 4. Click 5: Center Point O(0,0,0) Floating in Pure Open Space
                     if (isWedgeCut) {{
-                        const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1c1917, // Pure Neutral Matte Charcoal (Zero Blue)
-                            roughness: 0.85,
-                            metalness: 0.0,
-                            side: THREE.DoubleSide
-                        }});
-
-                        // (a) Lateral Wedge Cut-Walls
-                        const wallGeo = new THREE.CircleGeometry(R, 64, topCutAngle, Math.PI - topCutAngle);
-
-                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = sphereStart;
-                        wall1.rotation.y = Math.PI / 2;
-                        ballGroup.add(wall1);
-
-                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = sphereStart + sphereArc;
-                        wall2.rotation.y = Math.PI / 2;
-                        ballGroup.add(wall2);
-
-                        // (b) Connecting Cut-Wall Sleeve ("Wall 3" of the Bore)
-                        const rimRadius = R * Math.sin(topCutAngle);
-                        const rimHeight = R * Math.cos(topCutAngle);
-
-                        const sleeveGeo = new THREE.CylinderGeometry(
-                            rimRadius, 
-                            0.05, 
-                            rimHeight, 
-                            32, 
-                            1, 
-                            true,
-                            sphereStart,
-                            sphereArc
-                        );
-                        const sleeveMesh = new THREE.Mesh(sleeveGeo, wallMat);
-                        sleeveMesh.position.set(0, 0, rimHeight / 2);
-                        sleeveMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(sleeveMesh);
-
-                        // (c) Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.08, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xf59e0b, // Amber Gold
