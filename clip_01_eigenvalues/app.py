@@ -509,7 +509,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.15;
 
-                // Neutral Studio Lights
+                // Neutral Lights
                 const ambient = new THREE.AmbientLight(0xffffff, 0.60);
                 scene.add(ambient);
 
@@ -594,7 +594,23 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 let ballGroup = null;
 
                 // ============================================================
-                // CLICK 3, 4, 5: Unified Geometric Construction
+                // CARTESIAN POINT DEFINITIONS
+                // ============================================================
+                const O_cartesian = new THREE.Vector3(0, 0, 0);
+                const C_cartesian = new THREE.Vector3(0, 0, R);
+
+                const pAngle = 38 * (Math.PI / 180);
+                const P_cartesian = new THREE.Vector3(
+                    R * Math.cos(pAngle),
+                    R * Math.sin(pAngle),
+                    0.15 * R
+                );
+
+                // Point D: Offset cut origin in pure Cartesian (X, Y, Z)
+                const D_cartesian = new THREE.Vector3(0.35 * R, 0.25 * R, 0.85 * R);
+
+                // ============================================================
+                // CLICK 3, 4, 5: Unified Construction
                 // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow on Pitch
@@ -615,19 +631,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Cut Math: Tilted forward toward camera line-of-sight
                     const isWedgeCut = currentState >= 12;
-                    const wedgeSpan = isWedgeCut ? (65 * Math.PI / 180) : 0;
+                    const wedgeSpan = isWedgeCut ? (55 * Math.PI / 180) : 0;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
-                    const pAngle = 38 * (Math.PI / 180);
-                    
-                    // Origin D offset puts opening directly in view of elevated camera
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
-                    //const sphereStart = pAngle + (wedgeSpan / 2) //+ Math.PI;
-                    //const sphereStart = pAngle - 0.8
-                    //const sphereStart = pAngle + 0.5
 
-                    // 3. White Ball Base Shell
+                    // 3. White Ball Base
                     const ballGeo = new THREE.SphereGeometry(
                         R, 
                         64, 
@@ -643,43 +652,50 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
                     const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                     whiteBall.rotation.x = Math.PI / 2;
-                    // To this (Tilts the apex D away from C' by 30 degrees):
-                    //whiteBall.rotation.set(Math.PI / 2 - 0.5, 0.4, 0);
-
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Pure Matte Neutral Charcoal Cut-Walls
+                    // 4. Click 5: Cartesian Cut-Walls passing through [O, D, P]
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1c1917, // Pure Neutral Dark Charcoal
+                            color: 0x1c1917, // Pure Charcoal
                             roughness: 0.85,
                             metalness: 0.0,
                             side: THREE.DoubleSide
                         }});
 
-                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
+                        // Cartesian Wall 1: Plane passing through O, D, and Rim
+                        const wall1Points = [
+                            O_cartesian.x, O_cartesian.y, O_cartesian.z,
+                            D_cartesian.x, D_cartesian.y, D_cartesian.z,
+                            P_cartesian.x * 0.9, P_cartesian.y * 1.1, -0.2 * R
+                        ];
+                        const wall1Geo = new THREE.BufferGeometry();
+                        wall1Geo.setAttribute('position', new THREE.Float32BufferAttribute(wall1Points, 3));
+                        wall1Geo.computeVertexNormals();
+                        const wall1Mesh = new THREE.Mesh(wall1Geo, wallMat);
+                        ballGroup.add(wall1Mesh);
 
-                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = sphereStart;
-                        wall1.rotation.y = Math.PI / 2;
-                        //wall1.rotation.set(Math.PI / 2 - 0.5, 0.4, sphereStart);
-                        ballGroup.add(wall1);
-
-                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = sphereStart + sphereArc;
-                        wall2.rotation.y = Math.PI / 2;
-                        //wall2.rotation.set(Math.PI / 2 - 0.5, 0.4, sphereStart + sphereArc);
-                        ballGroup.add(wall2);
+                        // Cartesian Wall 2: Plane passing through O, D, and P
+                        const wall2Points = [
+                            O_cartesian.x, O_cartesian.y, O_cartesian.z,
+                            D_cartesian.x, D_cartesian.y, D_cartesian.z,
+                            P_cartesian.x, P_cartesian.y, P_cartesian.z
+                        ];
+                        const wall2Geo = new THREE.BufferGeometry();
+                        wall2Geo.setAttribute('position', new THREE.Float32BufferAttribute(wall2Points, 3));
+                        wall2Geo.computeVertexNormals();
+                        const wall2Mesh = new THREE.Mesh(wall2Geo, wallMat);
+                        ballGroup.add(wall2Mesh);
 
                         // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.09, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b, // Glowing Amber Gold
+                            color: 0xf59e0b, // Amber Gold
                             emissive: 0xf59e0b,
                             emissiveIntensity: 2.2
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0);
+                        oSphere.position.copy(O_cartesian);
                         ballGroup.add(oSphere);
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
@@ -743,14 +759,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 & 5: Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    const pAngle = 38 * (Math.PI / 180);
-                    const pLocal = new THREE.Vector3(
-                        R * Math.cos(pAngle),
-                        R * Math.sin(pAngle),
-                        0.15 * R
-                    );
-
-                    // Point P(x, y, z) - Remains in both Click 4 and Click 5
+                    // Point P(x, y, z)
                     const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
@@ -758,12 +767,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         emissiveIntensity: 2.5
                     }});
                     const pSphere = new THREE.Mesh(pGeo, pMat);
-                    pSphere.position.copy(pLocal);
+                    pSphere.position.copy(P_cartesian);
                     ballGroup.add(pSphere);
 
                     const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
                     pLabel.scale.set(1.4, 0.44, 1);
-                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
+                    pLabel.position.copy(P_cartesian).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
 
                     // Point C'(0, R, 0)
@@ -774,7 +783,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         emissiveIntensity: 2.0
                     }});
                     const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                    cTopSphere.position.set(0, 0, R);
+                    cTopSphere.position.copy(C_cartesian);
                     ballGroup.add(cTopSphere);
 
                     const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
