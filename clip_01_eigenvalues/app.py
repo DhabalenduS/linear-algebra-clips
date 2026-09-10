@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Restored Baseline)
+# Slides 1-3 Complete Implementation (Restored Baseline + Module 1 Equatorial Floor)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -628,29 +628,29 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const isWedgeCut = currentState >= 12;
                     const pAngle = 38 * (Math.PI / 180); 
                     const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
-                    const sphereStart = pAngle + (wedgeSpan / 2)+Math.PI;
+                    const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
-                    // 3. White Ball Base Shell
-                    const ballGeo = new THREE.SphereGeometry(
-                        R, 
-                        64, 
-                        64, 
-                        sphereStart, 
-                        sphereArc
-                    );
-                    const ballMat = new THREE.MeshStandardMaterial({{
-                        color: 0xf8fafc,
-                        roughness: 0.18,
-                        metalness: 0.10,
-                        side: THREE.DoubleSide
-                    }});
-                    const whiteBall = new THREE.Mesh(ballGeo, ballMat);
-                    whiteBall.rotation.x = Math.PI / 2;
-                    ballGroup.add(whiteBall);
+                    // 3. White Ball Base Shell + Click 5 Architectural Equatorial Cut
+                    if (!isWedgeCut) {{
+                        const ballGeo = new THREE.SphereGeometry(R, 64, 64);
+                        const ballMat = new THREE.MeshStandardMaterial({{
+                            color: 0xf8fafc,
+                            roughness: 0.18,
+                            metalness: 0.10,
+                            side: THREE.DoubleSide
+                        }});
+                        const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                        whiteBall.rotation.x = Math.PI / 2;
+                        ballGroup.add(whiteBall);
+                    }} else {{
+                        const ballMat = new THREE.MeshStandardMaterial({{
+                            color: 0xf8fafc,
+                            roughness: 0.18,
+                            metalness: 0.10,
+                            side: THREE.DoubleSide
+                        }});
 
-                    // 4. Click 5: Pure Matte Neutral Charcoal Cut-Walls & Horizontal Floor
-                    if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1c1917, // Pure Neutral Dark Charcoal
                             roughness: 0.85,
@@ -658,27 +658,39 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
-                        // 1. Upper Vertical Wall 1 (Quarter circle only, 0 to PI/2)
+                        // A. Solid Lower Hemisphere (full 360 degrees)
+                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
+                        lowerMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(lowerMesh);
+
+                        // B. Upper Hemisphere with 90-deg wedge cut
+                        const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
+                        const upperMesh = new THREE.Mesh(upperGeo, ballMat);
+                        upperMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(upperMesh);
+
+                        // C. Horizontal Floor Cap at Equator
+                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
+                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
+                        floorMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(floorMesh);
+
+                        // D. Upper Vertical Wall 1
                         const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // 2. Upper Vertical Wall 2 (Quarter circle only, 0 to PI/2)
+                        // E. Upper Vertical Wall 2
                         const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const wall2 = new THREE.Mesh(wallGeo2, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // 3. Flat Horizontal Floor at the Equator
-                        const floorGeo = new THREE.CircleGeometry(R, 64, 0, wedgeSpan);
-                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.z = sphereStart;
-                        ballGroup.add(floorMesh);
-                        
-                        // Center Point O(0, 0, 0)
+                        // F. Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
