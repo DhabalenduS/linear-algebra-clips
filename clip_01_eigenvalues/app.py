@@ -658,26 +658,25 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
-                        // Vertical Wall 1
-                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
-                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
+                        // 1. Upper Vertical Wall 1 (Quarter circle only, 0 to PI/2)
+                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // Vertical Wall 2
-                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
+                        // 2. Upper Vertical Wall 2 (Quarter circle only, 0 to PI/2)
+                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        const wall2 = new THREE.Mesh(wallGeo2, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // --- Horizontal Floor at Equator ---
-                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
+                        // 3. Flat Horizontal Floor at the Equator
+                        const floorGeo = new THREE.CircleGeometry(R, 64, 0, wedgeSpan);
                         const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.x = Math.PI / 2; // Tilts plane horizontally so top is visible
-                        floorMesh.rotation.z = Math.PI / 2; // Aligns with the wedge cut opening
+                        floorMesh.rotation.z = sphereStart;
                         ballGroup.add(floorMesh);
-                        // -----------------------------------
                         
                         // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
