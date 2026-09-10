@@ -672,13 +672,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // Visible Horizontal Equatorial Floor Shelf
-                        const floorGeo = new THREE.CircleGeometry(R, 64, 0, wedgeSpan);
+                        // --- Solid Horizontal Floor at Equator ---
+                        const floorGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.z = sphereStart + sphereArc;
+                        floorMesh.rotation.x = Math.PI / 2; // Lies flat horizontally in X-Z space
                         floorMesh.position.set(0, 0, 0);
                         ballGroup.add(floorMesh);
-
+                        // -----------------------------------------
                         // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
