@@ -725,17 +725,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         linewidth: 2
                     }});
 
-                    // Robust Check: Exclude any vertex in the cut sector
+                    // Precise exclusion: any element in the upper-right cut zone
                     function isInsideWedge(v) {{
                         if (!isWedgeCut) return false;
-                        let ang = Math.atan2(v.y, v.x);
-                        if (ang < 0) ang += Math.PI * 2;
-                        const cutCenter = (pAngle + Math.PI / 2) % (Math.PI * 2);
-                        let diff = Math.abs(ang - cutCenter);
-                        if (diff > Math.PI) diff = (Math.PI * 2) - diff;
-                        return diff < (wedgeSpan / 1.5);
+                        // The cut occupies the quadrant where X > -0.1 and Y > -0.2
+                        return (v.x > -0.1 && v.y > -0.2);
                     }}
-
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
                         if (!isInsideWedge(v)) {{
@@ -750,7 +745,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
-                                // Exclude if EITHER vertex is inside wedge
                                 if (!isInsideWedge(icoVerts[i]) && !isInsideWedge(icoVerts[j])) {{
                                     const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
                                     const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
