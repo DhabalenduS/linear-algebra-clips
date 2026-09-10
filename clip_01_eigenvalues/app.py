@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Clean Cutout & Filtered Decors)
+# Slides 1-3 Complete Implementation (Clean Cutout & Visible Equatorial Floor)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -624,7 +624,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Math
+                    // Wedge Cut Parameters
                     const isWedgeCut = currentState >= 12;
                     const pAngle = 38 * (Math.PI / 180); 
                     const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
@@ -672,10 +672,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // Horizontal Floor Shelf at Equator
-                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
+                        // Visible Horizontal Equatorial Floor Shelf
+                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart, wedgeSpan);
                         const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.x = Math.PI / 2;
+                        floorMesh.rotation.x = -Math.PI / 2;
+                        floorMesh.rotation.z = Math.PI / 2;
                         ballGroup.add(floorMesh);
 
                         // Center Point O(0, 0, 0)
@@ -695,9 +696,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(oLabel);
                     }}
 
-                    // 5. Pentagons and Seams (FILTERED: Clean inside the Wedge Cut)
+                    // 5. Pentagons and Seams (Filtered when Click 5 active)
                     const decoGroup = new THREE.Group();
-                    decoGroup.rotation.set(0.35, -0.65, 0.2);
+                    if (!isWedgeCut) {{
+                        decoGroup.rotation.set(0.35, -0.65, 0.2);
+                    }} else {{
+                        // Aligned orientation for cut state
+                        decoGroup.rotation.set(0, 0, 0);
+                    }}
                     ballGroup.add(decoGroup);
 
                     const phi = (1 + Math.sqrt(5)) / 2;
@@ -724,27 +730,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         linewidth: 2
                     }});
 
-                    // Helper: Check if a 3D vertex falls inside the Cut Sector
-                    function isInsideCut(localV) {{
+                    // Filter out elements inside the wedge opening
+                    function isInsideWedge(v) {{
                         if (!isWedgeCut) return false;
-                        // Transform point into ballGroup coordinate frame
-                        const vRotated = localV.clone().applyEuler(decoGroup.rotation);
-                        let angle = Math.atan2(vRotated.y, vRotated.x);
-                        if (angle < 0) angle += Math.PI * 2;
-                        
-                        let cutMin = (sphereStart + sphereArc) % (Math.PI * 2);
-                        let cutMax = (cutMin + wedgeSpan) % (Math.PI * 2);
-                        
-                        if (cutMin < cutMax) {{
-                            return (angle >= cutMin && angle <= cutMax);
-                        }} else {{
-                            return (angle >= cutMin || angle <= cutMax);
-                        }}
+                        let ang = Math.atan2(v.y, v.x);
+                        if (ang < 0) ang += Math.PI * 2;
+                        const cutCenter = (pAngle + Math.PI / 2) % (Math.PI * 2);
+                        const diff = Math.abs(ang - cutCenter);
+                        return diff < (wedgeSpan / 1.8);
                     }}
 
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
-                        if (!isInsideCut(v)) {{
+                        if (!isInsideWedge(v)) {{
                             const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
@@ -756,7 +754,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
-                                if (!isInsideCut(icoVerts[i]) && !isInsideCut(icoVerts[j])) {{
+                                if (!isInsideWedge(icoVerts[i]) && !isInsideWedge(icoVerts[j])) {{
                                     const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
                                     const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
                                     const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
