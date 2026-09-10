@@ -652,36 +652,32 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        // 1. Intact Lower Dome (Solid base, full 360 degrees)
-                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(lowerMesh);
+                        // 1. Solid Outer White Shell with Original Top-Right Wedge Opening
+                        const ballGeo = new THREE.SphereGeometry(R, 64, 64, sphereStart, sphereArc);
+                        const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                        whiteBall.rotation.x = Math.PI / 2;
+                        ballGroup.add(whiteBall);
 
-                        // 2. Upper Dome with Quarter Removed (Top-Right cavity)
-                        const upperGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI / 2, Math.PI * 1.5, 0, Math.PI / 2);
-                        const upperMesh = new THREE.Mesh(upperGeo, ballMat);
-                        upperMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(upperMesh);
+                        // 2. Vertical Wall 1
+                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI);
+                        const wall1 = new THREE.Mesh(wallGeo1, wallMat);
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall1);
 
-                        // 3. Flat Vertical Back Wall (Meeting at Center O)
-                        const backWallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
-                        const backWall = new THREE.Mesh(backWallGeo, wallMat);
-                        backWall.rotation.y = Math.PI / 2;
-                        ballGroup.add(backWall);
+                        // 3. Vertical Wall 2
+                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI);
+                        const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall2);
 
-                        // 4. Flat Horizontal Floor (Extending outward to Point P)
-                        const floorGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
-                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.x = -Math.PI / 2; // Flat horizontal stage
-                        ballGroup.add(floorMesh);
-
-                        // 5. Center Point O(0, 0, 0)
-                        const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
+                        // 4. Center Point O(0, 0, 0)
+                        const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
                             emissive: 0xf59e0b,
-                            emissiveIntensity: 2.5
+                            emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
                         oSphere.position.set(0, 0, 0);
@@ -689,12 +685,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.35, 0.35, 0.1);
+                        oLabel.position.set(0.0, 0.45, 0.1);
                         ballGroup.add(oLabel);
                     }}
                     // 5. Pentagons and Seams (Strictly Filtered)
                     const decoGroup = new THREE.Group();
-                    decoGroup.rotation.set(0, 0, 0);
+                    decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
 
                     const phi = (1 + Math.sqrt(5)) / 2;
