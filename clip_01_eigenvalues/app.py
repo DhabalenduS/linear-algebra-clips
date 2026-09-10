@@ -649,7 +649,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     whiteBall.rotation.x = Math.PI / 2;
                     ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Pure Matte Neutral Charcoal Cut-Walls
+                    // 4. Click 5: Pure Matte Neutral Charcoal Cut-Walls & Horizontal Floor
                     if (isWedgeCut) {{
                         const wallMat = new THREE.MeshStandardMaterial({{
                             color: 0x1c1917, // Pure Neutral Dark Charcoal
@@ -658,17 +658,24 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             side: THREE.DoubleSide
                         }});
 
+                        // Vertical Wall 1
                         const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
-
                         const wall1 = new THREE.Mesh(wallGeo, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
+                        // Vertical Wall 2
                         const wall2 = new THREE.Mesh(wallGeo, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
+
+                        // --- NEW: Horizontal Floor at Equator ---
+                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
+                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
+                        ballGroup.add(floorMesh);
+                        // ----------------------------------------
 
                         // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
@@ -685,7 +692,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oLabel.scale.set(1.4, 0.44, 1);
                         oLabel.position.set(0.0, 0.45, 0.1);
                         ballGroup.add(oLabel);
-                        
                     }}
 
                     // 5. Pentagons and Seams (Filtered to prevent stray lines inside cut)
