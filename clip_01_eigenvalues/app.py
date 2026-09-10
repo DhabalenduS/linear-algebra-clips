@@ -652,39 +652,33 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        // 1. Intact Lower Hemisphere (Blocks the green pitch completely)
-                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(lowerMesh);
+                        // Wedge Cut Ball Shell
+                        const ballGeo = new THREE.SphereGeometry(R, 64, 64, sphereStart, sphereArc);
+                        const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                        whiteBall.rotation.x = Math.PI / 2;
+                        ballGroup.add(whiteBall);
 
-                        // 2. Upper Cut Shell (Only upper sector removed)
-                        const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
-                        const upperMesh = new THREE.Mesh(upperGeo, ballMat);
-                        upperMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(upperMesh);
-
-                        // 3. Upper Vertical Wall 1 (Quarter circle only)
-                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        // Vertical Wall 1
+                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // 4. Upper Vertical Wall 2 (Quarter circle only)
-                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        // Vertical Wall 2
+                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI);
                         const wall2 = new THREE.Mesh(wallGeo2, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // 5. Solid Horizontal Floor at Equator (Dark Stage)
-                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
+                        // Visible Horizontal Equatorial Floor Shelf
+                        const floorGeo = new THREE.CircleGeometry(R, 64, 0, wedgeSpan);
                         const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.z = Math.PI / 2;
-                        floorMesh.rotation.x = Math.PI / 2;
+                        floorMesh.rotation.z = sphereStart + sphereArc;
+                        floorMesh.position.set(0, 0, 0);
                         ballGroup.add(floorMesh);
-                        
+
                         // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
