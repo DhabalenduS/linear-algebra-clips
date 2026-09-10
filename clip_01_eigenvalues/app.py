@@ -673,10 +673,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(wall2);
 
                         // Visible Horizontal Equatorial Floor Shelf
-                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart, wedgeSpan);
+                        const floorGeo = new THREE.CircleGeometry(R, 64, 0, wedgeSpan);
                         const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.x = -Math.PI / 2;
-                        floorMesh.rotation.z = Math.PI / 2;
+                        floorMesh.rotation.z = sphereStart + sphereArc;
+                        floorMesh.position.set(0, 0, 0);
                         ballGroup.add(floorMesh);
 
                         // Center Point O(0, 0, 0)
@@ -696,14 +696,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(oLabel);
                     }}
 
-                    // 5. Pentagons and Seams (Filtered when Click 5 active)
+                    // 5. Pentagons and Seams (Strictly Filtered)
                     const decoGroup = new THREE.Group();
-                    if (!isWedgeCut) {{
-                        decoGroup.rotation.set(0.35, -0.65, 0.2);
-                    }} else {{
-                        // Aligned orientation for cut state
-                        decoGroup.rotation.set(0, 0, 0);
-                    }}
+                    decoGroup.rotation.set(0, 0, 0);
                     ballGroup.add(decoGroup);
 
                     const phi = (1 + Math.sqrt(5)) / 2;
@@ -730,14 +725,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         linewidth: 2
                     }});
 
-                    // Filter out elements inside the wedge opening
+                    // Robust Check: Exclude any vertex in the cut sector
                     function isInsideWedge(v) {{
                         if (!isWedgeCut) return false;
                         let ang = Math.atan2(v.y, v.x);
                         if (ang < 0) ang += Math.PI * 2;
                         const cutCenter = (pAngle + Math.PI / 2) % (Math.PI * 2);
-                        const diff = Math.abs(ang - cutCenter);
-                        return diff < (wedgeSpan / 1.8);
+                        let diff = Math.abs(ang - cutCenter);
+                        if (diff > Math.PI) diff = (Math.PI * 2) - diff;
+                        return diff < (wedgeSpan / 1.5);
                     }}
 
                     const pentagonRadius = 0.39;
@@ -754,6 +750,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
+                                // Exclude if EITHER vertex is inside wedge
                                 if (!isInsideWedge(icoVerts[i]) && !isInsideWedge(icoVerts[j])) {{
                                     const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
                                     const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
