@@ -624,84 +624,58 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // ============================================================
-                    // MODULE 1: Exact Aligned Equatorial Wedge Cut
-                    // ============================================================
+                    // Wedge Cut Math
                     const isWedgeCut = currentState >= 12;
-                    const pAngle = 38 * (Math.PI / 180);
-                    const halfWedge = 45 * (Math.PI / 180); // 90-degree total wedge opening
-                    const cutStart = pAngle - halfWedge;
-                    const cutEnd = pAngle + halfWedge;
+                    const pAngle = 38 * (Math.PI / 180); 
+                    const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
+                    const sphereStart = pAngle + (wedgeSpan / 2)+Math.PI;
+                    const sphereArc = Math.PI * 2 - wedgeSpan;
 
+                    // 3. White Ball Base Shell
+                    const ballGeo = new THREE.SphereGeometry(
+                        R, 
+                        64, 
+                        64, 
+                        sphereStart, 
+                        sphereArc
+                    );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10,
                         side: THREE.DoubleSide
                     }});
+                    const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                    whiteBall.rotation.x = Math.PI / 2;
+                    ballGroup.add(whiteBall);
 
-                    const cutWallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1e2024, // Dark matte charcoal cap
-                        roughness: 0.85,
-                        metalness: 0.05,
-                        side: THREE.DoubleSide
-                    }});
+                    // 4. Click 5: Pure Matte Neutral Charcoal Cut-Walls
+                    if (isWedgeCut) {{
+                        const wallMat = new THREE.MeshStandardMaterial({{
+                            color: 0x1c1917, // Pure Neutral Dark Charcoal
+                            roughness: 0.85,
+                            metalness: 0.0,
+                            side: THREE.DoubleSide
+                        }});
 
-                    if (!isWedgeCut) {{
-                        // Clicks 3 & 4: Original Full Sphere
-                        const fullBallGeo = new THREE.SphereGeometry(R, 64, 64);
-                        const fullBall = new THREE.Mesh(fullBallGeo, ballMat);
-                        fullBall.rotation.x = Math.PI / 2;
-                        ballGroup.add(fullBall);
-                    }} else {{
-                        // Click 5+: Upper Wedge Cut aligned with Point P
+                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
 
-                        // 1. Solid Lower Hemisphere (Full 360 bottom half)
-                        const lowerGeo = new THREE.SphereGeometry(
-                            R, 64, 32,
-                            0, Math.PI * 2,
-                            Math.PI / 2, Math.PI / 2
-                        );
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(lowerMesh);
-
-                        // 2. Upper Hemisphere with exact 90-deg opening centered on P
-                        const upperGeo = new THREE.SphereGeometry(
-                            R, 64, 32,
-                            cutEnd, Math.PI * 2 - (2 * halfWedge),
-                            0, Math.PI / 2
-                        );
-                        const upperMesh = new THREE.Mesh(upperGeo, ballMat);
-                        upperMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(upperMesh);
-
-                        // 3. Horizontal Floor Cap at Equator (Facing up)
-                        const floorGeo = new THREE.CircleGeometry(R, 48, cutStart, 2 * halfWedge);
-                        const floorMesh = new THREE.Mesh(floorGeo, cutWallMat);
-                        // Lies flat in the local equatorial plane
-                        ballGroup.add(floorMesh);
-
-                        // 4. Vertical Wall 1 (at cutStart)
-                        const wallGeo1 = new THREE.CircleGeometry(R, 48, 0, Math.PI / 2);
-                        const wall1 = new THREE.Mesh(wallGeo1, cutWallMat);
-                        wall1.rotation.x = Math.PI / 2;
-                        wall1.rotation.y = -cutStart;
+                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // 5. Vertical Wall 2 (at cutEnd)
-                        const wallGeo2 = new THREE.CircleGeometry(R, 48, 0, Math.PI / 2);
-                        const wall2 = new THREE.Mesh(wallGeo2, cutWallMat);
-                        wall2.rotation.x = Math.PI / 2;
-                        wall2.rotation.y = -cutEnd;
+                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // 6. Center Origin Marker O(0, 0, 0)
-                        const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
+                        // Center Point O(0, 0, 0)
+                        const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
                             emissive: 0xf59e0b,
-                            emissiveIntensity: 2.5
+                            emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
                         oSphere.position.set(0, 0, 0);
@@ -709,9 +683,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(-0.25, 0.40, 0.1);
+                        oLabel.position.set(0.0, 0.45, 0.1);
                         ballGroup.add(oLabel);
+                        
                     }}
+
                     // 5. Pentagons and Seams (Filtered to prevent stray lines inside cut)
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
