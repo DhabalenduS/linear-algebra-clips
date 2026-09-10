@@ -671,12 +671,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // --- NEW: Horizontal Floor at Equator ---
+                        // --- Horizontal Floor at Equator ---
                         const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
                         const floorMesh = new THREE.Mesh(floorGeo, wallMat);
+                        floorMesh.rotation.x = Math.PI / 2; // Tilts plane horizontally so top is visible
+                        floorMesh.rotation.z = Math.PI / 2; // Aligns with the wedge cut opening
                         ballGroup.add(floorMesh);
-                        // ----------------------------------------
-
+                        // -----------------------------------
+                        
                         // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
