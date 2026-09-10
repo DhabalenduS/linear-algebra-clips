@@ -624,58 +624,77 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Math
+                    // ============================================================
+                    // MODULE 1: Solid Base Shell + Architectural Equatorial Cut
+                    // ============================================================
                     const isWedgeCut = currentState >= 12;
-                    const pAngle = 38 * (Math.PI / 180); 
-                    const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
-                    const sphereStart = pAngle + (wedgeSpan / 2)+Math.PI;
-                    const sphereArc = Math.PI * 2 - wedgeSpan;
+                    const wedgeAngle = 90 * (Math.PI / 180); // 90-degree cut
+                    const startAngle = 0; // Starts from X-axis towards Z-axis
 
-                    // 3. White Ball Base Shell
-                    const ballGeo = new THREE.SphereGeometry(
-                        R, 
-                        64, 
-                        64, 
-                        sphereStart, 
-                        sphereArc
-                    );
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10,
+                        side: THREE.FrontSide
+                    }});
+
+                    const cutWallMat = new THREE.MeshStandardMaterial({{
+                        color: 0x1e2024, // High-contrast matte dark charcoal
+                        roughness: 0.85,
+                        metalness: 0.05,
                         side: THREE.DoubleSide
                     }});
-                    const whiteBall = new THREE.Mesh(ballGeo, ballMat);
-                    whiteBall.rotation.x = Math.PI / 2;
-                    ballGroup.add(whiteBall);
 
-                    // 4. Click 5: Pure Matte Neutral Charcoal Cut-Walls
-                    if (isWedgeCut) {{
-                        const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1c1917, // Pure Neutral Dark Charcoal
-                            roughness: 0.85,
-                            metalness: 0.0,
-                            side: THREE.DoubleSide
-                        }});
+                    if (!isWedgeCut) {{
+                        // Clicks 3 & 4: Standard Full Sphere
+                        const fullBallGeo = new THREE.SphereGeometry(R, 64, 64);
+                        const fullBall = new THREE.Mesh(fullBallGeo, ballMat);
+                        ballGroup.add(fullBall);
+                    }} else {{
+                        // Click 5+: Architectural Upper Wedge Cut
 
-                        const wallGeo = new THREE.CircleGeometry(R, 64, 0, Math.PI);
+                        // A. Solid Lower Hemisphere (Full 360 deg, bottom half)
+                        const lowerGeo = new THREE.SphereGeometry(
+                            R, 64, 32,
+                            0, Math.PI * 2,
+                            Math.PI / 2, Math.PI / 2
+                        );
+                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
+                        ballGroup.add(lowerMesh);
 
-                        const wall1 = new THREE.Mesh(wallGeo, wallMat);
-                        wall1.rotation.z = sphereStart;
-                        wall1.rotation.y = Math.PI / 2;
+                        // B. Upper Hemisphere with 90-deg sector removed
+                        const upperGeo = new THREE.SphereGeometry(
+                            R, 64, 32,
+                            startAngle + wedgeAngle, Math.PI * 2 - wedgeAngle,
+                            0, Math.PI / 2
+                        );
+                        const upperMesh = new THREE.Mesh(upperGeo, ballMat);
+                        ballGroup.add(upperMesh);
+
+                        // C. Horizontal Floor Cap at Equator (Y = 0)
+                        const floorGeo = new THREE.CircleGeometry(R, 48, startAngle, wedgeAngle);
+                        const floorMesh = new THREE.Mesh(floorGeo, cutWallMat);
+                        floorMesh.rotation.x = Math.PI / 2; // Lie flat horizontally on equator
+                        ballGroup.add(floorMesh);
+
+                        // D. Vertical Wall 1 (at startAngle)
+                        const wallGeo1 = new THREE.CircleGeometry(R, 48, 0, Math.PI / 2);
+                        const wall1 = new THREE.Mesh(wallGeo1, cutWallMat);
+                        wall1.rotation.y = -startAngle;
                         ballGroup.add(wall1);
 
-                        const wall2 = new THREE.Mesh(wallGeo, wallMat);
-                        wall2.rotation.z = sphereStart + sphereArc;
-                        wall2.rotation.y = Math.PI / 2;
+                        // E. Vertical Wall 2 (at startAngle + wedgeAngle)
+                        const wallGeo2 = new THREE.CircleGeometry(R, 48, 0, Math.PI / 2);
+                        const wall2 = new THREE.Mesh(wallGeo2, cutWallMat);
+                        wall2.rotation.y = -(startAngle + wedgeAngle);
                         ballGroup.add(wall2);
 
-                        // Center Point O(0, 0, 0)
-                        const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
+                        // F. Center Origin Marker O(0, 0, 0)
+                        const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
                             emissive: 0xf59e0b,
-                            emissiveIntensity: 3.0
+                            emissiveIntensity: 2.5
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
                         oSphere.position.set(0, 0, 0);
@@ -683,11 +702,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(0.0, 0.45, 0.1);
+                        oLabel.position.set(0.0, 0.35, 0.15);
                         ballGroup.add(oLabel);
-                        
                     }}
-
                     // 5. Pentagons and Seams (Filtered to prevent stray lines inside cut)
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
