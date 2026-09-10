@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Restored Baseline + Module 1 Equatorial Floor)
+# Slides 1-3 Complete Implementation (Clean Cutout & Filtered Decors)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -631,66 +631,54 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
-                    // 3. White Ball Base Shell + Click 5 Architectural Equatorial Cut
+                    // 3. White Ball Base Shell
+                    const ballMat = new THREE.MeshStandardMaterial({{
+                        color: 0xf8fafc,
+                        roughness: 0.18,
+                        metalness: 0.10,
+                        side: THREE.DoubleSide
+                    }});
+
+                    const wallMat = new THREE.MeshStandardMaterial({{
+                        color: 0x1c1917, // Pure Neutral Dark Charcoal
+                        roughness: 0.85,
+                        metalness: 0.0,
+                        side: THREE.DoubleSide
+                    }});
+
                     if (!isWedgeCut) {{
                         const ballGeo = new THREE.SphereGeometry(R, 64, 64);
-                        const ballMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf8fafc,
-                            roughness: 0.18,
-                            metalness: 0.10,
-                            side: THREE.DoubleSide
-                        }});
                         const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                         whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        const ballMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf8fafc,
-                            roughness: 0.18,
-                            metalness: 0.10,
-                            side: THREE.DoubleSide
-                        }});
+                        // Wedge Cut Ball Shell
+                        const ballGeo = new THREE.SphereGeometry(R, 64, 64, sphereStart, sphereArc);
+                        const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                        whiteBall.rotation.x = Math.PI / 2;
+                        ballGroup.add(whiteBall);
 
-                        const wallMat = new THREE.MeshStandardMaterial({{
-                            color: 0x1c1917, // Pure Neutral Dark Charcoal
-                            roughness: 0.85,
-                            metalness: 0.0,
-                            side: THREE.DoubleSide
-                        }});
-
-                        // A. Solid Lower Hemisphere (full 360 degrees)
-                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(lowerMesh);
-
-                        // B. Upper Hemisphere with 90-deg wedge cut
-                        const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
-                        const upperMesh = new THREE.Mesh(upperGeo, ballMat);
-                        upperMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(upperMesh);
-
-                        // C. Horizontal Floor Cap at Equator
-                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
-                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(floorMesh);
-
-                        // D. Upper Vertical Wall 1
-                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        // Vertical Wall 1
+                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // E. Upper Vertical Wall 2
-                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        // Vertical Wall 2
+                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI);
                         const wall2 = new THREE.Mesh(wallGeo2, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // F. Center Point O(0, 0, 0)
+                        // Horizontal Floor Shelf at Equator
+                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
+                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
+                        floorMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(floorMesh);
+
+                        // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
@@ -707,7 +695,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(oLabel);
                     }}
 
-                    // 5. Pentagons and Seams (Filtered to prevent stray lines inside cut)
+                    // 5. Pentagons and Seams (FILTERED: Clean inside the Wedge Cut)
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0.35, -0.65, 0.2);
                     ballGroup.add(decoGroup);
@@ -736,23 +724,45 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         linewidth: 2
                     }});
 
+                    // Helper: Check if a 3D vertex falls inside the Cut Sector
+                    function isInsideCut(localV) {{
+                        if (!isWedgeCut) return false;
+                        // Transform point into ballGroup coordinate frame
+                        const vRotated = localV.clone().applyEuler(decoGroup.rotation);
+                        let angle = Math.atan2(vRotated.y, vRotated.x);
+                        if (angle < 0) angle += Math.PI * 2;
+                        
+                        let cutMin = (sphereStart + sphereArc) % (Math.PI * 2);
+                        let cutMax = (cutMin + wedgeSpan) % (Math.PI * 2);
+                        
+                        if (cutMin < cutMax) {{
+                            return (angle >= cutMin && angle <= cutMax);
+                        }} else {{
+                            return (angle >= cutMin || angle <= cutMax);
+                        }}
+                    }}
+
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
-                        const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
-                        const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
-                        pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
-                        pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
-                        decoGroup.add(pentMesh);
+                        if (!isInsideCut(v)) {{
+                            const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
+                            const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
+                            pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
+                            pentMesh.lookAt(v.clone().multiplyScalar(R * 2));
+                            decoGroup.add(pentMesh);
+                        }}
                     }});
 
                     for (let i = 0; i < icoVerts.length; i++) {{
                         for (let j = i + 1; j < icoVerts.length; j++) {{
                             if (icoVerts[i].distanceTo(icoVerts[j]) < 1.1) {{
-                                const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
-                                const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
-                                const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-                                const seam = new THREE.Line(lineGeo, lineMat);
-                                decoGroup.add(seam);
+                                if (!isInsideCut(icoVerts[i]) && !isInsideCut(icoVerts[j])) {{
+                                    const p1 = icoVerts[i].clone().multiplyScalar(R * 1.001);
+                                    const p2 = icoVerts[j].clone().multiplyScalar(R * 1.001);
+                                    const lineGeo = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+                                    const seam = new THREE.Line(lineGeo, lineMat);
+                                    decoGroup.add(seam);
+                                }}
                             }}
                         }}
                     }}
