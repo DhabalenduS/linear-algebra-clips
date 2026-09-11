@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slide 1-3 Implementation with Concave Inner Bowl (Click 5)
+# Slide 1-3 Implementation with Concave Inner Bowl (Click 5 & 6)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -539,6 +539,24 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     return new THREE.CanvasTexture(sCanvas);
                 }}
 
+                // Helper: Cavity Shadow Texture for True 3D Concave Depth
+                function createCavityTexture() {{
+                    const c = document.createElement('canvas');
+                    c.width = 512;
+                    c.height = 512;
+                    const ctx = c.getContext('2d');
+                    
+                    const grad = ctx.createRadialGradient(256, 340, 30, 256, 256, 250);
+                    grad.addColorStop(0, '#94a3b8');   // Soft illuminated inner floor
+                    grad.addColorStop(0.55, '#475569'); // Mid-depth slate
+                    grad.addColorStop(0.85, '#1e293b'); // Rich interior cavity shadow
+                    grad.addColorStop(1.0, '#0f172a');  // Deep shadow under the upper rim
+                    
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(0, 0, 512, 512);
+                    return new THREE.CanvasTexture(c);
+                }}
+
                 // Helper: Compact TV-Grade Math Pill Badge
                 function makeMathTextSprite(text, dotColor) {{
                     const canvas = document.createElement('canvas');
@@ -598,7 +616,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 );
 
                 // ============================================================
-                // CLICK 3, 4, 5: Unified Geometric Construction
+                // CLICK 3, 4, 5, 6: Unified Geometric Construction
                 // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow on Pitch
@@ -625,10 +643,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
-                    // ============================================================
-                    // STEP (i) + STEP (iii): WEDGE CUT + CONCAVE INNER BOWL
-                    // ============================================================
-                    
                     // Materials
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -637,7 +651,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.FrontSide
                     }});
 
-                    
                     const wallMat = new THREE.MeshStandardMaterial({{
                         color: 0x475569, // Clean slate cut-edge boundary
                         roughness: 0.50,
@@ -645,10 +658,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
 
-                    // Inner Bladder Material for Concave Interior Bowl (Light Gray)
+                    // Inner Bladder Material with 3D Cavity Shadow
                     const innerMat = new THREE.MeshStandardMaterial({{
-                        color: 0x94a3b8, // Light Slate Gray (reveals smooth 3D curved depth)
-                        roughness: 0.55,
+                        map: createCavityTexture(),
+                        roughness: 0.75,
                         metalness: 0.05,
                         side: THREE.DoubleSide
                     }});
@@ -659,29 +672,26 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        // --- STEP (i): Sliced Upper Shell (Click 5 / State >= 12) ---
+                        // --- Sliced Upper Shell (Click 5 / State >= 12) ---
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
                         upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
-                        // --- STEP (ii): Rear Skin / Back Shell (Click 6 / State >= 13) ---
-                        // --- STEP (ii): Rear Skin + Cut Framing Walls (Click 6 / State >= 13) ---
-                        // --- STEP (ii): Rear Skin + Top Framing Wall (Click 6 / State >= 13) ---
+                        // --- Rear Concave Inner Bowl + Framing Wall (Click 6 / State >= 13) ---
                         if (currentState >= 13) {{
-                            // 1. Rear Concave Inner Bowl (Light Gray)
                             const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                             const backMesh = new THREE.Mesh(backGeo, innerMat);
                             backMesh.rotation.x = Math.PI / 2;
                             ballGroup.add(backMesh);
 
-                            // 2. Vertical Radial Cut Wall (Top boundary from Pole to Center O)
                             const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
                             const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                             wall1.rotation.x = Math.PI / 2;
                             wall1.rotation.z = sphereStart;
                             ballGroup.add(wall1);
                         }}
+
                         // --- Center Point O(0, 0, 0) ---
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
@@ -698,6 +708,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oLabel.position.set(0.0, 0.45, 0.1);
                         ballGroup.add(oLabel);
                     }}
+
                     // 5. Pentagons and Seams (Strictly Filtered)
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0, 0, 0);
