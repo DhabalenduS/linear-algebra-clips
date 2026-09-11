@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slide 1-3 Implementation with Clean Uniform Markers & Labels
+# Slide 1-3 Implementation with Concave Inner Bowl (Click 5 & 6)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -557,7 +557,51 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     return new THREE.CanvasTexture(c);
                 }}
 
-                // Helper: Ultra-Prominent Borderless Text Sprite (Crisp Pure White Halo)
+                // Helper: Compact TV-Grade Math Pill Badge
+                function makeMathTextSprite(text, dotColor) {{
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 640;
+                    canvas.height = 200;
+                    const ctx = canvas.getContext('2d');
+
+                    const x = 30, y = 25, w = 580, h = 150, r = 75;
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+                    ctx.beginPath();
+                    ctx.moveTo(x + r, y);
+                    ctx.lineTo(x + w - r, y);
+                    ctx.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2);
+                    ctx.lineTo(x + r, y + h);
+                    ctx.arc(x + r, y + r, r, Math.PI / 2, -Math.PI / 2);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#64748b';
+                    ctx.lineWidth = 6;
+                    ctx.stroke();
+
+                    ctx.fillStyle = dotColor || '#2563eb';
+                    ctx.beginPath();
+                    ctx.arc(x + 65, y + r, 24, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.font = "bold italic 60px Georgia, serif";
+                    ctx.textAlign = "left";
+                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = "#0f172a";
+                    ctx.fillText(text, x + 115, y + r + 2);
+
+                    const texture = new THREE.CanvasTexture(canvas);
+                    const spriteMat = new THREE.SpriteMaterial({{
+                        map: texture,
+                        depthTest: false,
+                        depthWrite: false
+                    }});
+                    const sprite = new THREE.Sprite(spriteMat);
+                    sprite.renderOrder = 999;
+                    return sprite;
+                }}
+                // Helper: Ultra-Prominent Text Sprite (Clean Navy with Crisp White Halo)
                 function makeCleanTextSprite(text, color) {{
                     const canvas = document.createElement('canvas');
                     canvas.width = 640;
@@ -568,14 +612,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     
-                    // Pure White Halo Outline (Guarantees maximum visibility)
+                    // 1. Crisp Pure White Halo Outline (Guarantees maximum contrast)
                     ctx.strokeStyle = "#ffffff";
                     ctx.lineWidth = 10;
                     ctx.lineJoin = "round";
                     ctx.strokeText(text, 320, 80);
                     
-                    // High-contrast Bold Text
-                    ctx.fillStyle = color || "#dc2626";
+                    // 2. Rich Prominent Navy Text
+                    ctx.fillStyle = color || "#1e3a8a";
                     ctx.fillText(text, 320, 80);
                     
                     const texture = new THREE.CanvasTexture(canvas);
@@ -588,7 +632,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     sprite.renderOrder = 999;
                     return sprite;
                 }}
-
                 const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
                 const R = ballRadius;
@@ -639,8 +682,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x334155, // Clean slate cut-edge boundary
-                        roughness: 0.45,
+                        color: 0x475569, // Clean slate cut-edge boundary
+                        roughness: 0.50,
                         metalness: 0.10,
                         side: THREE.DoubleSide
                     }});
@@ -665,42 +708,33 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
-                        // --- Recessed Concave Bowl + Framing Walls (Click 6 / State >= 13) ---
+                        // --- Rear Concave Inner Bowl + Framing Wall (Click 6 / State >= 13) ---
                         if (currentState >= 13) {{
-                            // 1. Recessed Rear Concave Bowl
-                            const R_inner = R * 0.94;
-                            const backGeo = new THREE.SphereGeometry(R_inner, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                            const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                             const backMesh = new THREE.Mesh(backGeo, innerMat);
                             backMesh.rotation.x = Math.PI / 2;
                             ballGroup.add(backMesh);
 
-                            // 2. Vertical Radial Cut Wall (Top boundary from Pole to Center O)
                             const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
                             const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                             wall1.rotation.x = Math.PI / 2;
                             wall1.rotation.z = sphereStart;
                             ballGroup.add(wall1);
-
-                            // 3. Horizontal Cut-Edge Rim (At the Horizon boundary)
-                            const wallGeo2 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
-                            const wall2 = new THREE.Mesh(wallGeo2, wallMat);
-                            wall2.rotation.x = Math.PI / 2;
-                            wall2.rotation.z = sphereStart + sphereArc;
-                            ballGroup.add(wall2);
                         }}
 
-                        // --- Center Point O(0, 0, 0) (High Prominence Glowing Marker) ---
-                        const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                        // --- Center Point O(0, 0, 0) ---
+                        // --- Center Point O(0, 0, 0) at Geometric Origin ---
+                        const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0xf59e0b,
+                            color: 0xfbbf24,
                             emissive: 0xf59e0b,
-                            emissiveIntensity: 2.5
+                            emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
                         oSphere.position.set(0, 0, 0);
                         ballGroup.add(oSphere);
 
-                        // Borderless Prominent Crimson/Red Label for Point O
+                        // Crisp Royal Blue Label positioned snugly near Point O
                         const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#dc2626");
                         oLabel.scale.set(1.3, 0.40, 1);
                         oLabel.position.set(-0.35, 0.28, 0.05);
@@ -770,7 +804,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 & 5: Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Point P Marker Sphere (Glowing Cyan Dot)
                     const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
@@ -781,10 +814,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pSphere.position.copy(pLocal);
                     ballGroup.add(pSphere);
 
-                    // Borderless Prominent Cyan Label for Point P
-                    const pLabel = makeCleanTextSprite("P (x, y, z)", "#0284c7");
-                    pLabel.scale.set(1.3, 0.40, 1);
-                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.55, 0.28, 0.0));
+                    const pLabel = makeMathTextSprite("P (x, y, z)", "#06b6d4");
+                    pLabel.scale.set(1.4, 0.44, 1);
+                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
 
                     if (currentState === 11) {{
@@ -798,9 +830,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         cTopSphere.position.set(0, 0, R);
                         ballGroup.add(cTopSphere);
 
-                        const cLabel = makeCleanTextSprite("C'(0, R, 0)", "#e11d48");
-                        cLabel.scale.set(1.3, 0.40, 1);
-                        cLabel.position.set(-0.50, 0.28, R);
+                        const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
+                        cLabel.scale.set(1.4, 0.44, 1);
+                        cLabel.position.set(-0.55, 0.32, R);
                         ballGroup.add(cLabel);
                     }}
                 }}
