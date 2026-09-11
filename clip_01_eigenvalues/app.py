@@ -479,7 +479,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.beginPath(); ctx.arc(mx, my, r, 0, Math.PI * 0.5); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx + pw, my, r, Math.PI * 0.5, Math.PI); ctx.stroke();
                     ctx.beginPath(); ctx.arc(mx, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
-                    ctx.beginPath(); ctx.arc(mx + pw, my + ph, r, Math.PI, -Math.PI * 0.5); ctx.stroke();
+                    ctx.beginPath(); ctx.arc(mx + pw, my + ph, r, -Math.PI * 0.5, 0); ctx.stroke();
                 }}
                 draw2DPitch();
 
@@ -557,7 +557,39 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     return new THREE.CanvasTexture(c);
                 }}
 
-                // Helper: Compact TV-Grade Math Pill Badge
+                // Helper: Ultra-Prominent Text Sprite (Clean with Crisp White Halo)
+                function makeCleanTextSprite(text, color) {{
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 640;
+                    canvas.height = 160;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.font = "bold italic 68px Georgia, serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    
+                    // Pure White Halo Outline
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.lineWidth = 10;
+                    ctx.lineJoin = "round";
+                    ctx.strokeText(text, 320, 80);
+                    
+                    // Text
+                    ctx.fillStyle = color || "#dc2626";
+                    ctx.fillText(text, 320, 80);
+                    
+                    const texture = new THREE.CanvasTexture(canvas);
+                    const spriteMat = new THREE.SpriteMaterial({{
+                        map: texture,
+                        depthTest: false,
+                        depthWrite: false
+                    }});
+                    const sprite = new THREE.Sprite(spriteMat);
+                    sprite.renderOrder = 999;
+                    return sprite;
+                }}
+
+                // Helper: Compact Math Pill Badge (for P and C')
                 function makeMathTextSprite(text, dotColor) {{
                     const canvas = document.createElement('canvas');
                     canvas.width = 640;
@@ -601,37 +633,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     sprite.renderOrder = 999;
                     return sprite;
                 }}
-                // Helper: Ultra-Prominent Text Sprite (Clean Navy with Crisp White Halo)
-                function makeCleanTextSprite(text, color) {{
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 640;
-                    canvas.height = 160;
-                    const ctx = canvas.getContext('2d');
-                    
-                    ctx.font = "bold italic 68px Georgia, serif";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "middle";
-                    
-                    // 1. Crisp Pure White Halo Outline (Guarantees maximum contrast)
-                    ctx.strokeStyle = "#ffffff";
-                    ctx.lineWidth = 10;
-                    ctx.lineJoin = "round";
-                    ctx.strokeText(text, 320, 80);
-                    
-                    // 2. Rich Prominent Navy Text
-                    ctx.fillStyle = color || "#1e3a8a";
-                    ctx.fillText(text, 320, 80);
-                    
-                    const texture = new THREE.CanvasTexture(canvas);
-                    const spriteMat = new THREE.SpriteMaterial({{
-                        map: texture,
-                        depthTest: false,
-                        depthWrite: false
-                    }});
-                    const sprite = new THREE.Sprite(spriteMat);
-                    sprite.renderOrder = 999;
-                    return sprite;
-                }}
+
                 const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
                 const R = ballRadius;
@@ -682,8 +684,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x475569, // Clean slate cut-edge boundary
-                        roughness: 0.50,
+                        color: 0x334155, // Clean slate cut-edge boundary
+                        roughness: 0.45,
                         metalness: 0.10,
                         side: THREE.DoubleSide
                     }});
@@ -708,21 +710,30 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
-                        // --- Rear Concave Inner Bowl + Framing Wall (Click 6 / State >= 13) ---
+                        // --- Recessed Concave Bowl + Framing Walls (Click 6 / State >= 13) ---
                         if (currentState >= 13) {{
-                            const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                            // 1. Recessed Rear Concave Bowl (R_inner = 0.94 * R to break outer convex circle)
+                            const R_inner = R * 0.94;
+                            const backGeo = new THREE.SphereGeometry(R_inner, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                             const backMesh = new THREE.Mesh(backGeo, innerMat);
                             backMesh.rotation.x = Math.PI / 2;
                             ballGroup.add(backMesh);
 
+                            // 2. Vertical Radial Cut Wall (Top boundary from Pole to Center O)
                             const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
                             const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                             wall1.rotation.x = Math.PI / 2;
                             wall1.rotation.z = sphereStart;
                             ballGroup.add(wall1);
+
+                            // 3. Horizontal Cut-Edge Rim (At the Horizon boundary)
+                            const wallGeo2 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
+                            const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                            wall2.rotation.x = Math.PI / 2;
+                            wall2.rotation.z = sphereStart + sphereArc;
+                            ballGroup.add(wall2);
                         }}
 
-                        // --- Center Point O(0, 0, 0) ---
                         // --- Center Point O(0, 0, 0) at Geometric Origin ---
                         const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
@@ -734,7 +745,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oSphere.position.set(0, 0, 0);
                         ballGroup.add(oSphere);
 
-                        // Crisp Royal Blue Label positioned snugly near Point O
                         const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#dc2626");
                         oLabel.scale.set(1.3, 0.40, 1);
                         oLabel.position.set(-0.35, 0.28, 0.05);
