@@ -689,10 +689,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(lowerMesh);
 
                         // 5. Inner Concave Matte Bowl (Curves downwards, blocking green pitch)
-                        const innerLowerGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const innerLowerMesh = new THREE.Mesh(innerLowerGeo, innerMat);
-                        innerLowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(innerLowerMesh);
+                       // const innerLowerGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        // const innerLowerMesh = new THREE.Mesh(innerLowerGeo, innerMat);
+                        // innerLowerMesh.rotation.x = Math.PI / 2;
+                        //ballGroup.add(innerLowerMesh);
                         
                         // 6. Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
