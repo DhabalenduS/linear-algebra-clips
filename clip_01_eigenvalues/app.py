@@ -637,10 +637,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.FrontSide
                     }});
 
+                    
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1c1917, // Pure Neutral Dark Charcoal for Cut Faces
-                        roughness: 0.85,
-                        metalness: 0.0,
+                        color: 0x475569, // Clean slate cut-edge boundary
+                        roughness: 0.50,
+                        metalness: 0.10,
                         side: THREE.DoubleSide
                     }});
 
@@ -665,11 +666,27 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(upperMesh);
 
                         // --- STEP (ii): Rear Skin / Back Shell (Click 6 / State >= 13) ---
+                        // --- STEP (ii): Rear Skin + Cut Framing Walls (Click 6 / State >= 13) ---
                         if (currentState >= 13) {{
+                            // 1. Rear Concave Inner Bowl
                             const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                             const backMesh = new THREE.Mesh(backGeo, innerMat);
                             backMesh.rotation.x = Math.PI / 2;
                             ballGroup.add(backMesh);
+
+                            // 2. Vertical Radial Cut Wall (From Pole to Center O)
+                            const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
+                            const wall1 = new THREE.Mesh(wallGeo1, wallMat);
+                            wall1.rotation.x = Math.PI / 2;
+                            wall1.rotation.z = sphereStart;
+                            ballGroup.add(wall1);
+
+                            // 3. Horizontal Radial Cut Wall (From Center O to Equator near P)
+                            const wallGeo2 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
+                            const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                            wall2.rotation.x = Math.PI / 2;
+                            wall2.rotation.z = sphereStart + sphereArc;
+                            ballGroup.add(wall2);
                         }}
 
                         // --- Center Point O(0, 0, 0) ---
