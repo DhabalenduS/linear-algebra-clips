@@ -668,6 +668,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
+                        // The Floor Sector lying flat at Z = 0 (closes the bottom of the cut)
+                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
+                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
+                        ballGroup.add(floorMesh);
+
                         // 2. Vertical Cut Wall 1 (Top boundary of the slice)
                         //const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         //const wall1 = new THREE.Mesh(wallGeo1, wallMat);
