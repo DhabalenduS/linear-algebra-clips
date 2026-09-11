@@ -724,7 +724,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         // --- Center Point O(0, 0, 0) ---
                         // --- Center Point O(0, 0, 0) at Geometric Origin ---
-                        const oGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                        const oGeo = new THREE.SphereGeometry(0.15, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0x06b6d4,
                             emissive: 0x06b6d4,
