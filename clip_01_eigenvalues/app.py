@@ -649,7 +649,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         color: 0x18181b, // Matte dark rubber interior
                         roughness: 0.90,
                         metalness: 0.0,
-                        side: THREE.DoubleSide
+                        side: THREE.BackSide
                     }});
 
                     if (!isWedgeCut) {{
@@ -658,25 +658,49 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
+                        // --- STEP (i): Sliced Upper Shell + Vertical Walls ---
+                        
+                        // --- CLEAN SHALLOW WEDGE SLICE (Stops at Equator) ---
+                        
                         // 1. Sliced Shell (Upper quadrant carved out)
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
                         upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
-                        // 2. Full Outer White Lower Hemisphere (Intact bottom half)
-                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(lowerMesh);
+                        // The Floor Sector lying flat at Z = 0 (closes the bottom of the cut)
+                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
+                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
+                        ballGroup.add(floorMesh);
 
-                        // 3. Inner Concave Matte Bowl (Curves downwards inside, blocking green pitch)
-                        const innerLowerGeo = new THREE.SphereGeometry(R * 0.99, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const innerLowerMesh = new THREE.Mesh(innerLowerGeo, innerMat);
-                        innerLowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(innerLowerMesh);
+                        // 2. Vertical Cut Wall 1 (Top boundary of the slice)
+                        //const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        //const wall1 = new THREE.Mesh(wallGeo1, wallMat);
+                        //wall1.rotation.x = Math.PI / 2;
+                        //wall1.rotation.z = sphereStart;
+                        //ballGroup.add(wall1);
 
-                        // 4. Center Point O(0, 0, 0)
+                        // 3. Horizontal Boundary Wall 2 (Floor of the slice - stops cut from going deep)
+                        //const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        //const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                        //wall2.rotation.x = Math.PI / 2;
+                        //wall2.rotation.z = sphereStart + sphereArc;
+                       // ballGroup.add(wall2);
+                        // --- STEP (iii): Concave Interior Bowl (Blocks Green Ground) ---
+
+                        // 4. Outer White Lower Hemisphere
+                        //const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        //const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
+                        //lowerMesh.rotation.x = Math.PI / 2;
+                        //ballGroup.add(lowerMesh);
+
+                        // 5. Inner Concave Matte Bowl (Curves downwards, blocking green pitch)
+                       // const innerLowerGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        // const innerLowerMesh = new THREE.Mesh(innerLowerGeo, innerMat);
+                        // innerLowerMesh.rotation.x = Math.PI / 2;
+                        //ballGroup.add(innerLowerMesh);
+                        
+                        // 6. Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
