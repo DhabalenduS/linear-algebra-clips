@@ -645,12 +645,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.DoubleSide
                     }});
 
-                    // Inner Bladder Material for Concave Interior Bowl
+                    // Inner Bladder Material for Concave Interior Bowl (Light Gray)
                     const innerMat = new THREE.MeshStandardMaterial({{
-                        color: 0x18181b, // Matte dark rubber interior
-                        roughness: 0.90,
-                        metalness: 0.0,
-                        side: THREE.BackSide
+                        color: 0x94a3b8, // Light Slate Gray (reveals smooth 3D curved depth)
+                        roughness: 0.55,
+                        metalness: 0.05,
+                        side: THREE.DoubleSide
                     }});
 
                     if (!isWedgeCut) {{
@@ -667,28 +667,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                         // --- STEP (ii): Rear Skin / Back Shell (Click 6 / State >= 13) ---
                         // --- STEP (ii): Rear Skin + Cut Framing Walls (Click 6 / State >= 13) ---
+                        // --- STEP (ii): Rear Skin + Top Framing Wall (Click 6 / State >= 13) ---
                         if (currentState >= 13) {{
-                            // 1. Rear Concave Inner Bowl
+                            // 1. Rear Concave Inner Bowl (Light Gray)
                             const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                             const backMesh = new THREE.Mesh(backGeo, innerMat);
                             backMesh.rotation.x = Math.PI / 2;
                             ballGroup.add(backMesh);
 
-                            // 2. Vertical Radial Cut Wall (From Pole to Center O)
+                            // 2. Vertical Radial Cut Wall (Top boundary from Pole to Center O)
                             const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
                             const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                             wall1.rotation.x = Math.PI / 2;
                             wall1.rotation.z = sphereStart;
                             ballGroup.add(wall1);
-
-                            // 3. Horizontal Radial Cut Wall (From Center O to Equator near P)
-                            const wallGeo2 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
-                            const wall2 = new THREE.Mesh(wallGeo2, wallMat);
-                            wall2.rotation.x = Math.PI / 2;
-                            wall2.rotation.z = sphereStart + sphereArc;
-                            ballGroup.add(wall2);
                         }}
-
                         // --- Center Point O(0, 0, 0) ---
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
