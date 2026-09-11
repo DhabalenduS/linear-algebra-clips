@@ -658,21 +658,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        // Here I am trying reverse: Concave Interior Bowl +  Wedge Cut Slice
-                        // --- STEP (iii): Concave Interior Bowl (Blocks Green Ground) ---
-
-                        // 4. Outer White Lower Hemisphere
-                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(lowerMesh);
-
-                        // 5. Inner Concave Matte Bowl (Curves downwards, blocking green pitch)
-                        const innerLowerGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const innerLowerMesh = new THREE.Mesh(innerLowerGeo, innerMat);
-                        innerLowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(innerLowerMesh);
                         // --- STEP (i): Sliced Upper Shell + Vertical Walls ---
+                        
                         // 1. Upper Cut Shell (Upper sector carved out)
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
@@ -693,7 +680,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        
+                        // --- STEP (iii): Concave Interior Bowl (Blocks Green Ground) ---
+
+                        // 4. Outer White Lower Hemisphere
+                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
+                        lowerMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(lowerMesh);
+
+                        // 5. Inner Concave Matte Bowl (Curves downwards, blocking green pitch)
+                        const innerLowerGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const innerLowerMesh = new THREE.Mesh(innerLowerGeo, innerMat);
+                        innerLowerMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(innerLowerMesh);
                         
                         // 6. Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
