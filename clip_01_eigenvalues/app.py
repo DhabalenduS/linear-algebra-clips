@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slide 1-3 Implementation with Concave Inner Bowl (Click 5)
+# Slide 1-3 Implementation with Concave Inner Bowl & Proper Vertical Walls (Click 5)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -516,13 +516,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.45);
                 scene.add(hemiLight);
 
-                const keyLight = new THREE.DirectionalLight(0xffffff, 1.65);
+                const keyLight = new THREE.DirectionalLight(0xffffff, 1.70);
                 keyLight.position.set(-10, 20, 16);
                 scene.add(keyLight);
 
-                const rimLight = new THREE.DirectionalLight(0xffffff, 0.70);
-                rimLight.position.set(10, 12, -8);
-                scene.add(rimLight);
+                const fillLight = new THREE.DirectionalLight(0xffffff, 0.55);
+                fillLight.position.set(10, 8, 10);
+                scene.add(fillLight);
 
                 // Helper: Soft Contact Shadow
                 function createContactShadowTexture() {{
@@ -589,12 +589,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const R = ballRadius;
                 let ballGroup = null;
 
-                // Cartesian Point Definitions
-                const pAngle = 38 * (Math.PI / 180);
+                // Position Point P on the upper-right outer shell rim
+                const pAngle = 35 * (Math.PI / 180);
                 const pLocal = new THREE.Vector3(
-                    R * Math.cos(pAngle),
-                    R * Math.sin(pAngle),
-                    0.15 * R
+                    R * Math.cos(pAngle) * 0.92,
+                    R * Math.sin(pAngle) * 0.70,
+                    R * 0.60
                 );
 
                 // ============================================================
@@ -613,22 +613,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. Ball Root Group
+                    // 2. Ball Root Group (Natural Upright Orientation)
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
-                    ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
-                    // Wedge Cut Parameters
                     const isWedgeCut = currentState >= 12;
-                    const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
-                    const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
-                    const sphereArc = Math.PI * 2 - wedgeSpan;
 
-                    // ============================================================
-                    // STEP (i) + STEP (iii): WEDGE CUT + CONCAVE INNER BOWL
-                    // ============================================================
-                    
                     // Materials
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -638,62 +629,92 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1c1917, // Pure Neutral Dark Charcoal for Cut Faces
+                        color: 0x1e293b, // Dark Charcoal for Upper Vertical Slices
                         roughness: 0.85,
                         metalness: 0.0,
                         side: THREE.DoubleSide
                     }});
 
-                    // Inner Bladder Material for Concave Interior Bowl
+                    // Matte Rubber Bladder for Concave Lower Interior
                     const innerMat = new THREE.MeshStandardMaterial({{
-                        color: 0x18181b, // Matte dark rubber interior
+                        color: 0x0f172a, // Deep rich matte navy-charcoal
                         roughness: 0.90,
-                        metalness: 0.0,
+                        metalness: 0.05,
                         side: THREE.BackSide
                     }});
 
                     if (!isWedgeCut) {{
                         const ballGeo = new THREE.SphereGeometry(R, 64, 64);
                         const whiteBall = new THREE.Mesh(ballGeo, ballMat);
-                        whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        // --- STEP (i): Sliced Upper Shell + Vertical Walls ---
+                        // ============================================================
+                        // CLICK 5: CLEAN WEDGE CUT + TRUE CONCAVE INNER BOWL
+                        // ============================================================
                         
-                        // 1. Upper Cut Shell (Upper sector carved out)
-                        const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
+                        // Wedge Cut Sector: Front quadrant (0 to 90 degrees around Y axis)
+                        const phiStart = 0;
+                        const phiLength = Math.PI * 0.5; // 90 degree slice
+
+                        // 1. Upper Sliced Shell (Remaining 270 degrees of upper hemisphere)
+                        const upperGeo = new THREE.SphereGeometry(R, 64, 32, phiStart + phiLength, Math.PI * 2 - phiLength, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
-                        upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
-                        // 2. Vertical Cut Wall 1
-                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        // 2. Vertical Cut Wall 1 (From North Pole down to Equator along phi = phiStart)
+                        // Uses a true vertical quarter-circle plane spanning from Y=R down to Y=0
+                        const wallGeo1 = new THREE.BufferGeometry();
+                        const segments = 32;
+                        const vertices1 = [0, 0, 0]; // Origin (0,0,0)
+                        for (let i = 0; i <= segments; i++) {{
+                            const theta = (Math.PI / 2) * (i / segments); // 0 (top) to PI/2 (equator)
+                            const y = R * Math.cos(theta);
+                            const r_xz = R * Math.sin(theta);
+                            const x = r_xz * Math.cos(phiStart);
+                            const z = r_xz * Math.sin(phiStart);
+                            vertices1.push(x, y, z);
+                        }}
+                        const indices1 = [];
+                        for (let i = 1; i <= segments; i++) {{
+                            indices1.push(0, i, i + 1);
+                        }}
+                        wallGeo1.setAttribute('position', new THREE.Float32BufferAttribute(vertices1, 3));
+                        wallGeo1.setIndex(indices1);
+                        wallGeo1.computeVertexNormals();
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
-                        wall1.rotation.z = sphereStart;
-                        wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // 3. Vertical Cut Wall 2
-                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        // 3. Vertical Cut Wall 2 (From North Pole down to Equator along phi = phiStart + phiLength)
+                        const wallGeo2 = new THREE.BufferGeometry();
+                        const vertices2 = [0, 0, 0]; // Origin (0,0,0)
+                        for (let i = 0; i <= segments; i++) {{
+                            const theta = (Math.PI / 2) * (i / segments);
+                            const y = R * Math.cos(theta);
+                            const r_xz = R * Math.sin(theta);
+                            const x = r_xz * Math.cos(phiStart + phiLength);
+                            const z = r_xz * Math.sin(phiStart + phiLength);
+                            vertices2.push(x, y, z);
+                        }}
+                        const indices2 = [];
+                        for (let i = 1; i <= segments; i++) {{
+                            indices2.push(0, i, i + 1);
+                        }}
+                        wallGeo2.setAttribute('position', new THREE.Float32BufferAttribute(vertices2, 3));
+                        wallGeo2.setIndex(indices2);
+                        wallGeo2.computeVertexNormals();
                         const wall2 = new THREE.Mesh(wallGeo2, wallMat);
-                        wall2.rotation.z = sphereStart + sphereArc;
-                        wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // --- STEP (iii): Concave Interior Bowl (Blocks Green Ground) ---
-
-                        // 4. Outer White Lower Hemisphere
+                        // 4. Outer White Lower Hemisphere (Intact outer bottom half)
                         const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                         const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(lowerMesh);
 
-                        // 5. Inner Concave Matte Bowl (Curves downwards, blocking green pitch)
-                        const innerLowerGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const innerLowerMesh = new THREE.Mesh(innerLowerGeo, innerMat);
-                        innerLowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(innerLowerMesh);
-                        
+                        // 5. TRUE CONCAVE INNER BOWL (Continuous matte dark interior lining)
+                        const innerBowlGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const innerBowlMesh = new THREE.Mesh(innerBowlGeo, innerMat);
+                        ballGroup.add(innerBowlMesh);
+
                         // 6. Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
@@ -710,9 +731,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oLabel.position.set(0.0, 0.45, 0.1);
                         ballGroup.add(oLabel);
                     }}
+
                     // 5. Pentagons and Seams (Strictly Filtered)
                     const decoGroup = new THREE.Group();
-                    decoGroup.rotation.set(0, 0, 0);
                     ballGroup.add(decoGroup);
 
                     const phi = (1 + Math.sqrt(5)) / 2;
@@ -741,7 +762,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     function isInsideWedge(v) {{
                         if (!isWedgeCut) return false;
-                        return (v.x > -0.1 && v.y > -0.2);
+                        // Exclude vertices in the upper cut quadrant (y > 0, x > -0.1, z > -0.1)
+                        return (v.y > 0 && v.x > -0.1 && v.z > -0.1);
                     }}
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
@@ -796,12 +818,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             emissiveIntensity: 2.0
                         }});
                         const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                        cTopSphere.position.set(0, 0, R);
+                        cTopSphere.position.set(0, R, 0);
                         ballGroup.add(cTopSphere);
 
                         const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
                         cLabel.scale.set(1.4, 0.44, 1);
-                        cLabel.position.set(-0.55, 0.32, R);
+                        cLabel.position.set(-0.55, R + 0.32, 0);
                         ballGroup.add(cLabel);
                     }}
                 }}
