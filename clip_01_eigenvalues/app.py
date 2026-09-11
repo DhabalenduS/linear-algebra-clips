@@ -816,9 +816,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ballGroup.add(pSphere);
 
                     const pLabel = makeCleanTextSprite("P (x, y, z)", "#dc2626");
-                    pLabel.scale.set(1.4, 0.44, 1);
+                    pLabel.scale.set(1.6, 0.44, 1);
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
+                    
                     
                     if (currentState === 11) {{
                         const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
