@@ -721,9 +721,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
 
                         // --- Center Point O(0, 0, 0) ---
-                        // --- Center Point O(0, 0, 0) placed on Intact White Surface ---
-                        const oPosSurface = new THREE.Vector3(-0.45 * R, 0.20 * R, 0.85 * R);
-
+                        // --- Center Point O(0, 0, 0) at Geometric Origin ---
                         const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
@@ -731,12 +729,13 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.copy(oPosSurface);
+                        oSphere.position.set(0, 0, 0);
                         ballGroup.add(oSphere);
 
-                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#f59e0b");
-                        oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.copy(oPosSurface).add(new THREE.Vector3(-0.15, 0.38, 0.05));
+                        // Crisp Royal Blue Label positioned snugly near Point O
+                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#1d4ed8");
+                        oLabel.scale.set(1.2, 0.38, 1);
+                        oLabel.position.set(-0.32, 0.25, 0.05);
                         ballGroup.add(oLabel);
                     }}
 
