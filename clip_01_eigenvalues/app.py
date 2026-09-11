@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slide 1-3 Implementation: True Concave Inner Bowl Cutaway
+# Slide 1-3 Implementation with Concave Inner Bowl (Click 5)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -510,19 +510,19 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMappingExposure = 1.15;
 
                 // Neutral Studio Lights
-                const ambient = new THREE.AmbientLight(0xffffff, 0.55);
+                const ambient = new THREE.AmbientLight(0xffffff, 0.65);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x0f172a, 0.40);
+                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.45);
                 scene.add(hemiLight);
 
-                const keyLight = new THREE.DirectionalLight(0xffffff, 1.75);
+                const keyLight = new THREE.DirectionalLight(0xffffff, 1.65);
                 keyLight.position.set(-10, 20, 16);
                 scene.add(keyLight);
 
-                const fillLight = new THREE.DirectionalLight(0xffffff, 0.50);
-                fillLight.position.set(10, 8, 10);
-                scene.add(fillLight);
+                const rimLight = new THREE.DirectionalLight(0xffffff, 0.70);
+                rimLight.position.set(10, 12, -8);
+                scene.add(rimLight);
 
                 // Helper: Soft Contact Shadow
                 function createContactShadowTexture() {{
@@ -589,12 +589,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 const R = ballRadius;
                 let ballGroup = null;
 
-                // Point P on front-right upper quadrant
+                // Cartesian Point Definitions
                 const pAngle = 38 * (Math.PI / 180);
                 const pLocal = new THREE.Vector3(
-                    R * Math.cos(pAngle) * 0.85,
-                    R * Math.sin(pAngle) * 0.75,
-                    R * 0.55
+                    R * Math.cos(pAngle),
+                    R * Math.sin(pAngle),
+                    0.15 * R
                 );
 
                 // ============================================================
@@ -616,9 +616,14 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     // 2. Ball Root Group
                     ballGroup = new THREE.Group();
                     ballGroup.position.copy(oPos);
+                    ballGroup.lookAt(camera.position);
                     scene.add(ballGroup);
 
+                    // Wedge Cut Parameters
                     const isWedgeCut = currentState >= 12;
+                    const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
+                    const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
+                    const sphereArc = Math.PI * 2 - wedgeSpan;
 
                     // Materials
                     const ballMat = new THREE.MeshStandardMaterial({{
@@ -628,10 +633,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         side: THREE.FrontSide
                     }});
 
+                    const wallMat = new THREE.MeshStandardMaterial({{
+                        color: 0x1c1917,
+                        roughness: 0.85,
+                        metalness: 0.0,
+                        side: THREE.DoubleSide
+                    }});
+
                     // Dark Matte Material for the Concave Interior Bladder Bowl
                     const innerBowlMat = new THREE.MeshStandardMaterial({{
-                        color: 0x0f172a, // Rich dark matte navy/charcoal
-                        roughness: 0.85,
+                        color: 0x1e293b, // Deep matte slate/charcoal
+                        roughness: 0.90,
                         metalness: 0.05,
                         side: THREE.BackSide
                     }});
@@ -639,24 +651,42 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     if (!isWedgeCut) {{
                         const ballGeo = new THREE.SphereGeometry(R, 64, 64);
                         const whiteBall = new THREE.Mesh(ballGeo, ballMat);
+                        whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        // 1. Outer Intact Lower Hemisphere (White outer bottom shell)
+                        // 1. Outer Intact Lower Hemisphere (White outer bottom)
                         const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                         const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
+                        lowerMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(lowerMesh);
 
-                        // 2. TRUE CONCAVE INNER BOWL (Inner lower hemisphere bladder - blocks green pitch)
-                        const innerBowlGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        // 2. CONCAVE INNER BOWL (Inner lower hemisphere bladder - blocks green pitch)
+                        const innerBowlGeo = new THREE.SphereGeometry(R * 0.996, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                         const innerBowlMesh = new THREE.Mesh(innerBowlGeo, innerBowlMat);
+                        innerBowlMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(innerBowlMesh);
 
-                        // 3. Upper Cut Shell (Quarter sector removed in the front)
-                        const upperCutGeo = new THREE.SphereGeometry(R, 64, 32, Math.PI * 0.45, Math.PI * 1.55, 0, Math.PI / 2);
-                        const upperCutMesh = new THREE.Mesh(upperCutGeo, ballMat);
-                        ballGroup.add(upperCutMesh);
+                        // 3. Upper Cut Shell (Only upper sector removed)
+                        const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
+                        const upperMesh = new THREE.Mesh(upperGeo, ballMat);
+                        upperMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(upperMesh);
 
-                        // 4. Center Point O(0, 0, 0)
+                        // 4. Upper Vertical Cut Wall 1
+                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        const wall1 = new THREE.Mesh(wallGeo1, wallMat);
+                        wall1.rotation.z = sphereStart;
+                        wall1.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall1);
+
+                        // 5. Upper Vertical Cut Wall 2
+                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        wall2.rotation.y = Math.PI / 2;
+                        ballGroup.add(wall2);
+
+                        // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
@@ -675,6 +705,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // 5. Pentagons and Seams (Strictly Filtered)
                     const decoGroup = new THREE.Group();
+                    decoGroup.rotation.set(0, 0, 0);
                     ballGroup.add(decoGroup);
 
                     const phi = (1 + Math.sqrt(5)) / 2;
@@ -703,8 +734,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     function isInsideWedge(v) {{
                         if (!isWedgeCut) return false;
-                        // Filter out upper-front quadrant
-                        return (v.y > 0 && v.x > -0.2 && v.z > -0.2);
+                        return (v.x > -0.1 && v.y > -0.2);
                     }}
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
@@ -759,12 +789,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             emissiveIntensity: 2.0
                         }});
                         const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                        cTopSphere.position.set(0, R, 0);
+                        cTopSphere.position.set(0, 0, R);
                         ballGroup.add(cTopSphere);
 
                         const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
                         cLabel.scale.set(1.4, 0.44, 1);
-                        cLabel.position.set(-0.55, R + 0.32, 0);
+                        cLabel.position.set(-0.55, 0.32, R);
                         ballGroup.add(cLabel);
                     }}
                 }}
