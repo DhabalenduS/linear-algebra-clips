@@ -676,11 +676,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(wall1);
 
                         // 3. Horizontal Boundary Wall 2 (Floor of the slice - stops cut from going deep)
-                        const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
-                        const wall2 = new THREE.Mesh(wallGeo2, wallMat);
-                        wall2.rotation.x = Math.PI / 2;
-                        wall2.rotation.z = sphereStart + sphereArc;
-                        ballGroup.add(wall2);
+                        //const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        //const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                        //wall2.rotation.x = Math.PI / 2;
+                        //wall2.rotation.z = sphereStart + sphereArc;
+                       // ballGroup.add(wall2);
                         // --- STEP (iii): Concave Interior Bowl (Blocks Green Ground) ---
 
                         // 4. Outer White Lower Hemisphere
