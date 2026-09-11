@@ -669,11 +669,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(upperMesh);
 
                         // 2. Vertical Cut Wall 1 (Top boundary of the slice)
-                        const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
-                        const wall1 = new THREE.Mesh(wallGeo1, wallMat);
-                        wall1.rotation.x = Math.PI / 2;
-                        wall1.rotation.z = sphereStart;
-                        ballGroup.add(wall1);
+                        //const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
+                        //const wall1 = new THREE.Mesh(wallGeo1, wallMat);
+                        //wall1.rotation.x = Math.PI / 2;
+                        //wall1.rotation.z = sphereStart;
+                        //ballGroup.add(wall1);
 
                         // 3. Horizontal Boundary Wall 2 (Floor of the slice - stops cut from going deep)
                         //const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
