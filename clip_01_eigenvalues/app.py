@@ -735,7 +735,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(oSphere);
 
                         // Crisp Royal Blue Label positioned snugly near Point O
-                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#1e3a8a");
+                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#ea580c");
                         oLabel.scale.set(1.3, 0.40, 1);
                         oLabel.position.set(-0.35, 0.28, 0.05);
                         ballGroup.add(oLabel);
