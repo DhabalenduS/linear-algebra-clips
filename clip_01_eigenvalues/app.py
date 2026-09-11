@@ -601,22 +601,25 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     sprite.renderOrder = 999;
                     return sprite;
                 }}
-                // Helper: Clean Text-Only Sprite (No pill box or border)
+                // Helper: Ultra-Prominent Text Sprite (Clean Navy with Crisp White Halo)
                 function makeCleanTextSprite(text, color) {{
                     const canvas = document.createElement('canvas');
                     canvas.width = 640;
                     canvas.height = 160;
                     const ctx = canvas.getContext('2d');
                     
-                    ctx.font = "bold italic 60px Georgia, serif";
+                    ctx.font = "bold italic 68px Georgia, serif";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    ctx.fillStyle = color || "#f59e0b";
                     
-                    // Subtle dark outline for high-contrast readability against white/dark surfaces
-                    ctx.strokeStyle = "rgba(15, 23, 42, 0.85)";
-                    ctx.lineWidth = 6;
+                    // 1. Crisp Pure White Halo Outline (Guarantees maximum contrast)
+                    ctx.strokeStyle = "#ffffff";
+                    ctx.lineWidth = 10;
+                    ctx.lineJoin = "round";
                     ctx.strokeText(text, 320, 80);
+                    
+                    // 2. Rich Prominent Navy Text
+                    ctx.fillStyle = color || "#1e3a8a";
                     ctx.fillText(text, 320, 80);
                     
                     const texture = new THREE.CanvasTexture(canvas);
@@ -629,7 +632,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     sprite.renderOrder = 999;
                     return sprite;
                 }}
-
                 const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
                 const R = ballRadius;
@@ -733,9 +735,9 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(oSphere);
 
                         // Crisp Royal Blue Label positioned snugly near Point O
-                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#1d4ed8");
-                        oLabel.scale.set(1.2, 0.38, 1);
-                        oLabel.position.set(-0.32, 0.25, 0.05);
+                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#1e3a8a");
+                        oLabel.scale.set(1.3, 0.40, 1);
+                        oLabel.position.set(-0.35, 0.28, 0.05);
                         ballGroup.add(oLabel);
                     }}
 
