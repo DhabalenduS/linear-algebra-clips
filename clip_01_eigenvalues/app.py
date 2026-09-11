@@ -660,26 +660,27 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }} else {{
                         // --- STEP (i): Sliced Upper Shell + Vertical Walls ---
                         
-                        // 1. Upper Cut Shell (Upper sector carved out)
+                        // --- CLEAN SHALLOW WEDGE SLICE (Stops at Equator) ---
+                        
+                        // 1. Sliced Shell (Upper quadrant carved out)
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
                         upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
-                        // 2. Vertical Cut Wall 1
+                        // 2. Vertical Cut Wall 1 (Top boundary of the slice)
                         const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
+                        wall1.rotation.x = Math.PI / 2;
                         wall1.rotation.z = sphereStart;
-                        wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // 3. Vertical Cut Wall 2
+                        // 3. Horizontal Boundary Wall 2 (Floor of the slice - stops cut from going deep)
                         const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                        wall2.rotation.x = Math.PI / 2;
                         wall2.rotation.z = sphereStart + sphereArc;
-                        wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
-
                         // --- STEP (iii): Concave Interior Bowl (Blocks Green Ground) ---
 
                         // 4. Outer White Lower Hemisphere
