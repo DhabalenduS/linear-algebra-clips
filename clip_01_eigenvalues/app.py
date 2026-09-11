@@ -625,6 +625,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
+                    // ============================================================
+                    // STEP (i) + STEP (iii): WEDGE CUT + CONCAVE INNER BOWL
+                    // ============================================================
+                    
                     // Materials
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
@@ -634,17 +638,17 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1c1917,
+                        color: 0x1c1917, // Pure Neutral Dark Charcoal for Cut Faces
                         roughness: 0.85,
                         metalness: 0.0,
                         side: THREE.DoubleSide
                     }});
 
-                    // Dark Matte Material for the Concave Interior Bladder Bowl
-                    const innerBowlMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1e293b, // Deep matte slate/charcoal
+                    // Inner Bladder Material for Concave Interior Bowl
+                    const innerMat = new THREE.MeshStandardMaterial({{
+                        color: 0x18181b, // Matte dark rubber interior
                         roughness: 0.90,
-                        metalness: 0.05,
+                        metalness: 0.0,
                         side: THREE.BackSide
                     }});
 
@@ -654,39 +658,43 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        // 1. Outer Intact Lower Hemisphere (White outer bottom)
-                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(lowerMesh);
-
-                        // 2. CONCAVE INNER BOWL (Inner lower hemisphere bladder - blocks green pitch)
-                        const innerBowlGeo = new THREE.SphereGeometry(R * 0.996, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const innerBowlMesh = new THREE.Mesh(innerBowlGeo, innerBowlMat);
-                        innerBowlMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(innerBowlMesh);
-
-                        // 3. Upper Cut Shell (Only upper sector removed)
+                        // --- STEP (i): Sliced Upper Shell + Vertical Walls ---
+                        
+                        // 1. Upper Cut Shell (Upper sector carved out)
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
                         upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
-                        // 4. Upper Vertical Cut Wall 1
+                        // 2. Vertical Cut Wall 1
                         const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // 5. Upper Vertical Cut Wall 2
+                        // 3. Vertical Cut Wall 2
                         const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const wall2 = new THREE.Mesh(wallGeo2, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // Center Point O(0, 0, 0)
+                        // --- STEP (iii): Concave Interior Bowl (Blocks Green Ground) ---
+
+                        // 4. Outer White Lower Hemisphere
+                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
+                        lowerMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(lowerMesh);
+
+                        // 5. Inner Concave Matte Bowl (Curves downwards, blocking green pitch)
+                        const innerLowerGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const innerLowerMesh = new THREE.Mesh(innerLowerGeo, innerMat);
+                        innerLowerMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(innerLowerMesh);
+                        
+                        // 6. Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
@@ -702,7 +710,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         oLabel.position.set(0.0, 0.45, 0.1);
                         ballGroup.add(oLabel);
                     }}
-
                     // 5. Pentagons and Seams (Strictly Filtered)
                     const decoGroup = new THREE.Group();
                     decoGroup.rotation.set(0, 0, 0);
