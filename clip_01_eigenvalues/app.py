@@ -820,6 +820,38 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
                     
+                    // ============================================================
+                    // 3D Vector Ray OP with Arrowhead (Connecting O to P)
+                    // ============================================================
+                    const pDir = pLocal.clone().normalize();
+                    const pDist = pLocal.length();
+
+                    const rayGroup = new THREE.Group();
+
+                    // 1. Solid 3D Ray Shaft (Cylinder)
+                    const headLength = 0.26;
+                    const shaftLength = pDist - headLength;
+                    const shaftGeo = new THREE.CylinderGeometry(0.032, 0.032, shaftLength, 16);
+                    const rayMat = new THREE.MeshStandardMaterial({{
+                        color: 0x06b6d4,
+                        emissive: 0x06b6d4,
+                        emissiveIntensity: 2.0,
+                        roughness: 0.25
+                    }});
+                    const shaft = new THREE.Mesh(shaftGeo, rayMat);
+                    shaft.position.set(0, shaftLength / 2, 0);
+                    rayGroup.add(shaft);
+
+                    // 2. 3D Arrowhead (Cone pointing directly at Point P)
+                    const headGeo = new THREE.ConeGeometry(0.09, headLength, 16);
+                    const head = new THREE.Mesh(headGeo, rayMat);
+                    head.position.set(0, shaftLength + (headLength / 2), 0);
+                    rayGroup.add(head);
+
+                    // Orient the entire ray along the vector OP
+                    rayGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pDir);
+                    ballGroup.add(rayGroup);
+                    
                     
                     if (currentState === 11) {{
                         const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
