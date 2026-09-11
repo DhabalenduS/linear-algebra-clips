@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slides 1-3 Complete Implementation (Clean Cutout & Visible Equatorial Floor)
+# Slide 1-3 Implementation with Concave Inner Bowl (Click 5)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -508,13 +508,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.15;
-                renderer.localClippingEnabled = true;
 
                 // Neutral Studio Lights
-                const ambient = new THREE.AmbientLight(0xffffff, 0.60);
+                const ambient = new THREE.AmbientLight(0xffffff, 0.65);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.40);
+                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.45);
                 scene.add(hemiLight);
 
                 const keyLight = new THREE.DirectionalLight(0xffffff, 1.65);
@@ -549,7 +548,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     const x = 30, y = 25, w = 580, h = 150, r = 75;
 
-                    // 1. Crisp White Pill Badge
                     ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
                     ctx.beginPath();
                     ctx.moveTo(x + r, y);
@@ -560,18 +558,15 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.closePath();
                     ctx.fill();
 
-                    // 2. Slate Border
                     ctx.strokeStyle = '#64748b';
                     ctx.lineWidth = 6;
                     ctx.stroke();
 
-                    // 3. Vibrant Indicator Dot
                     ctx.fillStyle = dotColor || '#2563eb';
                     ctx.beginPath();
                     ctx.arc(x + 65, y + r, 24, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // 4. Bold Typography
                     ctx.font = "bold italic 60px Georgia, serif";
                     ctx.textAlign = "left";
                     ctx.textBaseline = "middle";
@@ -626,24 +621,31 @@ elif 8 <= st.session_state.presentation_state <= 18:
 
                     // Wedge Cut Parameters
                     const isWedgeCut = currentState >= 12;
-                    const pAngle = 38 * (Math.PI / 180); 
                     const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
-                    // 3. White Ball Base Shell
+                    // Materials
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
                         metalness: 0.10,
-                        side: THREE.DoubleSide
+                        side: THREE.FrontSide
                     }});
 
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x1c1917, // Pure Neutral Dark Charcoal
+                        color: 0x1c1917,
                         roughness: 0.85,
                         metalness: 0.0,
                         side: THREE.DoubleSide
+                    }});
+
+                    // Dark Matte Material for the Concave Interior Bladder Bowl
+                    const innerBowlMat = new THREE.MeshStandardMaterial({{
+                        color: 0x1e293b, // Deep matte slate/charcoal
+                        roughness: 0.90,
+                        metalness: 0.05,
+                        side: THREE.BackSide
                     }});
 
                     if (!isWedgeCut) {{
@@ -652,39 +654,38 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         whiteBall.rotation.x = Math.PI / 2;
                         ballGroup.add(whiteBall);
                     }} else {{
-                        // 1. Intact Lower Hemisphere (Blocks the green pitch completely)
+                        // 1. Outer Intact Lower Hemisphere (White outer bottom)
                         const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                         const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
                         lowerMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(lowerMesh);
 
-                        // 2. Upper Cut Shell (Only upper sector removed)
+                        // 2. CONCAVE INNER BOWL (Inner lower hemisphere bladder - blocks green pitch)
+                        const innerBowlGeo = new THREE.SphereGeometry(R * 0.996, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const innerBowlMesh = new THREE.Mesh(innerBowlGeo, innerBowlMat);
+                        innerBowlMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(innerBowlMesh);
+
+                        // 3. Upper Cut Shell (Only upper sector removed)
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
                         upperMesh.rotation.x = Math.PI / 2;
                         ballGroup.add(upperMesh);
 
-                        // 3. Upper Vertical Wall 1 (Quarter circle only)
+                        // 4. Upper Vertical Cut Wall 1
                         const wallGeo1 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.z = sphereStart;
                         wall1.rotation.y = Math.PI / 2;
                         ballGroup.add(wall1);
 
-                        // 4. Upper Vertical Wall 2 (Quarter circle only)
+                        // 5. Upper Vertical Cut Wall 2
                         const wallGeo2 = new THREE.CircleGeometry(R, 64, 0, Math.PI / 2);
                         const wall2 = new THREE.Mesh(wallGeo2, wallMat);
                         wall2.rotation.z = sphereStart + sphereArc;
                         wall2.rotation.y = Math.PI / 2;
                         ballGroup.add(wall2);
 
-                        // 5. Solid Horizontal Floor at Equator (Dark Stage)
-                        const floorGeo = new THREE.CircleGeometry(R, 64, sphereStart + sphereArc, wedgeSpan);
-                        const floorMesh = new THREE.Mesh(floorGeo, wallMat);
-                        floorMesh.rotation.z = Math.PI / 2;
-                        floorMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(floorMesh);
-                        
                         // Center Point O(0, 0, 0)
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
@@ -731,10 +732,8 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         linewidth: 2
                     }});
 
-                    // Precise exclusion: any element in the upper-right cut zone
                     function isInsideWedge(v) {{
                         if (!isWedgeCut) return false;
-                        // The cut occupies the quadrant where X > -0.1 and Y > -0.2
                         return (v.x > -0.1 && v.y > -0.2);
                     }}
                     const pentagonRadius = 0.39;
@@ -767,7 +766,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 // CLICK 4 & 5: Points C' and P(x, y, z)
                 // ============================================================
                 if (currentState >= 11 && ballGroup) {{
-                    // Point P(x, y, z) - At Horizon in Middle of Wedge Cut
                     const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
                     const pMat = new THREE.MeshStandardMaterial({{
                         color: 0x06b6d4,
@@ -783,7 +781,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
                     ballGroup.add(pLabel);
 
-                    // Point C'(0, R, 0) - Only in Click 4 (currentState == 11)
                     if (currentState === 11) {{
                         const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
                         const cTopMat = new THREE.MeshStandardMaterial({{
