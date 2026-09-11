@@ -684,10 +684,10 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         // --- STEP (iii): Concave Interior Bowl (Blocks Green Ground) ---
 
                         // 4. Outer White Lower Hemisphere
-                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(lowerMesh);
+                        //const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        //const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
+                        //lowerMesh.rotation.x = Math.PI / 2;
+                        //ballGroup.add(lowerMesh);
 
                         // 5. Inner Concave Matte Bowl (Curves downwards, blocking green pitch)
                        // const innerLowerGeo = new THREE.SphereGeometry(R * 0.995, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
