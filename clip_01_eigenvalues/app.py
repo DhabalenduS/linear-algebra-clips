@@ -601,6 +601,34 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     sprite.renderOrder = 999;
                     return sprite;
                 }}
+                // Helper: Clean Text-Only Sprite (No pill box or border)
+                function makeCleanTextSprite(text, color) {{
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 640;
+                    canvas.height = 160;
+                    const ctx = canvas.getContext('2d');
+                    
+                    ctx.font = "bold italic 60px Georgia, serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = color || "#f59e0b";
+                    
+                    // Subtle dark outline for high-contrast readability against white/dark surfaces
+                    ctx.strokeStyle = "rgba(15, 23, 42, 0.85)";
+                    ctx.lineWidth = 6;
+                    ctx.strokeText(text, 320, 80);
+                    ctx.fillText(text, 320, 80);
+                    
+                    const texture = new THREE.CanvasTexture(canvas);
+                    const spriteMat = new THREE.SpriteMaterial({{
+                        map: texture,
+                        depthTest: false,
+                        depthWrite: false
+                    }});
+                    const sprite = new THREE.Sprite(spriteMat);
+                    sprite.renderOrder = 999;
+                    return sprite;
+                }}
 
                 const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
@@ -693,19 +721,22 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         }}
 
                         // --- Center Point O(0, 0, 0) ---
-                        const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
+                        // --- Center Point O(0, 0, 0) placed on Intact White Surface ---
+                        const oPosSurface = new THREE.Vector3(-0.45 * R, 0.20 * R, 0.85 * R);
+
+                        const oGeo = new THREE.SphereGeometry(0.12, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
                             color: 0xfbbf24,
                             emissive: 0xf59e0b,
                             emissiveIntensity: 3.0
                         }});
                         const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0);
+                        oSphere.position.copy(oPosSurface);
                         ballGroup.add(oSphere);
 
-                        const oLabel = makeMathTextSprite("O (0, 0, 0)", "#f59e0b");
+                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#f59e0b");
                         oLabel.scale.set(1.4, 0.44, 1);
-                        oLabel.position.set(0.0, 0.45, 0.1);
+                        oLabel.position.copy(oPosSurface).add(new THREE.Vector3(-0.15, 0.38, 0.05));
                         ballGroup.add(oLabel);
                     }}
 
