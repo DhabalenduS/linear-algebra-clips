@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slide 1-3 Implementation (Cleaned Click 4 & 2R Slow-Motion Inflation)
+# Slide 1-3 Implementation (Perfected 3D Concave Cavity & Uniform Outer Shell)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -467,7 +467,7 @@ elif 8 <= st.session_state.presentation_state <= 25:
                 renderer.toneMappingExposure = 1.15;
 
                 // High-Depth 3D Sculpting Lights
-                const ambient = new THREE.AmbientLight(0xffffff, 0.36);
+                const ambient = new THREE.AmbientLight(0xffffff, 0.38);
                 scene.add(ambient);
 
                 const hemiLight = new THREE.HemisphereLight(0xffffff, 0x0f172a, 0.28);
@@ -487,8 +487,8 @@ elif 8 <= st.session_state.presentation_state <= 25:
                     sCanvas.height = 256;
                     const sCtx = sCanvas.getContext('2d');
                     const grad = sCtx.createRadialGradient(128, 128, 15, 128, 128, 120);
-                    grad.addColorStop(0, 'rgba(10, 25, 10, 0.75)');
-                    grad.addColorStop(0.5, 'rgba(15, 35, 15, 0.35)');
+                    grad.addColorStop(0, 'rgba(10, 25, 10, 0.70)');
+                    grad.addColorStop(0.5, 'rgba(15, 35, 15, 0.25)');
                     grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
                     sCtx.fillStyle = grad;
                     sCtx.fillRect(0, 0, 256, 256);
@@ -502,9 +502,9 @@ elif 8 <= st.session_state.presentation_state <= 25:
                     const ctx = c.getContext('2d');
                     const grad = ctx.createRadialGradient(256, 340, 30, 256, 256, 250);
                     grad.addColorStop(0, '#94a3b8');
-                    grad.addColorStop(0.55, '#475569');
-                    grad.addColorStop(0.85, '#1e293b');
-                    grad.addColorStop(1.0, '#0f172a');
+                    grad.addColorStop(0.50, '#475569');
+                    grad.addColorStop(0.80, '#1e293b');
+                    grad.addColorStop(1.0, '#0a0f1d');
                     ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, 512, 512);
                     return new THREE.CanvasTexture(c);
@@ -566,13 +566,13 @@ elif 8 <= st.session_state.presentation_state <= 25:
                 // CONSTRUCT 3D SCENE
                 // Click 3 (State 10): 3D Football appears
                 // Click 4 (State 11): Point P(x, y, z) appears on surface
-                // Click 5 (State 12): Wedge Cut + Concave Inner Bowl + Point O revealed
+                // Click 5 (State 12): Wedge Cut + Deep Concave Inner Bowl + Point O
                 // Click 6 (State 13): Ray OP appears with arrowhead
-                // Click 7 (State 14): Smooth Pumping Animation (2R Scale, 6.4s)
+                // Click 7 (State 14): Smooth Pumping Animation (2R Scale, 9.0s)
                 // ============================================================
                 if (currentState >= 10) {{
-                    // 1. Soft Contact Shadow
-                    const shadowGeo = new THREE.PlaneGeometry(R * 2.2, R * 2.2);
+                    // 1. Soft Contact Shadow (Depth-write off to prevent clipping)
+                    const shadowGeo = new THREE.PlaneGeometry(R * 2.5, R * 2.5);
                     const shadowMat = new THREE.MeshBasicMaterial({{
                         map: createContactShadowTexture(),
                         transparent: true,
@@ -580,7 +580,7 @@ elif 8 <= st.session_state.presentation_state <= 25:
                     }});
                     shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
                     shadowMesh.rotation.x = -Math.PI / 2;
-                    shadowMesh.position.set(0, 0.02, 0);
+                    shadowMesh.position.set(0, 0.01, 0);
                     scene.add(shadowMesh);
 
                     // 2. Root Group (Center O)
@@ -598,6 +598,7 @@ elif 8 <= st.session_state.presentation_state <= 25:
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
+                    // Materials
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf1f5f9,
                         roughness: 0.38,
@@ -614,9 +615,9 @@ elif 8 <= st.session_state.presentation_state <= 25:
 
                     const innerMat = new THREE.MeshStandardMaterial({{
                         map: createCavityTexture(),
-                        roughness: 0.75,
+                        roughness: 0.70,
                         metalness: 0.05,
-                        side: THREE.DoubleSide
+                        side: THREE.BackSide  // STRICTLY inside cavity
                     }});
 
                     if (!isWedgeCut) {{
@@ -625,32 +626,38 @@ elif 8 <= st.session_state.presentation_state <= 25:
                         whiteBall.rotation.x = Math.PI / 2;
                         expandableBallBody.add(whiteBall);
                     }} else {{
-                        // 1. Upper Sliced Outer Shell (White Leather)
+                        // 1. Upper Sliced Shell (Uniform White Leather)
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
                         upperMesh.rotation.x = Math.PI / 2;
                         expandableBallBody.add(upperMesh);
 
-                        // 2. Lower Outer Shell (Uniform White Leather - Entire Bottom Hemisphere)
-                        const lowerOuterGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerOuterMesh = new THREE.Mesh(lowerOuterGeo, ballMat);
-                        lowerOuterMesh.rotation.x = Math.PI / 2;
-                        expandableBallBody.add(lowerOuterMesh);
+                        // 2. Lower Hemisphere Shell (Uniform White Leather - Full 360 Outside)
+                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
+                        lowerMesh.rotation.x = Math.PI / 2;
+                        expandableBallBody.add(lowerMesh);
 
-                        // 3. Interior Cut Floor with Cavity Depth Shading (Inside Cut Only)
-                        const cutFloorGeo = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
-                        const cutFloor = new THREE.Mesh(cutFloorGeo, innerMat);
-                        cutFloor.position.set(0, 0, 0);
-                        cutFloor.rotation.z = sphereStart;
-                        expandableBallBody.add(cutFloor);
+                        // 3. Deep Concave Inner Bowl (Inside Cut Only, BackSide ensures no leak)
+                        const backGeo = new THREE.SphereGeometry(R * 0.998, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const backMesh = new THREE.Mesh(backGeo, innerMat);
+                        backMesh.rotation.x = Math.PI / 2;
+                        expandableBallBody.add(backMesh);
 
-                        // 4. Cut Boundary Framing Wall
+                        // 4. Cut Framing Wall Plane 1 (Vertical)
                         const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.x = Math.PI / 2;
                         wall1.rotation.z = sphereStart;
                         expandableBallBody.add(wall1);
-                        
+
+                        // 5. Cut Framing Wall Plane 2 (Horizontal/Radial)
+                        const wallGeo2 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
+                        const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                        wall2.rotation.x = Math.PI / 2;
+                        wall2.rotation.z = sphereStart + sphereArc;
+                        expandableBallBody.add(wall2);
+
                         // Click 5: Center Point O(0, 0, 0) & Label Revealed inside Cavity
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
@@ -783,8 +790,8 @@ elif 8 <= st.session_state.presentation_state <= 25:
                     if (currentState >= 14) {{
                         const pPrimeGeo = new THREE.SphereGeometry(0.10, 32, 32);
                         const pPrimeMat = new THREE.MeshStandardMaterial({{
-                            color: 0x10b981,
-                            emissive: 0x10b981,
+                            color: 0x06b6d4,
+                            emissive: 0x06b6d4,
                             emissiveIntensity: 2.5
                         }});
                         pPrimeSphere = new THREE.Mesh(pPrimeGeo, pPrimeMat);
