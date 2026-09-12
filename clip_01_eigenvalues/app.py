@@ -784,7 +784,7 @@ elif 8 <= st.session_state.presentation_state <= 25:
                         pPrimeSphere.position.copy(pLocalInitial);
                         ballRootGroup.add(pPrimeSphere);
 
-                        pPrimeLabel = makeCleanTextSprite("P' (x', y', z')", "#15803d");
+                        pPrimeLabel = makeCleanTextSprite("P' (x', y', z')", "#dc2626");
                         pPrimeLabel.scale.set(1.9, 0.44, 1);
                         pPrimeLabel.position.copy(pLocalInitial).add(new THREE.Vector3(0.76, 0.32, 0.0));
                         ballRootGroup.add(pPrimeLabel);
