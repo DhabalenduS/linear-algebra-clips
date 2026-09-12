@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slide 1-3 Implementation with Concave Inner Bowl (Click 5 & 6)
+# Slide 1-3 Implementation with Refined Click Sequence
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -163,45 +163,6 @@ st.markdown(
         box-sizing: border-box;
     }
 
-    .panel-section-title {
-        font-size: clamp(1.2rem, 1.6vw, 1.8rem);
-        font-weight: 700;
-        color: #1e3a8a;
-        margin-top: 1.5vh;
-        margin-bottom: 1vh;
-        border-bottom: 2px solid #bfdbfe;
-        padding-bottom: 4px;
-    }
-
-    .panel-bullet {
-        font-size: clamp(0.95rem, 1.22vw, 1.35rem);
-        line-height: 1.45;
-        color: #1e293b;
-        margin-bottom: 1.4vh;
-        display: flex;
-        align-items: flex-start;
-    }
-
-    .panel-bullet-icon {
-        color: #2563eb;
-        margin-right: 8px;
-        font-weight: 700;
-    }
-
-    .math-term {
-        font-weight: 700;
-        color: #1d4ed8;
-        background: #eff6ff;
-        padding: 1px 6px;
-        border-radius: 4px;
-        border: 1px solid #dbeafe;
-    }
-
-    .highlight-keyword {
-        font-weight: 700;
-        color: #b91c1c;
-    }
-
     iframe {
         position: fixed !important;
         left: 43vw !important;
@@ -232,10 +193,10 @@ st.markdown(
 )
 
 # ============================================================
-# ADVANCE PRESENTATION
+# ADVANCE PRESENTATION (Expanded State Budget)
 # ============================================================
 
-if st.session_state.presentation_state < 18:
+if st.session_state.presentation_state < 25:
     if st.button("advance", key="advance_button"):
         st.session_state.presentation_state += 1
         st.rerun()
@@ -351,7 +312,7 @@ elif 2 <= st.session_state.presentation_state <= 7:
 # STATES 8+ - SLIDE 3 (VISUALIZATION)
 # ============================================================
 
-elif 8 <= st.session_state.presentation_state <= 18:
+elif 8 <= st.session_state.presentation_state <= 25:
     state = st.session_state.presentation_state
 
     # Render Slide 3 Base
@@ -387,7 +348,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     background: transparent;
                     position: relative;
                 }}
-                /* LAYER 1: Permanent 2D Pitch Background */
                 #pitch2d {{
                     position: absolute;
                     inset: 0;
@@ -396,7 +356,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     z-index: 1;
                     display: block;
                 }}
-                /* LAYER 2: Transparent 3D Foreground */
                 #canvas3d {{
                     position: absolute;
                     inset: 0;
@@ -424,7 +383,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     pCanvas.height = 1536;
                     const ctx = pCanvas.getContext('2d');
 
-                    // Turf Stripes
                     const stripes = 10;
                     const sh = 1536 / stripes;
                     for (let i = 0; i < stripes; i++) {{
@@ -432,7 +390,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ctx.fillRect(0, i * sh, 2048, sh);
                     }}
 
-                    // Outer Boundary & Lines
                     const mx = 110, my = 140;
                     const pw = 2048 - (2 * mx);
                     const ph = 1536 - (2 * my);
@@ -509,7 +466,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.15;
 
-                // Neutral Studio Lights
+                // Lighting
                 const ambient = new THREE.AmbientLight(0xffffff, 0.65);
                 scene.add(ambient);
 
@@ -524,7 +481,6 @@ elif 8 <= st.session_state.presentation_state <= 18:
                 rimLight.position.set(10, 12, -8);
                 scene.add(rimLight);
 
-                // Helper: Soft Contact Shadow
                 function createContactShadowTexture() {{
                     const sCanvas = document.createElement('canvas');
                     sCanvas.width = 256;
@@ -539,69 +495,21 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     return new THREE.CanvasTexture(sCanvas);
                 }}
 
-                // Helper: Cavity Shadow Texture for True 3D Concave Depth
                 function createCavityTexture() {{
                     const c = document.createElement('canvas');
                     c.width = 512;
                     c.height = 512;
                     const ctx = c.getContext('2d');
-                    
                     const grad = ctx.createRadialGradient(256, 340, 30, 256, 256, 250);
-                    grad.addColorStop(0, '#94a3b8');   // Soft illuminated inner floor
-                    grad.addColorStop(0.55, '#475569'); // Mid-depth slate
-                    grad.addColorStop(0.85, '#1e293b'); // Rich interior cavity shadow
-                    grad.addColorStop(1.0, '#0f172a');  // Deep shadow under the upper rim
-                    
+                    grad.addColorStop(0, '#94a3b8');
+                    grad.addColorStop(0.55, '#475569');
+                    grad.addColorStop(0.85, '#1e293b');
+                    grad.addColorStop(1.0, '#0f172a');
                     ctx.fillStyle = grad;
                     ctx.fillRect(0, 0, 512, 512);
                     return new THREE.CanvasTexture(c);
                 }}
 
-                // Helper: Compact TV-Grade Math Pill Badge
-                function makeMathTextSprite(text, dotColor) {{
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 640;
-                    canvas.height = 200;
-                    const ctx = canvas.getContext('2d');
-
-                    const x = 30, y = 25, w = 580, h = 150, r = 75;
-
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
-                    ctx.beginPath();
-                    ctx.moveTo(x + r, y);
-                    ctx.lineTo(x + w - r, y);
-                    ctx.arc(x + w - r, y + r, r, -Math.PI / 2, Math.PI / 2);
-                    ctx.lineTo(x + r, y + h);
-                    ctx.arc(x + r, y + r, r, Math.PI / 2, -Math.PI / 2);
-                    ctx.closePath();
-                    ctx.fill();
-
-                    ctx.strokeStyle = '#64748b';
-                    ctx.lineWidth = 6;
-                    ctx.stroke();
-
-                    ctx.fillStyle = dotColor || '#2563eb';
-                    ctx.beginPath();
-                    ctx.arc(x + 65, y + r, 24, 0, Math.PI * 2);
-                    ctx.fill();
-
-                    ctx.font = "bold italic 60px Georgia, serif";
-                    ctx.textAlign = "left";
-                    ctx.textBaseline = "middle";
-                    ctx.fillStyle = "#0f172a";
-                    ctx.fillText(text, x + 115, y + r + 2);
-
-                    const texture = new THREE.CanvasTexture(canvas);
-                    const spriteMat = new THREE.SpriteMaterial({{
-                        map: texture,
-                        depthTest: false,
-                        depthWrite: false
-                    }});
-                    const sprite = new THREE.Sprite(spriteMat);
-                    sprite.renderOrder = 999;
-                    return sprite;
-                }}
-                // Helper: Ultra-Prominent Text Sprite (Clean Navy with Crisp White Halo)
                 function makeCleanTextSprite(text, color) {{
                     const canvas = document.createElement('canvas');
                     canvas.width = 640;
@@ -612,13 +520,11 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     
-                    // 1. Crisp Pure White Halo Outline (Guarantees maximum contrast)
                     ctx.strokeStyle = "#ffffff";
                     ctx.lineWidth = 10;
                     ctx.lineJoin = "round";
                     ctx.strokeText(text, 320, 80);
                     
-                    // 2. Rich Prominent Navy Text
                     ctx.fillStyle = color || "#1e3a8a";
                     ctx.fillText(text, 320, 80);
                     
@@ -632,48 +538,66 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     sprite.renderOrder = 999;
                     return sprite;
                 }}
+
                 const ballRadius = 1.35;
                 const oPos = new THREE.Vector3(0, ballRadius, 0);
                 const R = ballRadius;
-                let ballGroup = null;
 
-                // Cartesian Point Definitions
+                // Cartesian direction for Point P
                 const pAngle = 38 * (Math.PI / 180);
-                const pLocal = new THREE.Vector3(
-                    R * Math.cos(pAngle),
-                    R * Math.sin(pAngle),
-                    0.15 * R
-                );
+                const pUnitDir = new THREE.Vector3(
+                    Math.cos(pAngle),
+                    Math.sin(pAngle),
+                    0.15
+                ).normalize();
+
+                const pLocalInitial = pUnitDir.clone().multiplyScalar(R);
+
+                let ballRootGroup = null;
+                let expandableBallBody = null;
+                let rayGroup = null;
+                let rayShaft = null;
+                let rayHead = null;
+                let pPrimeSphere = null;
+                let pPrimeLabel = null;
+                let shadowMesh = null;
 
                 // ============================================================
-                // CLICK 3, 4, 5, 6: Unified Geometric Construction
+                // CONSTRUCT 3D SCENE
+                // Click 3 (State 10): 3D Football appears
+                // Click 4 (State 11): Point O & Point P appear
+                // Click 5 (State 12): Wedge Cut + Concave Inner Bowl
+                // Click 6 (State 13): Ray OP appears with arrowhead
+                // Click 7 (State 14): Smooth Pumping Animation
                 // ============================================================
                 if (currentState >= 10) {{
-                    // 1. Soft Contact Shadow on Pitch
+                    // 1. Soft Contact Shadow
                     const shadowGeo = new THREE.PlaneGeometry(R * 2.2, R * 2.2);
                     const shadowMat = new THREE.MeshBasicMaterial({{
                         map: createContactShadowTexture(),
                         transparent: true,
                         depthWrite: false
                     }});
-                    const shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+                    shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
                     shadowMesh.rotation.x = -Math.PI / 2;
                     shadowMesh.position.set(0, 0.02, 0);
                     scene.add(shadowMesh);
 
-                    // 2. Ball Root Group
-                    ballGroup = new THREE.Group();
-                    ballGroup.position.copy(oPos);
-                    ballGroup.lookAt(camera.position);
-                    scene.add(ballGroup);
+                    // 2. Root Group (Center O)
+                    ballRootGroup = new THREE.Group();
+                    ballRootGroup.position.copy(oPos);
+                    ballRootGroup.lookAt(camera.position);
+                    scene.add(ballRootGroup);
 
-                    // Wedge Cut Parameters
-                    const isWedgeCut = currentState >= 12;
+                    // 3. Expandable Ball Body
+                    expandableBallBody = new THREE.Group();
+                    ballRootGroup.add(expandableBallBody);
+
+                    const isWedgeCut = currentState >= 12; // Click 5
                     const wedgeSpan = isWedgeCut ? (90 * Math.PI / 180) : 0;
                     const sphereStart = pAngle + (wedgeSpan / 2) + Math.PI;
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
-                    // Materials
                     const ballMat = new THREE.MeshStandardMaterial({{
                         color: 0xf8fafc,
                         roughness: 0.18,
@@ -682,13 +606,12 @@ elif 8 <= st.session_state.presentation_state <= 18:
                     }});
 
                     const wallMat = new THREE.MeshStandardMaterial({{
-                        color: 0x475569, // Clean slate cut-edge boundary
+                        color: 0x475569,
                         roughness: 0.50,
                         metalness: 0.10,
                         side: THREE.DoubleSide
                     }});
 
-                    // Inner Bladder Material with 3D Cavity Shadow
                     const innerMat = new THREE.MeshStandardMaterial({{
                         map: createCavityTexture(),
                         roughness: 0.75,
@@ -700,52 +623,31 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         const ballGeo = new THREE.SphereGeometry(R, 64, 64);
                         const whiteBall = new THREE.Mesh(ballGeo, ballMat);
                         whiteBall.rotation.x = Math.PI / 2;
-                        ballGroup.add(whiteBall);
+                        expandableBallBody.add(whiteBall);
                     }} else {{
-                        // --- Sliced Upper Shell (Click 5 / State >= 12) ---
+                        // Click 5: Upper Sliced Shell
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
                         upperMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(upperMesh);
+                        expandableBallBody.add(upperMesh);
 
-                        // --- Rear Concave Inner Bowl + Framing Wall (Click 6 / State >= 13) ---
-                        
+                        // Click 5: Concave Inner Bladder Bowl
                         const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
                         const backMesh = new THREE.Mesh(backGeo, innerMat);
                         backMesh.rotation.x = Math.PI / 2;
-                        ballGroup.add(backMesh);
+                        expandableBallBody.add(backMesh);
 
+                        // Click 5: Framing Wall
                         const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.x = Math.PI / 2;
                         wall1.rotation.z = sphereStart;
-                        ballGroup.add(wall1);
-                        
-
-                        // --- Center Point O(0, 0, 0) ---
-                        // --- Center Point O(0, 0, 0) at Geometric Origin ---
-                        const oGeo = new THREE.SphereGeometry(0.15, 32, 32);
-                        const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0x06b6d4,
-                            emissive: 0x06b6d4,
-                            emissiveIntensity: 2.5
-                        }});
-                        const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0);
-                        ballGroup.add(oSphere);
-
-                        // Crisp Royal Blue Label positioned snugly near Point O
-                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#dc2626");
-                        oLabel.scale.set(1.3, 0.40, 1);
-                        oLabel.position.set(-0.35, 0.28, 0.05);
-                        ballGroup.add(oLabel);
-                        
+                        expandableBallBody.add(wall1);
                     }}
 
-                    // 5. Pentagons and Seams (Strictly Filtered)
+                    // Classic Pentagon Seams
                     const decoGroup = new THREE.Group();
-                    decoGroup.rotation.set(0, 0, 0);
-                    ballGroup.add(decoGroup);
+                    expandableBallBody.add(decoGroup);
 
                     const phi = (1 + Math.sqrt(5)) / 2;
                     const rawVerts = [
@@ -775,6 +677,7 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         if (!isWedgeCut) return false;
                         return (v.x > -0.1 && v.y > -0.2);
                     }}
+
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
                         if (!isInsideWedge(v)) {{
@@ -799,84 +702,148 @@ elif 8 <= st.session_state.presentation_state <= 18:
                             }}
                         }}
                     }}
-                }}
 
-                // ============================================================
-                // CLICK 4 & 5: Points C' and P(x, y, z)
-                // ============================================================
-                if (currentState >= 11 && ballGroup) {{
-                    const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
-                    const pMat = new THREE.MeshStandardMaterial({{
-                        color: 0x06b6d4,
-                        emissive: 0x06b6d4,
-                        emissiveIntensity: 2.5
-                    }});
-                    const pSphere = new THREE.Mesh(pGeo, pMat);
-                    pSphere.position.copy(pLocal);
-                    ballGroup.add(pSphere);
-
-                    const pLabel = makeCleanTextSprite("P (x, y, z)", "#dc2626");
-                    pLabel.scale.set(1.8, 0.44, 1);
-                    pLabel.position.copy(pLocal).add(new THREE.Vector3(0.72, 0.32, 0.0));
-                    ballGroup.add(pLabel);
-                    
-                    // ============================================================
-                    // 3D Vector Ray OP with Arrowhead (Connecting O to P)
-                    // ============================================================
-                    const pDir = pLocal.clone().normalize();
-                    const pDist = pLocal.length();
-
-                    const rayGroup = new THREE.Group();
-
-                    // 1. Solid 3D Ray Shaft (Cylinder)
-                    const headLength = 0.26;
-                    const shaftLength = pDist - headLength;
-                    const shaftGeo = new THREE.CylinderGeometry(0.032, 0.032, shaftLength, 16);
-                    const rayMat = new THREE.MeshStandardMaterial({{
-                        color: 0x06b6d4,
-                        emissive: 0x06b6d4,
-                        emissiveIntensity: 2.0,
-                        roughness: 0.25
-                    }});
-                    const shaft = new THREE.Mesh(shaftGeo, rayMat);
-                    shaft.position.set(0, shaftLength / 2, 0);
-                    rayGroup.add(shaft);
-
-                    // 2. 3D Arrowhead (Cone pointing directly at Point P)
-                    const headGeo = new THREE.ConeGeometry(0.09, headLength, 16);
-                    const head = new THREE.Mesh(headGeo, rayMat);
-                    head.position.set(0, shaftLength + (headLength / 2), 0);
-                    rayGroup.add(head);
-
-                    // Orient the entire ray along the vector OP
-                    rayGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pDir);
-                    ballGroup.add(rayGroup);
-                    
-                    
-                    if (currentState === 11) {{
-                        const cTopGeo = new THREE.SphereGeometry(0.09, 32, 32);
-                        const cTopMat = new THREE.MeshStandardMaterial({{
-                            color: 0xe11d48,
-                            emissive: 0xe11d48,
-                            emissiveIntensity: 2.0
+                    // ========================================================
+                    // CLICK 4 (State >= 11): Fixed Point O & Fixed Point P
+                    // ========================================================
+                    if (currentState >= 11) {{
+                        // Center Point O (0,0,0)
+                        const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
+                        const oMat = new THREE.MeshStandardMaterial({{
+                            color: 0x06b6d4,
+                            emissive: 0x06b6d4,
+                            emissiveIntensity: 2.5
                         }});
-                        const cTopSphere = new THREE.Mesh(cTopGeo, cTopMat);
-                        cTopSphere.position.set(0, 0, R);
-                        ballGroup.add(cTopSphere);
+                        const oSphere = new THREE.Mesh(oGeo, oMat);
+                        oSphere.position.set(0, 0, 0);
+                        ballRootGroup.add(oSphere);
 
-                        const cLabel = makeMathTextSprite("C'(0, R, 0)", "#e11d48");
-                        cLabel.scale.set(1.4, 0.44, 1);
-                        cLabel.position.set(-0.55, 0.32, R);
-                        ballGroup.add(cLabel);
+                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#dc2626");
+                        oLabel.scale.set(1.3, 0.40, 1);
+                        oLabel.position.set(-0.35, 0.28, 0.05);
+                        ballRootGroup.add(oLabel);
+
+                        // Original Point P(x, y, z) - Fixed in Space
+                        const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                        const pMat = new THREE.MeshStandardMaterial({{
+                            color: 0x06b6d4,
+                            emissive: 0x06b6d4,
+                            emissiveIntensity: 2.5
+                        }});
+                        const pSphere = new THREE.Mesh(pGeo, pMat);
+                        pSphere.position.copy(pLocalInitial);
+                        ballRootGroup.add(pSphere);
+
+                        const pLabel = makeCleanTextSprite("P (x, y, z)", "#dc2626");
+                        pLabel.scale.set(1.8, 0.44, 1);
+                        pLabel.position.copy(pLocalInitial).add(new THREE.Vector3(0.72, 0.32, 0.0));
+                        ballRootGroup.add(pLabel);
+                    }}
+
+                    // ========================================================
+                    // CLICK 6 (State >= 13): Ray OP with Arrowhead Appears
+                    // ========================================================
+                    if (currentState >= 13) {{
+                        rayGroup = new THREE.Group();
+                        rayGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), pUnitDir);
+                        ballRootGroup.add(rayGroup);
+
+                        const headLength = 0.26;
+                        const initialShaftLength = R - headLength;
+
+                        // Ray Shaft
+                        const shaftGeo = new THREE.CylinderGeometry(0.032, 0.032, 1, 16);
+                        const rayMat = new THREE.MeshStandardMaterial({{
+                            color: 0x06b6d4,
+                            emissive: 0x06b6d4,
+                            emissiveIntensity: 2.0,
+                            roughness: 0.25
+                        }});
+                        rayShaft = new THREE.Mesh(shaftGeo, rayMat);
+                        rayShaft.scale.set(1, initialShaftLength, 1);
+                        rayShaft.position.set(0, initialShaftLength / 2, 0);
+                        rayGroup.add(rayShaft);
+
+                        // Ray Arrowhead
+                        const headGeo = new THREE.ConeGeometry(0.09, headLength, 16);
+                        rayHead = new THREE.Mesh(headGeo, rayMat);
+                        rayHead.position.set(0, initialShaftLength + (headLength / 2), 0);
+                        rayGroup.add(rayHead);
+                    }}
+
+                    // ========================================================
+                    // CLICK 7 (State >= 14): Dynamic Destination Point P'
+                    // ========================================================
+                    if (currentState >= 14) {{
+                        const pPrimeGeo = new THREE.SphereGeometry(0.10, 32, 32);
+                        const pPrimeMat = new THREE.MeshStandardMaterial({{
+                            color: 0x10b981,
+                            emissive: 0x10b981,
+                            emissiveIntensity: 2.5
+                        }});
+                        pPrimeSphere = new THREE.Mesh(pPrimeGeo, pPrimeMat);
+                        pPrimeSphere.position.copy(pLocalInitial);
+                        ballRootGroup.add(pPrimeSphere);
+
+                        pPrimeLabel = makeCleanTextSprite("P' (x', y', z')", "#15803d");
+                        pPrimeLabel.scale.set(1.9, 0.44, 1);
+                        pPrimeLabel.position.copy(pLocalInitial).add(new THREE.Vector3(0.76, 0.32, 0.0));
+                        ballRootGroup.add(pPrimeLabel);
                     }}
                 }}
 
-                // Render Loop
-                function animate() {{
+                // ============================================================
+                // ANIMATION LOOP (Click 7: Smooth Pumping Demonstration)
+                // ============================================================
+                let animStartTime = null;
+                const animDuration = 3200; // 3.2s smooth deliberate expansion
+                const targetLambda = 1.45; // 1.45x radial scaling factor
+
+                function easeInOutCubic(t) {{
+                    return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+                }}
+
+                function animate(timestamp) {{
                     requestAnimationFrame(animate);
+
+                    if (currentState >= 14 && expandableBallBody) {{
+                        if (!animStartTime) animStartTime = timestamp;
+                        const elapsed = timestamp - animStartTime;
+                        const progress = Math.min(1.0, elapsed / animDuration);
+                        const eased = easeInOutCubic(progress);
+
+                        const currentLambda = 1.0 + (targetLambda - 1.0) * eased;
+
+                        // 1. Expand Football Body
+                        expandableBallBody.scale.set(currentLambda, currentLambda, currentLambda);
+
+                        // 2. Expand Contact Shadow
+                        if (shadowMesh) {{
+                            shadowMesh.scale.set(currentLambda, currentLambda, currentLambda);
+                        }}
+
+                        // 3. Extend Ray OP & Arrowhead
+                        if (rayShaft && rayHead) {{
+                            const headLength = 0.26;
+                            const newTotalDist = R * currentLambda;
+                            const newShaftLength = newTotalDist - headLength;
+
+                            rayShaft.scale.set(1, newShaftLength, 1);
+                            rayShaft.position.set(0, newShaftLength / 2, 0);
+                            rayHead.position.set(0, newShaftLength + (headLength / 2), 0);
+                        }}
+
+                        // 4. Move Destination Point P' & Label along ray
+                        if (pPrimeSphere && pPrimeLabel) {{
+                            const currentPPos = pLocalInitial.clone().multiplyScalar(currentLambda);
+                            pPrimeSphere.position.copy(currentPPos);
+                            pPrimeLabel.position.copy(currentPPos).add(new THREE.Vector3(0.76, 0.32, 0.0));
+                        }}
+                    }}
+
                     renderer.render(scene, camera);
                 }}
-                animate();
+                requestAnimationFrame(animate);
 
                 window.addEventListener('resize', () => {{
                     draw2DPitch();
