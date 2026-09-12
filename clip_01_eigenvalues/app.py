@@ -639,18 +639,18 @@ elif 8 <= st.session_state.presentation_state <= 25:
                         expandableBallBody.add(innerCavityMesh);
                         
                         // 4. Cut Framing Wall Plane 1 (Vertical)
-                        const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
-                        const wall1 = new THREE.Mesh(wallGeo1, wallMat);
-                        wall1.rotation.x = Math.PI / 2;
-                        wall1.rotation.z = sphereStart;
-                        expandableBallBody.add(wall1);
+                        //const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
+                        //const wall1 = new THREE.Mesh(wallGeo1, wallMat);
+                        //wall1.rotation.x = Math.PI / 2;
+                        //wall1.rotation.z = sphereStart;
+                        //expandableBallBody.add(wall1);
 
                         // 5. Cut Framing Wall Plane 2 (Horizontal/Radial)
-                        const wallGeo2 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
-                        const wall2 = new THREE.Mesh(wallGeo2, wallMat);
-                        wall2.rotation.x = Math.PI / 2;
-                        wall2.rotation.z = sphereStart + sphereArc;
-                        expandableBallBody.add(wall2);
+                        //const wallGeo2 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
+                        //const wall2 = new THREE.Mesh(wallGeo2, wallMat);
+                        //wall2.rotation.x = Math.PI / 2;
+                        //wall2.rotation.z = sphereStart + sphereArc;
+                        //expandableBallBody.add(wall2);
 
                         // Click 5: Center Point O(0, 0, 0) & Label Revealed inside Cavity
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
