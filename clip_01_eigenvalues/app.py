@@ -1,5 +1,5 @@
 # Clip 01 - Eigenvalues and Eigenvectors
-# Slide 1-3 Implementation with Refined Click Sequence
+# Slide 1-3 Implementation (Cleaned Click 4 & 2R Slow-Motion Inflation)
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -193,7 +193,7 @@ st.markdown(
 )
 
 # ============================================================
-# ADVANCE PRESENTATION (Expanded State Budget)
+# ADVANCE PRESENTATION
 # ============================================================
 
 if st.session_state.presentation_state < 25:
@@ -565,10 +565,10 @@ elif 8 <= st.session_state.presentation_state <= 25:
                 // ============================================================
                 // CONSTRUCT 3D SCENE
                 // Click 3 (State 10): 3D Football appears
-                // Click 4 (State 11): Point O & Point P appear
-                // Click 5 (State 12): Wedge Cut + Concave Inner Bowl
+                // Click 4 (State 11): Point P(x, y, z) appears on surface
+                // Click 5 (State 12): Wedge Cut + Concave Inner Bowl + Point O revealed
                 // Click 6 (State 13): Ray OP appears with arrowhead
-                // Click 7 (State 14): Smooth Pumping Animation
+                // Click 7 (State 14): Smooth Pumping Animation (2R Scale, 6.4s)
                 // ============================================================
                 if (currentState >= 10) {{
                     // 1. Soft Contact Shadow
@@ -643,6 +643,22 @@ elif 8 <= st.session_state.presentation_state <= 25:
                         wall1.rotation.x = Math.PI / 2;
                         wall1.rotation.z = sphereStart;
                         expandableBallBody.add(wall1);
+
+                        // Click 5: Center Point O(0, 0, 0) & Label Revealed inside Cavity
+                        const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
+                        const oMat = new THREE.MeshStandardMaterial({{
+                            color: 0x06b6d4,
+                            emissive: 0x06b6d4,
+                            emissiveIntensity: 2.5
+                        }});
+                        const oSphere = new THREE.Mesh(oGeo, oMat);
+                        oSphere.position.set(0, 0, 0);
+                        ballRootGroup.add(oSphere);
+
+                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#dc2626");
+                        oLabel.scale.set(1.3, 0.40, 1);
+                        oLabel.position.set(-0.35, 0.28, 0.05);
+                        ballRootGroup.add(oLabel);
                     }}
 
                     // Classic Pentagon Seams
@@ -704,26 +720,9 @@ elif 8 <= st.session_state.presentation_state <= 25:
                     }}
 
                     // ========================================================
-                    // CLICK 4 (State >= 11): Fixed Point O & Fixed Point P
+                    // CLICK 4 (State >= 11): Only Fixed Point P on the Surface
                     // ========================================================
                     if (currentState >= 11) {{
-                        // Center Point O (0,0,0)
-                        const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
-                        const oMat = new THREE.MeshStandardMaterial({{
-                            color: 0x06b6d4,
-                            emissive: 0x06b6d4,
-                            emissiveIntensity: 2.5
-                        }});
-                        const oSphere = new THREE.Mesh(oGeo, oMat);
-                        oSphere.position.set(0, 0, 0);
-                        ballRootGroup.add(oSphere);
-
-                        const oLabel = makeCleanTextSprite("O (0, 0, 0)", "#dc2626");
-                        oLabel.scale.set(1.3, 0.40, 1);
-                        oLabel.position.set(-0.35, 0.28, 0.05);
-                        ballRootGroup.add(oLabel);
-
-                        // Original Point P(x, y, z) - Fixed in Space
                         const pGeo = new THREE.SphereGeometry(0.10, 32, 32);
                         const pMat = new THREE.MeshStandardMaterial({{
                             color: 0x06b6d4,
@@ -793,11 +792,11 @@ elif 8 <= st.session_state.presentation_state <= 25:
                 }}
 
                 // ============================================================
-                // ANIMATION LOOP (Click 7: Smooth Pumping Demonstration)
+                // ANIMATION LOOP (Click 7: Majestic 2R Slow-Motion Inflation)
                 // ============================================================
                 let animStartTime = null;
-                const animDuration = 3200; // 3.2s smooth deliberate expansion
-                const targetLambda = 1.45; // 1.45x radial scaling factor
+                const animDuration = 6400; // 6.4s slow-motion lecture pace (half speed)
+                const targetLambda = 2.0;  // Full 2R radial scaling factor
 
                 function easeInOutCubic(t) {{
                     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
