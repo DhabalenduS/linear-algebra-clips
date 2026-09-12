@@ -709,18 +709,18 @@ elif 8 <= st.session_state.presentation_state <= 18:
                         ballGroup.add(upperMesh);
 
                         // --- Rear Concave Inner Bowl + Framing Wall (Click 6 / State >= 13) ---
-                        if (currentState >= 13) {{
-                            const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                            const backMesh = new THREE.Mesh(backGeo, innerMat);
-                            backMesh.rotation.x = Math.PI / 2;
-                            ballGroup.add(backMesh);
+                        
+                        const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const backMesh = new THREE.Mesh(backGeo, innerMat);
+                        backMesh.rotation.x = Math.PI / 2;
+                        ballGroup.add(backMesh);
 
-                            const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
-                            const wall1 = new THREE.Mesh(wallGeo1, wallMat);
-                            wall1.rotation.x = Math.PI / 2;
-                            wall1.rotation.z = sphereStart;
-                            ballGroup.add(wall1);
-                        }}
+                        const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
+                        const wall1 = new THREE.Mesh(wallGeo1, wallMat);
+                        wall1.rotation.x = Math.PI / 2;
+                        wall1.rotation.z = sphereStart;
+                        ballGroup.add(wall1);
+                        
 
                         // --- Center Point O(0, 0, 0) ---
                         // --- Center Point O(0, 0, 0) at Geometric Origin ---
