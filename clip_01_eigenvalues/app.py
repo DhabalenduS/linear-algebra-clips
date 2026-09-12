@@ -795,7 +795,7 @@ elif 8 <= st.session_state.presentation_state <= 25:
                 // ANIMATION LOOP (Click 7: Majestic 2R Slow-Motion Inflation)
                 // ============================================================
                 let animStartTime = null;
-                const animDuration = 6400; // 6.4s slow-motion lecture pace (half speed)
+                const animDuration = 9000; // 9.0s ultra-calm lecture pace
                 const targetLambda = 2.0;  // Full 2R radial scaling factor
 
                 function easeInOutCubic(t) {{
