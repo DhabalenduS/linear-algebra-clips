@@ -626,24 +626,18 @@ elif 8 <= st.session_state.presentation_state <= 25:
                         whiteBall.rotation.x = Math.PI / 2;
                         expandableBallBody.add(whiteBall);
                     }} else {{
-                        // 1. Upper Sliced Shell (Uniform White Leather)
-                        const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
-                        const upperMesh = new THREE.Mesh(upperGeo, ballMat);
-                        upperMesh.rotation.x = Math.PI / 2;
-                        expandableBallBody.add(upperMesh);
+                        // 1. Single Continuous 270° Outer Shell (Full Height Top-to-Bottom, Zero Seams)
+                        const outerCutGeo = new THREE.SphereGeometry(R, 64, 64, sphereStart, sphereArc, 0, Math.PI);
+                        const outerCutMesh = new THREE.Mesh(outerCutGeo, ballMat);
+                        outerCutMesh.rotation.x = Math.PI / 2;
+                        expandableBallBody.add(outerCutMesh);
 
-                        // 2. Lower Hemisphere Shell (Uniform White Leather - Full 360 Outside)
-                        const lowerGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const lowerMesh = new THREE.Mesh(lowerGeo, ballMat);
-                        lowerMesh.rotation.x = Math.PI / 2;
-                        expandableBallBody.add(lowerMesh);
-
-                        // 3. Deep Concave Inner Bowl (Inside Cut Only, BackSide ensures no leak)
-                        const backGeo = new THREE.SphereGeometry(R * 0.998, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const backMesh = new THREE.Mesh(backGeo, innerMat);
-                        backMesh.rotation.x = Math.PI / 2;
-                        expandableBallBody.add(backMesh);
-
+                        // 2. Deep Concave Inner Cavity (BackSide strictly renders on the interior)
+                        const innerCavityGeo = new THREE.SphereGeometry(R * 0.996, 64, 64, 0, Math.PI * 2, 0, Math.PI);
+                        const innerCavityMesh = new THREE.Mesh(innerCavityGeo, innerMat);
+                        innerCavityMesh.rotation.x = Math.PI / 2;
+                        expandableBallBody.add(innerCavityMesh);
+                        
                         // 4. Cut Framing Wall Plane 1 (Vertical)
                         const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
