@@ -625,25 +625,32 @@ elif 8 <= st.session_state.presentation_state <= 25:
                         whiteBall.rotation.x = Math.PI / 2;
                         expandableBallBody.add(whiteBall);
                     }} else {{
-                        // Click 5: Upper Sliced Shell
+                        // 1. Upper Sliced Outer Shell (White Leather)
                         const upperGeo = new THREE.SphereGeometry(R, 64, 32, sphereStart, sphereArc, 0, Math.PI / 2);
                         const upperMesh = new THREE.Mesh(upperGeo, ballMat);
                         upperMesh.rotation.x = Math.PI / 2;
                         expandableBallBody.add(upperMesh);
 
-                        // Click 5: Concave Inner Bladder Bowl
-                        const backGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
-                        const backMesh = new THREE.Mesh(backGeo, innerMat);
-                        backMesh.rotation.x = Math.PI / 2;
-                        expandableBallBody.add(backMesh);
+                        // 2. Lower Outer Shell (Uniform White Leather - Entire Bottom Hemisphere)
+                        const lowerOuterGeo = new THREE.SphereGeometry(R, 64, 32, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                        const lowerOuterMesh = new THREE.Mesh(lowerOuterGeo, ballMat);
+                        lowerOuterMesh.rotation.x = Math.PI / 2;
+                        expandableBallBody.add(lowerOuterMesh);
 
-                        // Click 5: Framing Wall
+                        // 3. Interior Cut Floor with Cavity Depth Shading (Inside Cut Only)
+                        const cutFloorGeo = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
+                        const cutFloor = new THREE.Mesh(cutFloorGeo, innerMat);
+                        cutFloor.position.set(0, 0, 0);
+                        cutFloor.rotation.z = sphereStart;
+                        expandableBallBody.add(cutFloor);
+
+                        // 4. Cut Boundary Framing Wall
                         const wallGeo1 = new THREE.CircleGeometry(R, 32, 0, Math.PI / 2);
                         const wall1 = new THREE.Mesh(wallGeo1, wallMat);
                         wall1.rotation.x = Math.PI / 2;
                         wall1.rotation.z = sphereStart;
                         expandableBallBody.add(wall1);
-
+                        
                         // Click 5: Center Point O(0, 0, 0) & Label Revealed inside Cavity
                         const oGeo = new THREE.SphereGeometry(0.14, 32, 32);
                         const oMat = new THREE.MeshStandardMaterial({{
