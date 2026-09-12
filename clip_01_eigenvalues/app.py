@@ -633,7 +633,7 @@ elif 8 <= st.session_state.presentation_state <= 25:
                         expandableBallBody.add(outerCutMesh);
 
                         // 2. Deep Concave Inner Cavity (BackSide strictly renders on the interior)
-                        const innerCavityGeo = new THREE.SphereGeometry(R * 0.996, 64, 64, 0, Math.PI * 2, 0, Math.PI);
+                        const innerCavityGeo = new THREE.SphereGeometry(R * 0.994, 64, 32, sphereStart + sphereArc, wedgeSpan, 0, Math.PI);
                         const innerCavityMesh = new THREE.Mesh(innerCavityGeo, innerMat);
                         innerCavityMesh.rotation.x = Math.PI / 2;
                         expandableBallBody.add(innerCavityMesh);
