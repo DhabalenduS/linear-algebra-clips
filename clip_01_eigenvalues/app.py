@@ -466,21 +466,21 @@ elif 8 <= st.session_state.presentation_state <= 25:
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.15;
 
-                // Lighting
-                const ambient = new THREE.AmbientLight(0xffffff, 0.65);
+                // High-Depth 3D Sculpting Lights
+                const ambient = new THREE.AmbientLight(0xffffff, 0.36);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x18181b, 0.45);
+                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x0f172a, 0.28);
                 scene.add(hemiLight);
 
-                const keyLight = new THREE.DirectionalLight(0xffffff, 1.65);
-                keyLight.position.set(-10, 20, 16);
+                const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
+                keyLight.position.set(-14, 18, 14);
                 scene.add(keyLight);
 
-                const rimLight = new THREE.DirectionalLight(0xffffff, 0.70);
-                rimLight.position.set(10, 12, -8);
+                const rimLight = new THREE.DirectionalLight(0x94a3b8, 0.65);
+                rimLight.position.set(12, 10, -8);
                 scene.add(rimLight);
-
+                
                 function createContactShadowTexture() {{
                     const sCanvas = document.createElement('canvas');
                     sCanvas.width = 256;
@@ -599,9 +599,9 @@ elif 8 <= st.session_state.presentation_state <= 25:
                     const sphereArc = Math.PI * 2 - wedgeSpan;
 
                     const ballMat = new THREE.MeshStandardMaterial({{
-                        color: 0xf8fafc,
-                        roughness: 0.18,
-                        metalness: 0.10,
+                        color: 0xf1f5f9,
+                        roughness: 0.38,
+                        metalness: 0.04,
                         side: THREE.FrontSide
                     }});
 
