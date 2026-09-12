@@ -466,20 +466,20 @@ elif 8 <= st.session_state.presentation_state <= 25:
                 renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 renderer.toneMappingExposure = 1.15;
 
-                // High-Depth 3D Sculpting Lights
-                const ambient = new THREE.AmbientLight(0xffffff, 0.38);
+                // Studio Balanced Lighting (No Dark Underside)
+                const ambient = new THREE.AmbientLight(0xffffff, 0.75);
                 scene.add(ambient);
 
-                const hemiLight = new THREE.HemisphereLight(0xffffff, 0x0f172a, 0.28);
+                const hemiLight = new THREE.HemisphereLight(0xffffff, 0xf1f5f9, 0.45);
                 scene.add(hemiLight);
 
-                const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
-                keyLight.position.set(-14, 18, 14);
+                const keyLight = new THREE.DirectionalLight(0xffffff, 1.25);
+                keyLight.position.set(-10, 16, 14);
                 scene.add(keyLight);
 
-                const rimLight = new THREE.DirectionalLight(0x94a3b8, 0.65);
-                rimLight.position.set(12, 10, -8);
-                scene.add(rimLight);
+                const fillLight = new THREE.DirectionalLight(0xffffff, 0.55);
+                fillLight.position.set(0, -10, 10);
+                scene.add(fillLight);
                 
                 function createContactShadowTexture() {{
                     const sCanvas = document.createElement('canvas');
