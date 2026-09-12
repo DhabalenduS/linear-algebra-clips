@@ -734,8 +734,8 @@ elif 8 <= st.session_state.presentation_state <= 25:
                         ballRootGroup.add(pSphere);
 
                         const pLabel = makeCleanTextSprite("P (x, y, z)", "#dc2626");
-                        pLabel.scale.set(1.8, 0.44, 1);
-                        pLabel.position.copy(pLocalInitial).add(new THREE.Vector3(0.72, 0.32, 0.0));
+                        pLabel.scale.set(1.5, 0.38, 1);
+                        pLabel.position.copy(pLocalInitial).add(new THREE.Vector3(-0.05, 0.42, 0.05));
                         ballRootGroup.add(pLabel);
                     }}
 
