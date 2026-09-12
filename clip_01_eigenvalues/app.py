@@ -482,9 +482,9 @@ elif 8 <= st.session_state.presentation_state <= 25:
                 scene.add(rimLight);
                
                 // Dedicated Bottom Bounce Light (Brightens the underside)
-                const bottomFillLight = new THREE.DirectionalLight(0xffffff, 0.50);
-                bottomFillLight.position.set(0, -10, 12);
-                scene.add(bottomFillLight);
+                //const bottomFillLight = new THREE.DirectionalLight(0xffffff, 0.50);
+                //bottomFillLight.position.set(0, -10, 12);
+                //scene.add(bottomFillLight);
 
                 function createContactShadowTexture() {{
                     const sCanvas = document.createElement('canvas');
