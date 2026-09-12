@@ -704,7 +704,8 @@ elif 8 <= st.session_state.presentation_state <= 25:
 
                     const pentagonRadius = 0.39;
                     icoVerts.forEach(v => {{
-                        if (!isInsideWedge(v)) {{
+                        // Only draw front-visible pentagons — stops rear flat pentagons from sticking out
+                        if (!isInsideWedge(v) && v.z > -0.15) {{
                             const pentGeo = new THREE.CircleGeometry(pentagonRadius, 5);
                             const pentMesh = new THREE.Mesh(pentGeo, pentagonMat);
                             pentMesh.position.copy(v.clone().multiplyScalar(R * 1.002));
